@@ -31,6 +31,7 @@ public:
 	void enableCommand();
 	void close();
 
+
 protected:
 	bool initialize(HttpRequest &request, HttpResponse &response);
 	bool is(HttpServerConnection* conn) { return connection == conn; };
