@@ -176,7 +176,7 @@ int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args)
 
 		case 'p':
 			s = ultoa((unsigned long) va_arg(args, void *), tempNum, 16);
-			while (*s)
+			while (*s && (maxLen - (uint32_t)(str - buf) > OVERFLOW_GUARD))
 				*str++ = *s++;
 			continue;
 
@@ -198,7 +198,7 @@ int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args)
 		case 'f':
 
 			s = dtostrf(va_arg(args, double), width, precision, tempNum);
-			while (*s)
+			while (*s && (maxLen - (uint32_t)(str - buf) > OVERFLOW_GUARD))
 				*str++ = *s++;
 			continue;
 
@@ -217,7 +217,7 @@ int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args)
 		else
 			s = ultoa_wp(va_arg(args, unsigned int), tempNum, base, width, pad);
 
-		while (*s)
+		while (*s && (maxLen - (uint32_t)(str - buf) > OVERFLOW_GUARD))
 			*str++ = *s++;
 	}
 
