@@ -135,7 +135,11 @@ void HttpServer::processWebSocketFrame(pbuf *buf, HttpServerConnection& connecti
 		msg.setString((char*)data, size);
 		debugf("WS: %s", msg.c_str());
 		if (sock && wsMessage) wsMessage(*sock, msg);
+		
+		/*
+		Remove command executor reference from here; should be in application callback
 		if (sock && sock->commandExecutor) sock->commandExecutor->executorReceive(msg+"\r");
+		*/
 	}
 	else if (frameType == WS_BINARY_FRAME)
 	{

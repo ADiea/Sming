@@ -17,10 +17,13 @@ WebSocket::WebSocket(HttpServerConnection* conn)
 
 WebSocket::~WebSocket()
 {
+	/*
+	Remove command executor reference from here; should be in application callback
 	if (commandExecutor)
 	{
 		delete commandExecutor;
 	}
+	*/
 }
 
 bool WebSocket::initialize(HttpRequest& request, HttpResponse& response)
@@ -66,10 +69,13 @@ void WebSocket::sendBinary(const uint8_t* data, int size)
 
 void WebSocket::enableCommand()
 {
+	/*
+	Remove command executor reference from here; should be in application callback
 	if (!commandExecutor)
 	{
 		commandExecutor = new CommandExecutor(this);
 	}
+	*/
 }
 
 void WebSocket::close()

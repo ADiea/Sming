@@ -38,6 +38,9 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
+#ifndef LWIP_DEBUG
+#define LWIP_DEBUG
+#endif
 
 /*
 User runtime var table
@@ -973,7 +976,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * Define to 0 if your device is low on memory.
  */
 #ifndef TCP_QUEUE_OOSEQ
-#define TCP_QUEUE_OOSEQ                 1 //TODO: test memory gain when disabled
+#define TCP_QUEUE_OOSEQ                 0 //TODO: test memory gain when disabled
 #endif
 
 /**
@@ -1910,7 +1913,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * IGMP_DEBUG: Enable debugging in igmp.c.
  */
 #ifndef IGMP_DEBUG
-#define IGMP_DEBUG                      (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define IGMP_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
@@ -1938,21 +1941,21 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * RAW_DEBUG: Enable debugging in raw.c.
  */
 #ifndef RAW_DEBUG
-#define RAW_DEBUG                       (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define RAW_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**
  * MEM_DEBUG: Enable debugging in mem.c.
  */
 #ifndef MEM_DEBUG
-#define MEM_DEBUG                       (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define MEM_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**
  * MEMP_DEBUG: Enable debugging in memp.c.
  */
 #ifndef MEMP_DEBUG
-#define MEMP_DEBUG                      (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define MEMP_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
@@ -2101,14 +2104,14 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  */
 
 #ifndef ESPCONN_TCP_DEBUG
-#define ESPCONN_TCP_DEBUG 				(LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define ESPCONN_TCP_DEBUG 				LWIP_DBG_OFF
 #endif
 
 #ifndef ESPCONN_UDP_DEBUG
-#define ESPCONN_UDP_DEBUG 				(LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define ESPCONN_UDP_DEBUG 				LWIP_DBG_OFF
 #endif
 
 #ifndef ESPCONN_DEBUG
-#define ESPCONN_DEBUG 					(LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define ESPCONN_DEBUG 					LWIP_DBG_OFF
 #endif
 #endif /* __LWIP_OPT_H__ */
