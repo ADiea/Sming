@@ -53,7 +53,7 @@ void WebSocket::send(const char* message, int length, wsFrameType type)
 	size_t headSize = sizeof(frameHeader);
 	wsMakeFrame(nullptr, length, frameHeader, &headSize, type);
 	connection->write((char*)frameHeader, headSize, TCP_WRITE_FLAG_COPY | TCP_WRITE_FLAG_MORE);
-	connection->writeString(message, TCP_WRITE_FLAG_COPY);
+	connection->write(message, length, TCP_WRITE_FLAG_COPY);
 	connection->flush();
 }
 
