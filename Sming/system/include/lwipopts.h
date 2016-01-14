@@ -434,7 +434,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * ARP_TABLE_SIZE: Number of active MAC-IP address pairs cached.
  */
 #ifndef ARP_TABLE_SIZE
-#define ARP_TABLE_SIZE                  10
+#define ARP_TABLE_SIZE                  8
 #endif
 
 /**
@@ -445,7 +445,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * packet in a row to an IP address that is not in the ARP cache.
  */
 #ifndef ARP_QUEUEING
-#define ARP_QUEUEING                    1
+#define ARP_QUEUEING                    0
 #endif
 
 /**
@@ -459,7 +459,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * Also notice that this slows down input processing of every IP packet!
  */
 #ifndef ETHARP_TRUST_IP_MAC
-#define ETHARP_TRUST_IP_MAC             1
+#define ETHARP_TRUST_IP_MAC             0
 #endif
 
 /**
@@ -947,7 +947,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
  */
 #ifndef TCP_MAXRTX
-#define TCP_MAXRTX                      (*(volatile uint32*)0x600011E8)
+#define TCP_MAXRTX                     (*(volatile uint32*)0x600011E8)
 #endif
 
 /**

@@ -66,7 +66,7 @@
  *
  */
 
-/* изменения и дополения:
+/* Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ� Ð¸ Ð´Ð¾Ð¿Ð¾Ð»ÐµÐ½Ð¸Ñ�:
  pvvx , Vitaly (http://esp8266.ru/forum/threads/razrabotka-biblioteki-malogo-webservera-na-esp8266.56/page-43#post-10192)
 */ 
 
@@ -1773,7 +1773,7 @@ dhcp_create_msg(struct netif *netif, struct dhcp *dhcp, u8_t message_type)
   	dhcp->xid = xid;
   }
   LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_TRACE,
-              ("transaction id xid(%"X32_F")\n", xid));
+              ("dhcp_create_msg(): transaction id xid(%"X32_F")\n", xid));
 
   dhcp->msg_out = (struct dhcp_msg *)dhcp->p_out->payload;
 

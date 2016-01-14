@@ -63,7 +63,7 @@ static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
 #endif
 
 #if TCP_DEBUG
-const char tcp_state_str_rodata[][12] ICACHE_RODATA_ATTR = {
+const char tcp_state_str_rodata[][12] /*ICACHE_RODATA_ATTR*/ = {
   "CLOSED",      
   "LISTEN",      
   "SYN_SENT",    
@@ -778,6 +778,8 @@ tcp_slowtmr(void)
   u8_t pcb_reset;       /* flag if a RST should be sent when removing */
   err_t err;
 
+  u8_t ipcb=0; /*count all active pcbs*/
+
   err = ERR_OK;
 
   ++tcp_ticks;
@@ -786,10 +788,10 @@ tcp_slowtmr(void)
   prev = NULL;
   pcb = tcp_active_pcbs;
   if (pcb == NULL) {
-    LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: no active pcbs\n"));
+    //LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: no active pcbs\n"));
   }
   while (pcb != NULL) {
-    LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: processing active pcb\n"));
+    LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: processing active pcb %d\n", ipcb++));
     LWIP_ASSERT("tcp_slowtmr: active pcb->state != CLOSED\n", pcb->state != CLOSED);
     LWIP_ASSERT("tcp_slowtmr: active pcb->state != LISTEN\n", pcb->state != LISTEN);
     LWIP_ASSERT("tcp_slowtmr: active pcb->state != TIME-WAIT\n", pcb->state != TIME_WAIT);
@@ -960,7 +962,7 @@ tcp_slowtmr(void)
       ++prev->polltmr;
       if (prev->polltmr >= prev->pollinterval) {
         prev->polltmr = 0;
-        LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: polling application\n"));
+        //LWIP_DEBUGF(TCP_DEBUG, ("tcp_slowtmr: polling application\n"));
         TCP_EVENT_POLL(prev, err);
         /* if err == ERR_ABRT, 'prev' is already deallocated */
         if (err == ERR_OK) {
@@ -1423,9 +1425,13 @@ tcp_pcb_purge(struct tcp_pcb *pcb)
     }
     if (pcb->unsent != NULL) {
       LWIP_DEBUGF(TCP_DEBUG, ("tcp_pcb_purge: not all data sent\n"));
+      tcp_segs_free(pcb->unsent);
+      pcb->unsent = NULL;
     }
     if (pcb->unacked != NULL) {
       LWIP_DEBUGF(TCP_DEBUG, ("tcp_pcb_purge: data left on ->unacked\n"));
+      tcp_segs_free(pcb->unacked);
+      pcb->unacked = NULL;
     }
 #if TCP_QUEUE_OOSEQ
     if (pcb->ooseq != NULL) {
@@ -1439,9 +1445,6 @@ tcp_pcb_purge(struct tcp_pcb *pcb)
        queue if it fires */
     pcb->rtime = -1;
 
-    tcp_segs_free(pcb->unsent);
-    tcp_segs_free(pcb->unacked);
-    pcb->unacked = pcb->unsent = NULL;
 #if TCP_OVERSIZE
     pcb->unsent_oversize = 0;
 #endif /* TCP_OVERSIZE */
@@ -1581,7 +1584,7 @@ tcp_debug_print(struct tcp_hdr *tcphdr)
 void
 tcp_debug_print_state(enum tcp_state s)
 {
-  LWIP_DEBUGF(TCP_DEBUG, ("State: %s\n", tcp_state_str[s]));
+  LWIP_DEBUGF(TCP_DEBUG, ("State: %s\n", tcp_state_str_rodata[s]));
 }
 
 /**
