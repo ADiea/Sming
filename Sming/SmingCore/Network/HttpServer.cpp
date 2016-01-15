@@ -133,7 +133,7 @@ void HttpServer::processWebSocketFrame(pbuf *buf, HttpServerConnection& connecti
 	{
 		String msg;
 		msg.setString((char*)data, size);
-		debugf("WS: %s", msg.c_str());
+		debugf("WS %x: %s", sock, msg.c_str());
 		if (sock && wsMessage) wsMessage(*sock, msg);
 		
 		/*
