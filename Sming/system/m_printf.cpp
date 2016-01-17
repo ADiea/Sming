@@ -96,7 +96,7 @@ int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args)
 	int8_t precision, width;
 	char pad;
 
-	char tempNum[24];
+	char tempNum[40];
 
 	for (str = buf; *fmt; fmt++)
 	{
