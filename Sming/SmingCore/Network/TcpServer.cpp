@@ -103,7 +103,6 @@ err_t TcpServer::onAccept(tcp_pcb *clientTcp, err_t err)
 	if (system_get_free_heap_size() < 6500)
 	{
 		debugf("\r\nCONNECTION DROPPED (heap %d)\r\n", system_get_free_heap_size());
-		system_restart();
 		return ERR_MEM;
 	}
 
