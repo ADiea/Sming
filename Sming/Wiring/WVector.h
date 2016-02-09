@@ -84,11 +84,11 @@ class Vector : public Countable<Element>
      }
      const Vector<Element>& operator=(const Vector<Element>&& other) // move assignment
      {
-    	if (_data != nullptr)
-    	{
-    		removeAllElements();
-    		delete[] _data;        // delete this storage
-    	}
+         if (_data != nullptr)
+         {
+           removeAllElements();
+           delete[] _data;        // delete this storage
+         }
          _data = other._data;  // move
          _size = other._size;
          _capacity = other._capacity;
@@ -133,8 +133,8 @@ void Vector<Element>::copyFrom(const Vector<Element>& rhv)
 {
 	if (_data != nullptr)
 	{
-		removeAllElements();
-		delete[] _data;
+	  removeAllElements();
+	  delete[] _data;
 	}
   _size = rhv._size;
   _capacity = rhv._capacity;
