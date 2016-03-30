@@ -68,6 +68,8 @@ void SDCard_begin(uint8 PIN_CARD_SS)
 		return;
 	}
 
+	debugf("SDCard begin");
+
 	/* Give a work area to the default drive */
 	FRESULT mountRes = f_mount(pFatFs, "", 0);
 	if(FR_OK != mountRes)
@@ -342,13 +344,14 @@ DSTATUS disk_initialize (
 
 	if (drv) return RES_NOTRDY;
 
+	debugf("SDCard init start");
 //	SDCardSPI->setDelay(SCK_SLOW_INIT);
-	SDCardSPI->beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+	//SDCardSPI->beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
 
 	dly_us(10000);			/* 10ms */
 
 //	SDCardSPI->setMOSI(HIGH); /* Send 0xFF */
-//	debugf("disk_initialize (send 80 0xFF cycles)");
+	debugf("disk_initialize (send 80 0xFF cycles)");
 	for (n = 10; n; n--) {
 		d = 0xFF;
 		SDCardSPI->transfer(&d, 1);	/* Apply 80 dummy clocks and the card gets ready to receive command */
@@ -357,7 +360,7 @@ DSTATUS disk_initialize (
 
 	BYTE retCmd;
 
-//	debugf("disk_initialize (send n send_cmd(CMD0, 0)");
+	debugf("disk_initialize (send n send_cmd(CMD0, 0)");
 	n=5;
 	do
 	{
@@ -365,11 +368,11 @@ DSTATUS disk_initialize (
 		n--;
 	}
 	while(n && retCmd != 1);
-//	debugf("disk_initialize (until n = 5 && ret != 1");
+	debugf("disk_initialize (until n = 5 && ret != 1");
 
 	if (retCmd == 1)
 	{
-//		debugf("disk_initialize (Enter Idle state - send_cmd(CMD8, 0x1AA) == 1");
+		debugf("disk_initialize (Enter Idle state - send_cmd(CMD8, 0x1AA) == 1");
 		/* Enter Idle state */
 		if (send_cmd(CMD8, 0x1AA) == 1) {	/* SDv2? */
 //			SDCardSPI->setMOSI(HIGH); /* Send 0xFF */
@@ -427,8 +430,9 @@ DSTATUS disk_initialize (
 	deselect();
 
 //	SDCardSPI->setDelay(SCK_NORMAL);
-	SDCardSPI->beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE0));
+	//SDCardSPI->beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE0));
 
+	debugf("SDCard init end");
 
 	return Stat;
 }

@@ -97,7 +97,7 @@ void Si4432::init() {
 		pinMode(_intPin, INPUT);
 
 	_spi->begin();
-//	_spi->setDelay(200);
+	_spi->setDelay(200);
 
 #if DEBUG_SI4432
 	debugf("SPI is initialized now.");
@@ -187,7 +187,9 @@ bool Si4432::sendPacket(uint8_t length,
 				if (waitForPacket(ackTimeout)) {
 					getPacketReceived(responseLength, responseBuffer);
 					return true;
-				} else {
+				}
+				else
+				{
 					return false;
 				}
 			} else {
@@ -198,7 +200,9 @@ bool Si4432::sendPacket(uint8_t length,
 
 	//timeout occured.
 	debugf("TX timeout");
-
+#if DEBUG_SI4432
+	readAll();
+#endif
 	switchMode(Ready);
 
 	if (ReadRegister(REG_DEV_STATUS) & 0x80) {
@@ -226,7 +230,9 @@ bool Si4432::waitForPacket(uint64_t waitMs) {
 	//timeout occured.
 
 	debugf("RX timeout");
-
+#if DEBUG_SI4432
+	readAll();
+#endif
 	switchMode(Ready);
 	clearRxFIFO();
 
@@ -255,7 +261,25 @@ void Si4432::switchMode(byte mode) {
 #if DEBUG_SI4432
 	delay(1);
 	byte val = ReadRegister(REG_DEV_STATUS);
-	debugf("== DEV STATUS: %x ==", val);
+
+	const char* err="none";
+	const char* state="unkn";
+	if(val & 0x80)err="Overflow";
+	if(val & 0x40)err="Underflow";
+	if(val & 0x10)err="HeadErr";
+	if(val & 0x08)err="FreqErr";
+
+
+
+	if(val & 0x3 == 0)
+		state ="idle";
+	else if(val & 0x3 == 0x1)
+		state ="RX";
+	else if(val & 0x3 == 0x2)
+			state ="TX";
+	debugf("num:%x, state:%s", val & 0x3, state);
+
+	debugf("== DEV STATUS: %x ==; Err:%s bufRX:%s State:%s", val, err, val & 0x20?"empty":"full", state);
 #endif
 }
 
@@ -267,11 +291,15 @@ void Si4432::setBaudRateFast(eBaudRate baud)
 {
 	_kbps = baud;
 
-	BurstWrite(REG_IF_FILTER_BW, &(BaudRates[baud].reg[0]), 1);
+	byte baudSettings[12];
 
-	BurstWrite(REG_CLOCK_RECOVERY_OVERSAMPLING, &(BaudRates[baud].reg[1]), 6);
+	memcpy(baudSettings, &BaudRates[baud].reg[0], 16);
 
-	BurstWrite(REG_TX_DATARATE1, &(BaudRates[baud].reg[7]), 5);
+	BurstWrite(REG_IF_FILTER_BW, (const byte*)baudSettings, 1);
+
+	BurstWrite(REG_CLOCK_RECOVERY_OVERSAMPLING, (const byte*)&(baudSettings[1]), 6);
+
+	BurstWrite(REG_TX_DATARATE1, (const byte*)&(baudSettings[7]), 5);
 }
 
 void Si4432::setBaudRate(uint16_t kbps) {
@@ -351,16 +379,16 @@ void Si4432::BurstWrite(Registers startReg, const byte value[], uint8_t length) 
 
 	byte regVal = (byte) startReg | 0x80; // set MSB
 
+#if DEBUG_VERBOSE_SI4432
+		debugf("Writing: %x | %x ... %x (%d bytes)", startReg,
+				value[0], value[length-1], length);
+#endif
+
 //	_spi->enable();
 	_spi->beginTransaction(_spi->SPIDefaultSettings);
 	delayMicroseconds(1);
 //	_spi->send(&regVal, 1);
 	_spi->transfer(&regVal, 1);
-
-#if DEBUG_VERBOSE_SI4432
-		debugf("Writing: %x | %x ... %x (%d bytes)", (regVal != 0xFF ? (regVal) & 0x7F : 0x7F),
-				value[0], value[length-1], length);
-#endif
 
 //	_spi->send(value, length);
 	_spi->transfer((uint8 *)value, length);
@@ -371,7 +399,8 @@ void Si4432::BurstWrite(Registers startReg, const byte value[], uint8_t length) 
 
 void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
 
-	byte regVal = (byte) startReg & 0x7F; // set MSB
+	byte regVal = (byte) startReg & 0x7F; // reset MSB
+	byte temp = 0xff;
 
 //	_spi->enable();
 	_spi->beginTransaction(_spi->SPIDefaultSettings);
@@ -379,17 +408,22 @@ void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
 //	_spi->send(&regVal, 1);
 	_spi->transfer(&regVal, 1);
 
-//	_spi->setMOSI(HIGH); /* Send 0xFF */
-	_spi->transfer((uint8 *)0xFF, 1);
+	//_spi->setMOSI(HIGH); /* Send 0xFF */
+	//_spi->transfer((uint8 *)&temp, 1);
 //	_spi->recv(value, length);
+	memset(value, 0xFF, length);
 	_spi->transfer((uint8 *)value, length);
 
+
+	//	_spi->disable();
+	_spi->endTransaction();
 #if DEBUG_VERBOSE_SI4432
-		debugf("Reading: %x  | %x..%x (%d bytes)", (regVal != 0x7F ? (regVal) & 0x7F : 0x7F),
+	if(length > 1)
+		debugf("Read %x  | %x..%x (%d bytes)", startReg,
 				value[0], value[length-1], length);
+	else
+		debugf("Read %x = %x ", startReg, value[0]);
 #endif
-		//	_spi->disable();
-			_spi->endTransaction();
 }
 
 void Si4432::readAll() {

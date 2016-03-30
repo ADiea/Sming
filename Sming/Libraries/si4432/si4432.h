@@ -31,7 +31,7 @@ Original location: https://github.com/theGanymedes/si4432/
 
 #include <SPISoft.h>
 
-#define DEBUG_SI4432 0
+#define DEBUG_SI4432 1
 #define DEBUG_VERBOSE_SI4432 0
 
 enum eBaudRate

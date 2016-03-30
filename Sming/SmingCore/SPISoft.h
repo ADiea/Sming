@@ -16,10 +16,11 @@ class SPISoft: public SPIBase {
 
 public:
 
-	SPISoft(uint16_t miso, uint16_t mosi, uint16_t sck, uint8_t delay) {
+	SPISoft(uint16_t miso, uint16_t mosi, uint16_t sck, uint16_t ss, uint8_t delay) {
 		mMISO = miso;
 		mMOSI = mosi;
 		mCLK = sck;
+		mSS = ss;
 		m_delay = delay;
 	}
 
@@ -38,12 +39,12 @@ public:
 	/*
 	 * beginTransaction(): Initializes the SPI bus using the defined SPISettings.
 	 */
-	virtual void beginTransaction(SPISettings mySettings) {};
+	virtual void beginTransaction(SPISettings mySettings) {digitalWrite(mSS, LOW);};
 
 	/*
 	 * endTransaction(): Stop using the SPI bus. Normally this is called after de-asserting the chip select, to allow other libraries to use the SPI bus.
 	 */
-	virtual void endTransaction() {};
+	virtual void endTransaction() {digitalWrite(mSS, HIGH);};
 
 	/*
 	 * transfer(), transfer16()
@@ -64,8 +65,10 @@ public:
 	*/
 	inline void setDelay(uint8_t dly) {m_delay = dly;}
 
+	inline void setMOSI(uint8_t val){digitalWrite(mMOSI, val);}
+
 private:
-	uint16_t mMISO, mMOSI, mCLK;
+	uint16_t mMISO, mMOSI, mCLK, mSS;
 	SPISettings mSPISettings;
 	uint8_t m_delay;
 };

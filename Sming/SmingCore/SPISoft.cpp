@@ -22,7 +22,11 @@ Descr: Implement software SPI. To improve speed, GPIO16 is not supported(see Dig
 
 static inline void IRAM_ATTR fastDelay(unsigned d)
 {
-	while(d) --d;
+	volatile unsigned a=d;
+	while(a)
+	{
+		--a;
+	}
 }
 
 void SPISoft::begin()
@@ -41,6 +45,9 @@ void SPISoft::begin()
 	digitalWrite(mMISO, HIGH);
 
 	pinMode(mMOSI, OUTPUT);
+
+	pinMode(mSS, OUTPUT);
+	digitalWrite(mSS, HIGH);
 }
 
 void SPISoft::transfer(uint8_t* buffer, uint32_t size)
