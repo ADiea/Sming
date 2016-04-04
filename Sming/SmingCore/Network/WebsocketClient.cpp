@@ -156,7 +156,7 @@ void WebsocketClient::onError(err_t err)
 
 	if ((err == ERR_ABRT) || (err == ERR_RST))
 	{
-		debugf("TCP Connection Reseted or Aborted", err);
+		debugf("TCP Connection Reseted or Aborted %d", err);
 
 	}
 	else

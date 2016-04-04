@@ -146,7 +146,7 @@ void Si4432::boot() {
 	switchMode(Ready);
 }
 
-bool Si4432::sendPacket(uint8_t length,
+eRadioError Si4432::sendPacket(uint8_t length,
 						const byte* data,
 						bool waitResponse/* = false*/,
 						uint32_t ackTimeout/* = 100*/,
@@ -186,14 +186,14 @@ bool Si4432::sendPacket(uint8_t length,
 			if (waitResponse) {
 				if (waitForPacket(ackTimeout)) {
 					getPacketReceived(responseLength, responseBuffer);
-					return true;
+					return err_NoError;
 				}
 				else
 				{
-					return false;
+					return err_RXTimeout;
 				}
 			} else {
-				return true;
+				return err_NoError;
 			}
 		}
 	}
@@ -209,8 +209,7 @@ bool Si4432::sendPacket(uint8_t length,
 		clearFIFO();
 	}
 
-	return false;
-
+	return err_TXTimeout;
 }
 
 bool Si4432::waitForPacket(uint64_t waitMs) {
@@ -223,7 +222,10 @@ bool Si4432::waitForPacket(uint64_t waitMs) {
 		if (!isPacketReceived()) {
 			continue;
 		} else {
-			return true;
+			if(64 >= ReadRegister(REG_RECEIVED_LENGTH))
+				return true;
+			else
+				continue; //received invalid length packet
 		}
 
 	}
@@ -242,6 +244,13 @@ bool Si4432::waitForPacket(uint64_t waitMs) {
 void Si4432::getPacketReceived(uint8_t* length, byte* readData) {
 
 	*length = ReadRegister(REG_RECEIVED_LENGTH);
+
+	if(*length > 64)
+	{
+		debugf("getPacketReceived inval len %d", *length);
+		*length = 0;
+		return;
+	}
 
 	BurstRead(REG_FIFO, readData, *length);
 
@@ -391,6 +400,7 @@ void Si4432::BurstWrite(Registers startReg, const byte value[], uint8_t length) 
 	_spi->transfer(&regVal, 1);
 
 //	_spi->send(value, length);
+	//debugf("SPI xfer w %x", value);
 	_spi->transfer((uint8 *)value, length);
 
 //	_spi->disable();
@@ -412,6 +422,7 @@ void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
 	//_spi->transfer((uint8 *)&temp, 1);
 //	_spi->recv(value, length);
 	memset(value, 0xFF, length);
+	//debugf("SPI xfer r read %x", value);
 	_spi->transfer((uint8 *)value, length);
 
 

@@ -31,7 +31,7 @@ Original location: https://github.com/theGanymedes/si4432/
 
 #include <SPISoft.h>
 
-#define DEBUG_SI4432 1
+#define DEBUG_SI4432 0
 #define DEBUG_VERBOSE_SI4432 0
 
 enum eBaudRate
@@ -40,6 +40,16 @@ enum eBaudRate
 	eBaud_115k2,
 	eBaud_230k4,
 	e_Baud_numBauds
+};
+
+enum eRadioError
+{
+	err_NoError = 0,
+	err_TXTimeout,
+	err_RXTimeout,
+	err_RadioBusy,
+	err_RadioNotInit,
+	err_ErrOther,
 };
 
 /* Now, according to the this design, you must
@@ -61,7 +71,7 @@ public:
 	void init();
 	void setCommsSignature(uint16_t signature); // used to 'sign' packets with a predetermined signature - call before boot
 
-	bool sendPacket(uint8_t length, const byte* data, bool waitResponse = false, uint32_t ackTimeout = 100,
+	eRadioError sendPacket(uint8_t length, const byte* data, bool waitResponse = false, uint32_t ackTimeout = 100,
 			uint8_t *responseLength = 0, byte* responseBuffer = 0); // switches to Tx mode and sends the package, then optionally receives response package
 
 	void startListening(); // switch to Rx mode (don't block)

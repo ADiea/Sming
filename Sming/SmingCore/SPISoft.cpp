@@ -54,6 +54,13 @@ void SPISoft::transfer(uint8_t* buffer, uint32_t size)
 {
 	uint8_t d;
 	uint8_t r;
+
+	if(!buffer)
+	{
+		debugf("SPIS:xfer NULL ptr");
+		return;
+	}
+
 	do {
 		d = *buffer; r=0;
 
