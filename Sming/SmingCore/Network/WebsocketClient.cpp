@@ -11,6 +11,8 @@
 
 #include "WebsocketClient.h"
 
+#define DBG_WEBCLI 1
+
 WebsocketClient::WebsocketClient(bool autoDestruct /*= false*/) :
 		TcpClient(autoDestruct)
 {
@@ -70,12 +72,15 @@ bool WebsocketClient::connect(String url)
 	this->uri = URL(url);
 	this->_url = url;
 	TcpClient::connect(uri.Host,uri.Port);
-	debugf("Connecting to Server");
+#if DBG_WEBCLI
+	debugf("wscli Connecting to Server");
+#endif
 	unsigned char keyStart[17];
 	char b64Key[25];
+	memset(b64Key, 0, sizeof(b64Key));
 	Mode = ws_Connecting; // Server Connected / WS Upgrade request sent
 
-	randomSeed(/*analogRead(0)*/5648);
+	randomSeed(/*analogRead(0)*/system_get_time());
 
 	for (int i = 0; i < 16; ++i)
 	{
@@ -84,10 +89,14 @@ bool WebsocketClient::connect(String url)
 
 	base64_encode(16, (const unsigned char*) keyStart, 24, (char*) b64Key);
 
-	for (int i = 0; i < 24; ++i)
-	{
-		key[i] = b64Key[i];
-	}
+
+	b64Key[24] = 0;
+	key = b64Key;
+
+#if DBG_WEBCLI
+		debugf("wscli enc key string %s", key.c_str());
+#endif
+
 	String protocol = "chat";
 	sendString("GET ");
 	if (uri.Path != "")
@@ -99,8 +108,9 @@ bool WebsocketClient::connect(String url)
 		sendString("/");
 	}
 	sendString(" HTTP/1.1\r\n");
-	sendString("Upgrade: websocket\r\n");
 	sendString("Connection: Upgrade\r\n");
+	sendString("Upgrade: WebSocket\r\n");
+	sendString("Origin: file://\r\n");
 	sendString("Host: ");
 	sendString(uri.Host);
 	sendString("\r\n");
@@ -156,15 +166,50 @@ void WebsocketClient::onError(err_t err)
 
 	if ((err == ERR_ABRT) || (err == ERR_RST))
 	{
-		debugf("TCP Connection Reseted or Aborted %d", err);
-
+#if DBG_WEBCLI
+		debugf("wscli TCP Connection Reseted or Aborted %d", err);
+#endif
 	}
 	else
 	{
-		debugf("Error  %d Occured ", err);
+#if DBG_WEBCLI
+		debugf("wscli Error  %d Occured ", err);
+#endif
 	}
 	TcpClient::onError(err);
 
+}
+
+//search lowercase
+char* strstrl(char* source, const char* sequence)
+{
+	int matchIndex = 0, maxIndex = strlen(sequence);
+	char curChar, *pos=NULL;
+	if(!source || !sequence || !*sequence) return NULL;
+	while(source && *source)
+	{
+		curChar = *source;
+		if(curChar >= 'A' && curChar <= 'Z' )
+			curChar +=32;
+		if(matchIndex == 0)
+			pos = source;
+		if(curChar == sequence[matchIndex])
+		{
+			if(matchIndex == maxIndex - 1)
+				return pos;
+			else
+			{
+				++matchIndex;
+			}
+		}
+		else
+		{
+			pos = NULL;
+			matchIndex = 0;
+		}
+		++source;
+	}
+	return pos;
 }
 
 /* Function Name: verifyKey
@@ -174,20 +219,44 @@ void WebsocketClient::onError(err_t err)
  */
 bool WebsocketClient::verifyKey(char* buf, int size)
 {
-	String dd = String(buf);
-	uint8_t s = dd.indexOf("Sec-WebSocket-Accept: ");
-	uint8_t t = dd.indexOf("\r\n", s);
-	String serverKey = dd.substring(s + 22, t);
-	//debugf("ServerKey : %s",serverKey.c_str());
+	char* serverKey = strstrl(buf, "sec-websocket-accept: ");
+
+	if(!serverKey)
+	{
+#if DBG_WEBCLI
+	debugf("wscli cannot find key");
+#endif
+		return false;
+	}
+
+	serverKey += sizeof("sec-websocket-accept: ") - 1;
+	char* endKey = strstr(serverKey, "\r\n");
+
+	if(!endKey || endKey - buf > size)
+	{
+#if DBG_WEBCLI
+	debugf("wscli cannot find key(2) reason:%s", endKey ? "out of bounds":"NULL");
+#endif
+		return false;
+	}
+
+	*endKey = 0;
+
+#if DBG_WEBCLI
+	debugf("wscli search key %s", serverKey);
+#endif
+
+
 	String hash = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	unsigned char data[20];
 	char secure[20 * 4];
 	sha1(data, hash.c_str(), hash.length());
 	base64_encode(20, data, 20 * 4, secure);
-
-	//debugf("clienKey : %s",secure);
+#if DBG_WEBCLI
+	debugf("wscli clienKey : %s",secure);
+#endif
 	// if the keys match, good to go
-	return serverKey.equals(String(secure)); //b64Result
+	return strstr(serverKey, secure) == serverKey;
 }
 
 /* Function Name: onFinished
@@ -200,12 +269,16 @@ void WebsocketClient::onFinished(TcpClientState finishState)
 	if (finishState == eTCS_Failed)
 	{
 		//  restart();
-		debugf("Tcp Client failure...");
+#if DBG_WEBCLI
+		debugf("wscli Tcp Client failure...");
+#endif
 		this->completecallback(false);
 	}
 	else
 	{
-		debugf("Websocket Closed Normally.");
+#if DBG_WEBCLI
+		debugf("wscli Websocket Closed Normally.");
+#endif
 		this->completecallback(true);
 	}
 	TcpClient::onFinished(finishState);
@@ -222,7 +295,9 @@ void WebsocketClient::sendPing()
 {
 	uint8_t buf[2] =
 	{ 0x89, 0x00 };
-	debugf("Sending PING");
+#if DBG_WEBCLI
+	debugf("wscli Sending PING");
+#endif
 	send((char*) buf, 2, false);
 }
 
@@ -234,7 +309,9 @@ void WebsocketClient::sendPong()
 {
 	uint8_t buf[2] =
 	{ 0x8A, 0x00 };
-	debugf("Sending PONG");
+#if DBG_WEBCLI
+	debugf("wscli Sending PONG");
+#endif
 	send((char*) buf, 2, false);
 }
 
@@ -244,7 +321,9 @@ void WebsocketClient::sendPong()
  */
 void WebsocketClient::disconnect()
 {
-	debugf("Terminating Websocket connection.");
+#if DBG_WEBCLI
+	debugf("wscli Terminating Websocket connection.");
+#endif
 	Mode = ws_Disconnected;
 	// Should send 0x87, 0x00 to server to tell it that I'm quitting here.
 	uint8_t buf[2] =
@@ -261,12 +340,12 @@ void WebsocketClient::disconnect()
  * Parameters: msg - Message char array 
  *             length - length of msg char array
  */
-void WebsocketClient::sendMessage(char* msg, uint16_t length)
+void WebsocketClient::sendMessage(const char* msg, uint16_t length)
 {
 	/*
 	 +-+-+-+-+-------+-+-------------+-------------------------------+
-	 0                   1                   2                   3
-	 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	  0               1               2               3
+	  7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
 	 +-+-+-+-+-------+-+-------------+-------------------------------+
 	 |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
 	 |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
@@ -292,8 +371,15 @@ void WebsocketClient::sendMessage(char* msg, uint16_t length)
 	 0x09: this frame is a ping.
 	 0x0A: this frame is a pong.
 	 */
-	uint8_t buffer[500];
-	uint8_t i = 0;
+	char* buffer = new char[10 + length];
+
+	if(!buffer)
+	{
+		debugf("wscli: sendMessage no heap for %d bytes", length + 8);
+		return;
+	}
+
+	uint16_t i = 0, j;
 	buffer[i++] = 0x80 | 0x01; //FINN = 1 and Sending Text Data
 
 	/*
@@ -324,11 +410,15 @@ void WebsocketClient::sendMessage(char* msg, uint16_t length)
 		mask[j] = random(0, 255);
 		buffer[i++] = mask[j];
 	}
-	for (uint16_t j = 0; j < length; j++)
+
+	for (j = 0; j < length; j++)
 	{
 		buffer[i++] = (msg[j] ^ mask[j % 4]);
 	}
-	send((char*) buffer, i, false);
+
+	send((const char*) buffer, i, false);
+
+	delete buffer;
 }
 
 /* Function Name: sendBinary
@@ -375,6 +465,7 @@ void WebsocketClient::sendBinary(uint8_t* msg, uint16_t length)
  */
 err_t WebsocketClient::onReceive(pbuf* buf)
 {
+	char* data = NULL;
 	if (buf == NULL)
 	{
 		// Disconnected, close it
@@ -383,23 +474,34 @@ err_t WebsocketClient::onReceive(pbuf* buf)
 	else
 	{
 		uint16_t size = buf->tot_len;
-		char* data = new char[size + 1];
+		data = new char[size + 1];
+		if(!data)
+			return -1;
+
 		pbuf_copy_partial(buf, data, size, 0);
 		data[size] = '\0';
-
-		//  debugf("%s", data); //print received buffer
+#if DBG_WEBCLI
+		debugf("wscli RX data %s, size %d %d", data, size, strlen(data)); //print received buffer
+#endif
 		switch (Mode)
 		{
 		case ws_Connecting:
 			if (verifyKey(data, size) == true)
 			{
 				Mode = ws_Connected;
-				this->connectedcallback(Mode);
-				//   debugf("Key Verified. Websocket Handshake completed");
+#if DBG_WEBCLI
+				debugf("wscli Key Verified. Websocket Handshake completed");
+#endif
 				sendPing();
+
+				this->connectedcallback(Mode);
+
 			}
 			else
 			{
+#if DBG_WEBCLI
+				debugf("wscli Key Not Verified.");
+#endif
 				Mode = ws_Disconnected; // Handshake was not proper.
 				this->connectedcallback(Mode);
 			}
@@ -429,7 +531,7 @@ err_t WebsocketClient::onReceive(pbuf* buf)
 					if (len == 127)
 					{
 						//next 8 bytes are length
-						debugf("64bit messenges not supported"); // Too big for Esp8266 to handle
+						debugf("wscli 64bit messenges not supported"); // Too big for Esp8266 to handle
 						return -1;
 					}
 					// debugf("Message is %d chars long",len);
@@ -461,30 +563,38 @@ err_t WebsocketClient::onReceive(pbuf* buf)
 			}
 			else if (op == 0x08)
 			{
-				debugf("Got Disconnect request from server.");
+				debugf("wscli Got Disconnect request from server.");
 				//RFC requires we return a close op code before closing the connection
 				disconnect();
 			}
 			else if (op == 0x09)
 			{
-				debugf("Got ping ...");
+#if DBG_WEBCLI
+				debugf("wscli Got ping ...");
+#endif
 				sendPong(); //Need to send Pong in response to Ping
 			}
 			else if (op = 0x10)
 			{
-				debugf("Got pong ...");
+#if DBG_WEBCLI
+				debugf("wscli Got pong ...");
+#endif
 				//A pong can contain app data, but shouldnt if we didnt send any...
 
 			}
 			else
 			{
-				debugf("Unknown opcode : %d ", op);
+				debugf("wscli Unknown opcode : %d ", op);
 				//Or not start of package if we failed to parse the entire previous one
 			}
 			break;
 		}
 		TcpClient::onReceive(buf);
 	}
+	if(data)
+		delete data;
+
+	return 0;
 }
 
 /* Function Name: sendMessage
@@ -494,11 +604,7 @@ err_t WebsocketClient::onReceive(pbuf* buf)
  */
 void WebsocketClient::sendMessage(String str)
 {
-	uint16_t size = str.length() + 1;
-	char cstr[size];
-
-	str.toCharArray(cstr, size);
-	sendMessage(cstr, size);
+	sendMessage(str.c_str(), str.length());
 }
 /* Function Name: getWSMode
  * Description: Gets present Mode of Websocet client

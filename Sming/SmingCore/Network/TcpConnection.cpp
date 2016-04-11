@@ -349,11 +349,11 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 
 	if (p != NULL)
 		pbuf_free(p);
-	else
+	/*else
 	{
 		con->close();
 		closeTcpConnection(tcp);
-	}
+	}*/
 
 	con->checkSelfFree();
 	//debugf("<staticOnReceive");

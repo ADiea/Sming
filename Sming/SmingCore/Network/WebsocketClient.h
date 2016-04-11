@@ -43,7 +43,7 @@ public:
 	void sendPing();
 	void sendPong();
 	void disconnect();
-	void sendMessage(char* msg, uint16_t length);
+	void sendMessage(const char* msg, uint16_t length);
 	void sendMessage(String str);
 	void sendBinary(uint8_t* msg, uint16_t length);
 	wsMode getWSMode();

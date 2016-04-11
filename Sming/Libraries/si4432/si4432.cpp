@@ -245,14 +245,27 @@ void Si4432::getPacketReceived(uint8_t* length, byte* readData) {
 
 	*length = ReadRegister(REG_RECEIVED_LENGTH);
 
-	if(*length > 64)
+	do
 	{
-		debugf("getPacketReceived inval len %d", *length);
-		*length = 0;
-		return;
-	}
+		if(*length == 0)
+		{
+			break;
+		}
 
-	BurstRead(REG_FIFO, readData, *length);
+		if(*length > 64)
+		{
+#if DEBUG_SI4432
+			debugf("getPacketReceived inval len %d", *length);
+#endif
+			*length = 0;
+			break;
+		}
+#if DEBUG_SI4432
+		debugf("getPacketReceived len %d buf %x", *length, readData);
+#endif
+		BurstRead(REG_FIFO, readData, *length);
+	}
+	while(false);
 
 	clearRxFIFO(); // which will also clear the interrupts
 }
@@ -559,9 +572,9 @@ bool Si4432::isPacketReceived() {
 		return true;
 	} else if (intStat & 0x01) { // packet crc error
 		switchMode(Ready); // get out of Rx mode till buffers are cleared
-//#if DEBUG_SI4432
+#if DEBUG_SI4432
 		debugf("CRC Error in Packet detected!-- %x ", intStat);
-//#endif
+#endif
 		clearRxFIFO();
 		switchMode(RXMode | Ready); // get back to work
 		return false;
