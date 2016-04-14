@@ -71,7 +71,14 @@ bool WebsocketClient::connect(String url)
 {
 	this->uri = URL(url);
 	this->_url = url;
-	TcpClient::connect(uri.Host,uri.Port);
+	
+	if(uri.Protocol == WSS_URL_PROTOCOL) {
+		TcpClient::connect(uri.Host, uri.Port, true);
+	}
+	else {
+		TcpClient::connect(uri.Host, uri.Port);
+	}	
+	
 #if DBG_WEBCLI
 	debugf("wscli Connecting to Server");
 #endif
@@ -340,7 +347,7 @@ void WebsocketClient::disconnect()
  * Parameters: msg - Message char array 
  *             length - length of msg char array
  */
-void WebsocketClient::sendMessage(const char* msg, uint16_t length)
+void WebsocketClient::sendMessage(const char* msg, unsigned short length)
 {
 	/*
 	 +-+-+-+-+-------+-+-------------+-------------------------------+

@@ -971,7 +971,7 @@ void ICACHE_FLASH_ATTR dhcps_stop(void)
  * 							Little-Endian.
  * Returns      : true or false
 *******************************************************************************/
-bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_lease(struct dhcps_lease *please)
+bool /*ICACHE_FLASH_ATTR*/ wifi_softap_set_dhcps_lease(struct dhcps_lease *please)
 {
 	if (please == NULL || (please->end_ip.addr - please->start_ip.addr > (DHCPS_MAX_LEASE << 24)))
 			return false;
@@ -988,7 +988,7 @@ bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_lease(struct dhcps_lease *please)
  * 							Little-Endian.
  * Returns      : true or false
 *******************************************************************************/
-bool ICACHE_FLASH_ATTR wifi_softap_get_dhcps_lease(struct dhcps_lease *please)
+bool /*ICACHE_FLASH_ATTR*/ wifi_softap_get_dhcps_lease(struct dhcps_lease *please)
 {
 	if (NULL == please)
 		return false;
@@ -1051,7 +1051,7 @@ void ICACHE_FLASH_ATTR dhcps_coarse_tmr(void)
 		kill_oldest_dhcps_pool();
 }
 
-bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_offer_option(uint8 level, void* optarg)
+bool /*ICACHE_FLASH_ATTR*/ wifi_softap_set_dhcps_offer_option(uint8 level, void* optarg)
 {
 	bool offer_flag = true;
 //	uint8 option = 0;
@@ -1073,7 +1073,7 @@ bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_offer_option(uint8 level, void* opt
 	return offer_flag;
 }
 
-bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_lease_time(uint32 minute)
+bool /*ICACHE_FLASH_ATTR*/ wifi_softap_set_dhcps_lease_time(uint32 minute)
 {
 /*    uint8 opmode = wifi_get_opmode();
 
@@ -1092,7 +1092,7 @@ bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_lease_time(uint32 minute)
     return true;
 }
 
-bool ICACHE_FLASH_ATTR wifi_softap_reset_dhcps_lease_time(void)
+bool /*ICACHE_FLASH_ATTR*/ wifi_softap_reset_dhcps_lease_time(void)
 {
 /*    uint8 opmode = wifi_get_opmode();
 
@@ -1107,7 +1107,7 @@ bool ICACHE_FLASH_ATTR wifi_softap_reset_dhcps_lease_time(void)
     return true;
 }
 
-uint32 ICACHE_FLASH_ATTR wifi_softap_get_dhcps_lease_time(void) // minute
+uint32 /*ICACHE_FLASH_ATTR*/ wifi_softap_get_dhcps_lease_time(void) // minute
 {
     return dhcps_lease_time;
 }

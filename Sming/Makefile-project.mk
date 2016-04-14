@@ -116,6 +116,8 @@ export COMPILE := gcc
 export PATH := $(ESP_HOME)/xtensa-lx106-elf/bin:$(PATH)
 XTENSA_TOOLS_ROOT := $(ESP_HOME)/xtensa-lx106-elf/bin
 
+CURRENT_DIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
+
 SPIFF_FILES ?= files
 
 BUILD_BASE	= out/build
@@ -131,6 +133,16 @@ FW_MEMINFO_SAVED = out/fwMeminfo
 # name for the target project
 TARGET		= app
 
+ENABLE_SSL = 1
+SSL_DEBUG = 1
+
+LIBSMING = sming
+#EXTRA_LIBS = 
+ifeq ($(ENABLE_SSL),1)
+	LIBSMING = sming
+#	EXTRA_LIBS += axtls
+endif
+
 # which modules (subdirectories) of the project to include in compiling
 # define your custom directories in the project's own Makefile before including this one
 MODULES      ?= app     # default to app if not set by user
@@ -140,7 +152,7 @@ EXTRA_INCDIR += $(SMING_HOME)/include $(SMING_HOME)/ $(SMING_HOME)/system/includ
 # libraries used in this project, mainly provided by the SDK
 USER_LIBDIR = $(SMING_HOME)/compiler/lib/
 
-LIBS		= microc microgcc hal phy pp net80211 wpa main sming crypto pwm $(EXTRA_LIBS)
+LIBS		= microc microgcc hal phy pp net80211 wpa main axtls $(LIBSMING) crypto pwm $(EXTRA_LIBS)
 
 # compiler flags using during compilation of source files
 CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106 $(USER_CFLAGS)
@@ -152,6 +164,19 @@ else
 	CFLAGS += -Os -g
 endif
 CXXFLAGS	= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++11 -felide-constructors
+
+# SSL support using axTLS
+ifeq ($(ENABLE_SSL),1)
+	LIBS += axtls	
+	EXTRA_INCDIR += $(SMING_HOME)/axtls-8266 $(SMING_HOME)/axtls-8266/ssl $(SMING_HOME)/axtls-8266/crypto 
+	AXTLS_FLAGS = -DLWIP_RAW=1 -DENABLE_SSL=1
+	ifeq ($(SSL_DEBUG),1) # 
+		AXTLS_FLAGS += -DSSL_DEBUG=1 -DDEBUG_TLS_MEM=1
+	endif
+endif
+
+CFLAGS += $(AXTLS_FLAGS)  
+CXXFLAGS += $(AXTLS_FLAGS)
 
 # we will use global WiFi settings from Eclipse Environment Variables, if possible
 WIFI_SSID ?= ""
@@ -305,8 +330,27 @@ $(TARGET_OUT): $(APP_AR)
 $(APP_AR): $(OBJ)
 	$(vecho) "AR $@"
 	$(Q) $(AR) cru $@ $^
+	
 
+sming-ssl: $(USER_LIBDIR)/lib$(LIBSMING).a
+
+$(USER_LIBDIR)/lib$(LIBSMING).a:
+	$(vecho) "Recompiling Sming with SSL support. This may take some time"
+	$(Q) $(MAKE) -C $(SMING_HOME) clean V=$(V) ENABLE_SSL=$(ENABLE_SSL) SMING_HOME=$(SMING_HOME)
+	$(Q) $(MAKE) -C $(SMING_HOME) V=$(V) ENABLE_SSL=$(ENABLE_SSL) SMING_HOME=$(SMING_HOME)
+
+include/ssl/private_key.h:
+	$(vecho) "Generating unique certificate and key. This may take some time"
+	$(Q) mkdir -p $(CURRENT_DIR)/include/ssl/
+	$(Q) AXDIR=$(CURRENT_DIR)/include/ssl/  $(SMING_HOME)/axtls-8266/tools/make_certs.sh 
+
+prepare-ssl: sming-ssl include/ssl/private_key.h
+
+ifeq ($(ENABLE_SSL), 1)
+checkdirs: prepare-ssl $(BUILD_DIR) $(FW_BASE)
+else
 checkdirs: $(BUILD_DIR) $(FW_BASE)
+endif
 
 $(BUILD_DIR):
 	$(Q) mkdir -p $@

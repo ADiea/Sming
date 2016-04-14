@@ -67,8 +67,15 @@ URL::URL(String urlString)
 		portStart++;
 		Port = urlString.substring(portStart, portEnd).toInt();
 	}
-	else
+	else if(Protocol == HTTPS_URL_PROTOCOL) {
+		Port = 443;
+	}
+	else if(Protocol == WSS_URL_PROTOCOL) {
+		Port = 443;
+	}	
+	else {
 		Port = 80;
+	}
 
 	// path
 	if (pathStart != -1)

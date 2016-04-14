@@ -415,7 +415,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool. 
  */
 #ifndef PBUF_POOL_SIZE
-#define PBUF_POOL_SIZE                  10 //TODO: try 20
+#define PBUF_POOL_SIZE                  15 //TODO: try 20
 #endif
 
 /*

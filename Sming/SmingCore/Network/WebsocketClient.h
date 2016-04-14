@@ -43,10 +43,19 @@ public:
 	void sendPing();
 	void sendPong();
 	void disconnect();
-	void sendMessage(const char* msg, uint16_t length);
+	void sendMessage(const char* msg, unsigned short length);
 	void sendMessage(String str);
 	void sendBinary(uint8_t* msg, uint16_t length);
 	wsMode getWSMode();
+	
+	using TcpClient::addSslOptions;
+	using TcpClient::setSslFingerprint;
+	using TcpClient::setSslClientKeyCert;
+	using TcpClient::freeSslClientKeyCert;
+#ifdef ENABLE_SSL
+	using TcpClient::getSsl;
+#endif
+	
 protected:
 	virtual void onFinished(TcpClientState finishState);
 	virtual err_t onConnected(err_t err);
