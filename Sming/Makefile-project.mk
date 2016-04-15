@@ -137,11 +137,7 @@ ENABLE_SSL = 1
 SSL_DEBUG = 1
 
 LIBSMING = sming
-#EXTRA_LIBS = 
-ifeq ($(ENABLE_SSL),1)
-	LIBSMING = sming
-#	EXTRA_LIBS += axtls
-endif
+
 
 # which modules (subdirectories) of the project to include in compiling
 # define your custom directories in the project's own Makefile before including this one
@@ -152,7 +148,9 @@ EXTRA_INCDIR += $(SMING_HOME)/include $(SMING_HOME)/ $(SMING_HOME)/system/includ
 # libraries used in this project, mainly provided by the SDK
 USER_LIBDIR = $(SMING_HOME)/compiler/lib/
 
-LIBS		= microc microgcc hal phy pp net80211 wpa main axtls $(LIBSMING) crypto pwm $(EXTRA_LIBS)
+LIBS		= microc microgcc hal phy pp net80211 wpa main $(LIBSMING) crypto pwm $(EXTRA_LIBS)
+
+#axtls
 
 # compiler flags using during compilation of source files
 CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106 $(USER_CFLAGS)
@@ -166,14 +164,12 @@ endif
 CXXFLAGS	= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++11 -felide-constructors
 
 # SSL support using axTLS
-ifeq ($(ENABLE_SSL),1)
-	LIBS += axtls	
-	EXTRA_INCDIR += $(SMING_HOME)/axtls-8266 $(SMING_HOME)/axtls-8266/ssl $(SMING_HOME)/axtls-8266/crypto 
-	AXTLS_FLAGS = -DLWIP_RAW=1 -DENABLE_SSL=1
-	ifeq ($(SSL_DEBUG),1) # 
-		AXTLS_FLAGS += -DSSL_DEBUG=1 -DDEBUG_TLS_MEM=1
-	endif
+EXTRA_INCDIR += $(SMING_HOME)/axtls-8266 $(SMING_HOME)/axtls-8266/ssl $(SMING_HOME)/axtls-8266/crypto 
+AXTLS_FLAGS = -DLWIP_RAW=1 -DENABLE_SSL=1
+ifeq ($(SSL_DEBUG),1) # 
+	AXTLS_FLAGS += -DSSL_DEBUG=1 -DDEBUG_TLS_MEM=1
 endif
+
 
 CFLAGS += $(AXTLS_FLAGS)  
 CXXFLAGS += $(AXTLS_FLAGS)
@@ -341,16 +337,19 @@ $(USER_LIBDIR)/lib$(LIBSMING).a:
 
 include/ssl/private_key.h:
 	$(vecho) "Generating unique certificate and key. This may take some time"
-	$(Q) mkdir -p $(CURRENT_DIR)/include/ssl/
-	$(Q) AXDIR=$(CURRENT_DIR)/include/ssl/  $(SMING_HOME)/axtls-8266/tools/make_certs.sh 
+	$(vecho) 1/3
+	$(Q) mkdir -p $(CURRENT_DIR)include/ssl/
+	$(vecho) 2/3
+	$(Q) set AXDIR=$(CURRENT_DIR)include/ssl/  
+	$(vecho) 3/3
+	#$(Q) $(SMING_HOME)/axtls-8266/tools/make_certs.sh 
+	$(vecho) done
 
 prepare-ssl: sming-ssl include/ssl/private_key.h
+		$(vecho) Prepare SSL
 
-ifeq ($(ENABLE_SSL), 1)
 checkdirs: prepare-ssl $(BUILD_DIR) $(FW_BASE)
-else
-checkdirs: $(BUILD_DIR) $(FW_BASE)
-endif
+		$(vecho) Prebuild scripts
 
 $(BUILD_DIR):
 	$(Q) mkdir -p $@
@@ -383,9 +382,9 @@ flash: all
 	$(vecho) "Killing Terminal to free $(COM_PORT)"
 	-$(Q) $(KILL_TERM)
 ifeq ($(DISABLE_SPIFFS), 1)
-	$(ESPTOOL) -p $(COM_PORT) -b $(COM_SPEED_ESPTOOL) write_flash $(flashimageoptions) 0x00000 $(FW_BASE)/0x00000.bin 0x0D000 $(FW_BASE)/0x09000.bin
+	$(ESPTOOL) -p $(COM_PORT) -b $(COM_SPEED_ESPTOOL) write_flash $(flashimageoptions) 0x00000 $(FW_BASE)/0x00000.bin 0x0F000 $(FW_BASE)/0x09000.bin
 else
-	$(ESPTOOL) -p $(COM_PORT) -b $(COM_SPEED_ESPTOOL) write_flash $(flashimageoptions) 0x00000 $(FW_BASE)/0x00000.bin 0x0D000 $(FW_BASE)/0x09000.bin $(SPIFF_START_OFFSET) $(SPIFF_BIN_OUT)
+	$(ESPTOOL) -p $(COM_PORT) -b $(COM_SPEED_ESPTOOL) write_flash $(flashimageoptions) 0x00000 $(FW_BASE)/0x00000.bin 0x0F000 $(FW_BASE)/0x09000.bin $(SPIFF_START_OFFSET) $(SPIFF_BIN_OUT)
 endif
 	$(TERMINAL)
 
@@ -400,7 +399,7 @@ clean:
 	$(Q) if [ -f "$(FW_MEMINFO_NEW)" ]; then \
 		mv $(FW_MEMINFO_NEW) $(FW_MEMINFO_SAVED); \
 	fi
-#remove build artifacts
+	$(vecho) remove build artifacts
 	$(Q) rm -f $(APP_AR)
 	$(Q) rm -f $(TARGET_OUT)
 	$(Q) rm -rf $(BUILD_DIR)

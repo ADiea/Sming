@@ -176,11 +176,11 @@ EXP_FUNC int STDCALL getdomainname(char *buf, int buf_size);
 #endif  /* Not Win32 */
 
 /* some functions to mutate the way these work */
-#define malloc(A)       ax_port_malloc(A, __FILE__, __LINE__)
+#define malloc(A)       ax_port_malloc(A, "", __LINE__)
 #ifndef realloc
-#define realloc(A,B)    ax_port_realloc(A,B, __FILE__, __LINE__)
+#define realloc(A,B)    ax_port_realloc(A,B, "", __LINE__)
 #endif
-#define calloc(A,B)     ax_port_calloc(A,B, __FILE__, __LINE__)
+#define calloc(A,B)     ax_port_calloc(A,B, "", __LINE__)
 #define free(x)         ax_port_free(x)
 
 EXP_FUNC void * STDCALL ax_port_malloc(size_t s, const char*, int);

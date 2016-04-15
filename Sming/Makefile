@@ -103,9 +103,6 @@ ENABLE_SSL = 1
 SSL_DEBUG = 1
 
 LIBSMING = libsming
-ifeq ($(ENABLE_SSL),1)
-	LIBSMING= libsming
-endif
 
 
 # name for the target project
@@ -120,7 +117,7 @@ USER_LIBDIR = compiler/lib
 LIBS		= microc microgcc hal phy pp net80211 wpa main
 
 # compiler flags using during compilation of source files. Add '-pg' for debugging
-CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106 -DUSE_ESPCONN -DLWIP_OPEN_SRC -DUSE_OPEN_DHCPS -DPBUF_RSV_FOR_WLAN -DEBUF_LWIP
+CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106 -DUSE_ESPCONN -DLWIP_OPEN_SRC -DUSE_OPEN_DHCPS -DPBUF_RSV_FOR_WLAN -DEBUF_LWIP -DESP8266
 ifeq ($(ENABLE_GDB), 1)
 	CFLAGS += -Og -ggdb -DGDBSTUB_FREERTOS=0 -DENABLE_GDB=1
 	MODULES		 += gdbstub
@@ -144,15 +141,15 @@ SDK_LDDIR	= ld
 SDK_INCDIR	= include include/json
 
 # SSL support using axTLS
-ifeq ($(ENABLE_SSL),1)
-	LIBS += axtls
-	MODULES		 += axtls-8266/compat axtls-8266/replacements
+
+#	LIBS += axtls
+	MODULES		 += axtls-8266/compat axtls-8266/replacements axtls-8266/crypto axtls-8266/ssl
 	EXTRA_INCDIR += axtls-8266 axtls-8266/ssl axtls-8266/crypto 
 	AXTLS_FLAGS = -DLWIP_RAW=1 -DENABLE_SSL=1
 	ifeq ($(SSL_DEBUG),1) # 
 		AXTLS_FLAGS += -DSSL_DEBUG=1 -DDEBUG_TLS_MEM=1 -DAXL_DEBUG=1
 	endif 
-endif
+
 
 CFLAGS += $(AXTLS_FLAGS)  
 CXXFLAGS += $(AXTLS_FLAGS)
@@ -242,34 +239,18 @@ gdbstub/Makefile:
 	$(Q) git submodule update
 endif
 
-spiffy: spiffy/spiffy
-
-spiffy/spiffy:
-	$(vecho) "Making spiffy utility"
-	$(Q) $(MAKE) --no-print-directory -C spiffy V=$(V)
-	$(vecho) "Done"
-
 $(APP_AR): $(OBJ)
 	$(vecho) "AR $@"
 	$(Q) $(AR) cru $@ $^
 	$(vecho) "Installing $(LIBSMING)"
-ifeq ($(ENABLE_SSL), 1)
-	$(vecho) "+ SSL support is enabled"
-else
-	$(vecho) "(!) SSL support is not enabled. To enable it type: 'make clean; make ENABLE_SSL=1'"
-endif
+
 	$(Q) cp -r $(APP_AR) $(USER_LIBDIR)/$(LIBSMING).a  
 	$(vecho) "Done"
 
 compile-ssl: 
-ifeq ($(ENABLE_SSL), 1)
-	$(Q) $(MAKE) --no-print-directory -C axtls-8266 -e V=$(V) BIN_DIR="$(SMING_HOME)/$(USER_LIBDIR)" ESP_HOME="$(ESP_HOME)"
-else
-	$(vecho) "(!) SSL support is not enabled. To enable it type: 'make clean; make ENABLE_SSL=1'"
-endif	
+#	$(Q) $(MAKE) --no-print-directory -C axtls-8266 -e V=$(V) BIN_DIR="$(SMING_HOME)/$(USER_LIBDIR)" ESP_HOME="$(ESP_HOME)"
 
-
-checkdirs: compile-ssl spiffy $(BUILD_DIR) $(FW_BASE)
+checkdirs: compile-ssl $(BUILD_DIR) $(FW_BASE)
 
 $(BUILD_DIR):
 	$(Q) mkdir -p $@
@@ -286,11 +267,7 @@ clean:
 	$(Q) rm -rf $(BUILD_DIR)
 	$(Q) rm -rf $(BUILD_BASE)
 	$(Q) rm -rf $(FW_BASE)
-ifeq ($(ENABLE_SSL), 1)
 	$(Q) $(MAKE) --no-print-directory -C axtls-8266 clean -e V=$(V) BIN_DIR="$(SMING_HOME)/$(USER_LIBDIR)"
-else
-	$(Q) $(MAKE) --no-print-directory -C spiffy clean V=$(V)
-endif	
 
 test: all spiffy samples
 

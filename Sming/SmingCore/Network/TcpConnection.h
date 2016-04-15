@@ -138,7 +138,7 @@ protected:
 	SSLCTX *sslContext = nullptr;
 #endif
 	boolean useSsl = false;
-	uint8_t *sslFingerprint;
+	uint8_t *sslFingerprint=null;
 	boolean sslConnected = false;
 	uint32_t sslOptions=0;
 	String hostname = "";

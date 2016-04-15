@@ -42,7 +42,7 @@
  * Author: Simon Goldschmidt (lwIP raw API part)
  */
 
-/* изменения и дополения:
+/* Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ� Ð¸ Ð´Ð¾Ð¿Ð¾Ð»ÐµÐ½Ð¸Ñ�:
  pvvx , Vitaly (http://esp8266.ru/forum/threads/razrabotka-biblioteki-malogo-webservera-na-esp8266.56/page-43#post-10192)
 */ 
 
@@ -57,8 +57,8 @@
 #include "lwip/dns.h"
 #include "lwip/ip_addr.h"
 #include "lwip/pbuf.h"
-#include "sdk/add_func.h"
-#include "sdk/os_printf.h"
+//#include "sdk/add_func.h"
+//#include "sdk/os_printf.h"
 
 #define os_sprintf ets_sprintf
 //#include <string.h>
@@ -340,7 +340,7 @@ static const int year_lengths[2] = {
   365,
   366
 } ;
-struct tm
+/*struct tm
 {
   int	tm_sec;
   int	tm_min;
@@ -351,10 +351,10 @@ struct tm
   int	tm_wday;
   int	tm_yday;
   int	tm_isdst;
-};
+};*/
 
 struct tm res_buf;
-typedef struct __tzrule_struct
+/*typedef struct __tzrule_struct
 {
   char ch;
   int m;
@@ -363,7 +363,7 @@ typedef struct __tzrule_struct
   int s;
   time_t change;
   int offset;
-} __tzrule_type;
+} __tzrule_type;*/
 
 __tzrule_type sntp__tzrule[2];
 struct tm * ICACHE_FLASH_ATTR

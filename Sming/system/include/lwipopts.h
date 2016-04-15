@@ -415,7 +415,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool. 
  */
 #ifndef PBUF_POOL_SIZE
-#define PBUF_POOL_SIZE                  15 //TODO: try 20
+#define PBUF_POOL_SIZE                  8 //TODO: try 20
 #endif
 
 /*
@@ -730,7 +730,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
    ---------- SNTP options ----------
    ----------------------------------
 */
-#define LWIP_SNTP 0
+#define LWIP_SNTP 1
 
 /*
    ----------------------------------
@@ -1864,14 +1864,14 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * ETHARP_DEBUG: Enable debugging in etharp.c.
  */
 #ifndef ETHARP_DEBUG
-#define ETHARP_DEBUG                    (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define ETHARP_DEBUG                    (LWIP_DBG_OFF)
 #endif
 
 /**
  * NETIF_DEBUG: Enable debugging in netif.c.
  */
 #ifndef NETIF_DEBUG
-#define NETIF_DEBUG                     (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define NETIF_DEBUG                     (LWIP_DBG_OFF)
 #endif
 
 /**
@@ -1976,7 +1976,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * TCP_DEBUG: Enable debugging for TCP.
  */
 #ifndef TCP_DEBUG
-#define TCP_DEBUG                       (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define TCP_DEBUG                       (LWIP_DBG_OFF)
 #endif
 
 /**
@@ -2068,7 +2068,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * DHCP_DEBUG: Enable debugging in dhcp.c.
  */
 #ifndef DHCP_DEBUG
-#define DHCP_DEBUG                      (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define DHCP_DEBUG                      (LWIP_DBG_OFF)
 #endif
 
 /**

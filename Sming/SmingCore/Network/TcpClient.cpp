@@ -81,7 +81,7 @@ bool TcpClient::send(const char* data, uint16_t len, bool forceCloseAfterSent /*
 	if (stream == NULL)
 		stream = new MemoryDataStream();
 
-	debugf("Storing %d bytes in stream", len);
+	//debugf("Storing %d bytes in stream", len);
 
 	stream->write((const uint8_t*)data, len);
 	asyncTotalLen += len;

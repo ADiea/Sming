@@ -46,7 +46,7 @@ as well as Adafruit raw 1.8" TFT display
 #elif defined(__AVR__)
   #include <avr/pgmspace.h>
 #elif defined(ESP8266)
-  #include <pgmspace.h>
+ // #include <pgmspace.h>
 #endif
 
 #if defined(__SAM3X8E__)

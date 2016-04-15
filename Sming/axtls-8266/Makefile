@@ -31,9 +31,7 @@ OBJ_FILES := \
 	ssl/tls1_svr.o \
 	ssl/x509.o \
 	crypto/crypto_misc.o \
-	replacements/mem.o \
-	replacements/time.o \
-	compat/lwipr_compat.o \
+
 
 
 CPPFLAGS += -I$(XTENSA_LIBS)/include \
