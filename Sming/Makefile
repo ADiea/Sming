@@ -104,20 +104,28 @@ SSL_DEBUG = 1
 
 LIBSMING = libsming
 
+MODULES		 += custom_heap/umm_malloc custom_heap
+EXTRA_INCDIR += custom_heap
+
+LIBMAIN = mainmm
+LIBMAIN_SRC = $(addprefix $(SDK_LIBDIR)/,libmain.a)
+LIBMAIN_DST = $(USER_LIBDIR)/lib$(LIBMAIN).a
+
 
 # name for the target project
 TARGET		= app
 
 # which modules (subdirectories) of the project to include in compiling
-MODULES		= system system/helpers system/lwip/api system/lwip/app system/lwip/core/ipv4 system/lwip/core system/lwip/netif Wiring SmingCore appinit $(filter %/, $(wildcard SmingCore/*/)) $(filter %/, $(wildcard Services/*/)) $(filter %/, $(wildcard Libraries/*/))
+MODULES		+= system system/helpers system/lwip/api system/lwip/app system/lwip/core/ipv4 system/lwip/core system/lwip/netif Wiring SmingCore appinit $(filter %/, $(wildcard SmingCore/*/)) $(filter %/, $(wildcard Services/*/)) $(filter %/, $(wildcard Libraries/*/))
 EXTRA_INCDIR    = include system/include Wiring Libraries SmingCore rboot rboot/appcode $(SDK_BASE)/../include
 
 # libraries used in this project, mainly provided by the SDK
 USER_LIBDIR = compiler/lib
-LIBS		= microc microgcc hal phy pp net80211 wpa main
+LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN)
 
 # compiler flags using during compilation of source files. Add '-pg' for debugging
-CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106 -DUSE_ESPCONN -DLWIP_OPEN_SRC -DUSE_OPEN_DHCPS -DPBUF_RSV_FOR_WLAN -DEBUF_LWIP -DESP8266
+CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections \
+			  -D__ets__ -DICACHE_FLASH -DARDUINO=106 -DUSE_ESPCONN -DLWIP_OPEN_SRC -DUSE_OPEN_DHCPS -DPBUF_RSV_FOR_WLAN -DEBUF_LWIP -DESP8266  -Wl,-wrap,system_restart_local 
 ifeq ($(ENABLE_GDB), 1)
 	CFLAGS += -Og -ggdb -DGDBSTUB_FREERTOS=0 -DENABLE_GDB=1
 	MODULES		 += gdbstub
@@ -230,7 +238,18 @@ endef
 
 .PHONY: all checkdirs clean spiffy test samples recurse-samples $(SAMPLES_DIRS)
 
-all: checkdirs $(APP_AR)
+all: checkdirs $(LIBMAIN_DST) $(APP_AR)
+
+$(LIBMAIN_DST): $(LIBMAIN_SRC)
+	$(vecho) "Preparing for custom heap implementation"
+	$(Q) cp $^ $@ 
+	$(Q) $(AR) -x $@
+	$(Q) mv *.o $(USER_LIBDIR)
+	$(Q) $(OBJCOPY) --weaken $(USER_LIBDIR)/user_interface.o
+	$(Q) $(AR) -rc $@ $(USER_LIBDIR)/*.o
+	$(Q) $(AR) -d $@ mem_manager.o
+	$(Q) rm $(USER_LIBDIR)/*.o
+
 
 ifeq ($(ENABLE_GDB), 1)	
 gdbstub/Makefile: 
