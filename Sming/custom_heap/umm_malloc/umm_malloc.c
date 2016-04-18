@@ -117,7 +117,7 @@
 
 #ifndef DBG_LOG_LEVEL
 #  undef  DBG_LOG_LEVEL
-#  define DBG_LOG_LEVEL 6
+#  define DBG_LOG_LEVEL 0
 #else
 #  undef  DBG_LOG_LEVEL
 #  define DBG_LOG_LEVEL DBG_LOG_LEVEL

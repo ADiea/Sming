@@ -54,18 +54,19 @@ extern "C"
 	#define sprintf_P(s, f_P, ...) \
 		({ \
 			int len_P = strlen_P(f_P); \
-			char *__localF = (char *)malloc(len_P + 1); \
-			strcpy_P(__localF, f_P); __localF[len_P] = '\0'; \
-			int __result = sprintf(s, __localF, ##__VA_ARGS__); \
-			free(__localF); \
+			int __result=0;char *__localF = (char *)malloc(len_P + 1); \
+			if(__localF) { strcpy_P(__localF, f_P); __localF[len_P] = '\0'; \
+			__result = m_sprintf(s, __localF, ##__VA_ARGS__); \
+			free(__localF);} \
 			__result; \
 		})
 	#define printf_P(f_P, ...) \
 		({ \
-			char *__localF = (char *)malloc(strlen_P(f_P) + 1); \
-			strcpy_P(__localF, (f_P)); \
-			int __result = os_printf_plus(__localF, ##__VA_ARGS__); \
-			free(__localF); \
+			int __result=0;char *__localF = (char *)malloc(strlen_P(f_P) + 1); \
+			if(__localF) { strcpy_P(__localF, (f_P)); \
+			__result = m_printf(__localF, ##__VA_ARGS__); \
+			/*__result += m_printf("\n");*/ \
+			free(__localF);} \
 			__result; \
 		})
 #ifdef __cplusplus

@@ -20,6 +20,11 @@
 
 #include "m_printf.h"
 
+#include "FakePgmSpace.h"
+
+void* malloc(size_t);
+void free(void*);
+
 #define __ESP8266_EX__ // System definition ESP8266 SOC
 
 #define IRAM_ATTR __attribute__((section(".iram.text")))
@@ -34,7 +39,11 @@
 #endif
 
 #undef assert
-#define debugf(fmt, ...) m_printf(fmt"\r\n", ##__VA_ARGS__)
+//#define debugf(fmt, ...) m_printf(fmt"\r\n", ##__VA_ARGS__)
+
+#define debugf(fmt, ...)  \
+		({static const char __attribute__((aligned(4))) __attribute__((section(".irom.text"))) _fmt##__FUNCTION__##__LINE__[] = fmt; printf_P(_fmt##__FUNCTION__##__LINE__, ##__VA_ARGS__);})
+
 #define assert(condition) if (!(condition)) SYSTEM_ERROR("ASSERT: %s %d", __FUNCTION__, __LINE__)
 #define SYSTEM_ERROR(fmt, ...) m_printf("ERROR: " fmt "\r\n", ##__VA_ARGS__)
 

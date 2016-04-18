@@ -9,6 +9,8 @@
 
 #define IRAM_ATTR __attribute__((section(".iram.text")))
 
+#define HEAP_OP_SIZE 250
+
 extern void *umm_malloc( size_t size );
 extern void *umm_calloc( size_t num, size_t size );
 extern void *umm_realloc( void *ptr, size_t size );
@@ -19,10 +21,11 @@ typedef struct _heapOp
 	char op;
 	uint32_t addr;
 	uint32_t size;
+	uint16_t opCounter;
 }heapOp;
-#define HEAP_OP_SIZE 250
-heapOp gLastHeapOp[HEAP_OP_SIZE];
 
+heapOp gLastHeapOp[HEAP_OP_SIZE];
+uint16_t gTotalHeapOp = 0;
 uint8_t gHeapOpFlushAfter = 240;
 
 void recordHeapOp(char op, uint32_t size, uint32_t addr)
@@ -40,16 +43,18 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr)
 		for(i=0; i <= heapOpIndex; i++)
 		{
 			if(gLastHeapOp[i].op == 'f')
-				ets_printf("hl{f,%x,0}\n", gLastHeapOp[i].addr);
+				ets_printf("hl{f,%x,0} %d\n", gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 			else
-				ets_printf("hl{%c,%d,0,%x}\n", gLastHeapOp[i].op, gLastHeapOp[i].size, gLastHeapOp[i].addr);
+				ets_printf("hl{%c,%d,0,%x} %d\n", gLastHeapOp[i].op, gLastHeapOp[i].size, gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 		}
 		heapOpIndex = -1;
 	}
 	++heapOpIndex;
+	++gTotalHeapOp;
 	gLastHeapOp[heapOpIndex].op = op;
 	gLastHeapOp[heapOpIndex].addr = addr;
 	gLastHeapOp[heapOpIndex].size = size;
+	gLastHeapOp[heapOpIndex].opCounter = gTotalHeapOp;
 }
 
 
@@ -71,21 +76,21 @@ void IRAM_ATTR vPortFree(void *ptr, const char* file, int line)
 void* IRAM_ATTR pvPortCalloc(size_t count, size_t size, const char* file, int line)
 {
 	void* ret = calloc(count, size);
-    recordHeapOp('c', size*count, (uint32_t)ret);
+    recordHeapOp('m', size*count, (uint32_t)ret);
     return ret;
 }
 
 void* IRAM_ATTR pvPortRealloc(void *ptr, size_t size, const char* file, int line)
 {
 	void* ret = realloc(ptr, size);
-    recordHeapOp('r', size, (uint32_t)ret);
+    recordHeapOp('m', size, (uint32_t)ret);
     return ret;
 }
 
 void* IRAM_ATTR pvPortZalloc(size_t size, const char* file, int line)
 {
 	void* ret = calloc(1, size);
-	recordHeapOp('z', size, (uint32_t)ret);
+	recordHeapOp('m', size, (uint32_t)ret);
     return ret;
 }
 

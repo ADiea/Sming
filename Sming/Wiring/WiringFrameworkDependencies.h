@@ -25,5 +25,6 @@
 #include "BitManipulations.h"
 #include "FakePgmSpace.h"
 #include "../SmingCore/pins_arduino.h"
+#include "m_printf.h"
 
 #endif /* WIRING_WIRINGFRAMEWORKDEPENDENCIES_H_ */
