@@ -364,6 +364,7 @@ DSTATUS disk_initialize (
 	n=5;
 	do
 	{
+		WDT.alive();
 		retCmd = send_cmd(CMD0, 0);
 		n--;
 	}

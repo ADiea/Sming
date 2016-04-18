@@ -55,6 +55,7 @@ static int send_raw_packet(SSL *ssl, uint8_t protocol);
 static void certificate_free(SSL* ssl);
 static int increase_bm_data_size(SSL *ssl);
 
+extern void system_soft_wdt_restart(void);
 /**
  * The server will pick the cipher based on the order that the order that the
  * ciphers are listed. This order is defined at compile time.
@@ -1242,7 +1243,7 @@ int basic_read(SSL *ssl, uint8_t **in_data)
         goto error;
     }
 
-    DISPLAY_BYTES(ssl, "received %d bytes", 
+    DISPLAY_BYTES(ssl, "received %d bytes",
             &ssl->bm_data[ssl->bm_read_index], read_len, read_len);
 
     ssl->got_bytes += read_len;
@@ -1928,6 +1929,8 @@ int process_certificate(SSL *ssl, X509_CTX **x509_ctx)
     X509_CTX **chain = x509_ctx;
     offset += 2;
 
+    system_soft_wdt_restart();
+
     PARANOIA_CHECK(total_cert_size, offset);
 
     while (offset < total_cert_size)
@@ -1936,6 +1939,7 @@ int process_certificate(SSL *ssl, X509_CTX **x509_ctx)
         cert_size = (buf[offset]<<8) + buf[offset+1];
         offset += 2;
         
+        system_soft_wdt_restart();
         if (x509_new(&buf[offset], NULL, chain))
         {
             ret = SSL_ERROR_BAD_CERTIFICATE;

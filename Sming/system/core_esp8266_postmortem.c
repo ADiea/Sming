@@ -40,6 +40,8 @@ static const char* s_panic_func = 0;
 
 static bool s_abort_called = false;
 
+static bool bResetInProgress = false;
+
 void uart_write_char_d(char c);
 static void uart0_write_char_d(char c);
 static void uart1_write_char_d(char c);
@@ -86,8 +88,12 @@ extern void custom_crash_callback( struct rst_info * rst_info, uint32_t stack, u
 
 void system_restart_local() __attribute__ ((alias("__wrap_system_restart_local")));
 
+void system_restart();
+
 void __wrap_system_restart_local() {
     register uint32_t sp asm("a1");
+
+    ets_printf("\n***RESET***\n");
 
     struct rst_info rst_info = {0};
     system_rtc_mem_read(0, &rst_info, sizeof(rst_info));
@@ -98,6 +104,14 @@ void __wrap_system_restart_local() {
     	ets_printf("Normal reset\n");
         return;
     }
+
+    if(bResetInProgress)
+    {
+    	ets_printf("Resetting...\n");
+    	return;
+    }
+
+    bResetInProgress = true;
 
     ets_install_putc1(&uart_write_char_d);
 
@@ -116,8 +130,8 @@ void __wrap_system_restart_local() {
         ets_printf("\nSoft WDT reset\n");
     }
 
-    uint32_t cont_stack_start = (uint32_t) &(g_cont.stack);
-    uint32_t cont_stack_end = (uint32_t) g_cont.stack_end;
+   // uint32_t cont_stack_start = (uint32_t) &(g_cont.stack);
+  //  uint32_t cont_stack_end = (uint32_t) g_cont.stack_end;
     uint32_t stack_end;
 
     // amount of stack taken by interrupt or exception handler
@@ -134,11 +148,11 @@ void __wrap_system_restart_local() {
         offset = 0x10;
     }
 
-    if (sp > cont_stack_start && sp < cont_stack_end) {
+    /*if (sp > cont_stack_start && sp < cont_stack_end) {
         ets_printf("\nctx: cont \n");
         stack_end = cont_stack_end;
     }
-    else {
+    else */{
         ets_printf("\nctx: sys \n");
         stack_end = 0x3fffffb0;
         // it's actually 0x3ffffff0, but the stuff below ets_run
@@ -153,7 +167,10 @@ void __wrap_system_restart_local() {
     custom_crash_callback( &rst_info, sp + offset, stack_end );
 
     //delayMicroseconds(10000);
-    __real_system_restart_local();
+    //__real_system_restart_local();
+    system_restart();
+    //or WDT reset
+    while(1);
 }
 
 

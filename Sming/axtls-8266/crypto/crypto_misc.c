@@ -45,6 +45,10 @@
 #ifdef ESP8266
 #define CONFIG_SSL_SKELETON_MODE 1
 uint32_t phy_get_rand();
+extern int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args);
+extern int m_vprintf ( const char * format, va_list arg );
+extern int m_printf(const char *fmt, ...);
+extern int m_snprintf(char* buf, int length, const char *fmt, ...);
 #endif
 
 #if defined(CONFIG_USE_DEV_URANDOM)
@@ -78,7 +82,7 @@ int get_file(const char *filename, uint8_t **buf)
     if (stream == NULL)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("file '%s' does not exist\n", filename); TTY_FLUSH();
+    	m_printf("file '%s' does not exist\n", filename); TTY_FLUSH();
 #endif
         return -1;
     }
@@ -251,20 +255,20 @@ static void print_hex(uint8_t hex)
         column = 0;
     }
 
-    printf("%02x ", hex);
+    m_printf("%02x ", hex);
     if (++column == 8)
     {
-        printf(": ");
+    	m_printf(": ");
     }
     else if (column >= 16)
     {
-        printf("\n");
+    	m_printf("\n");
         column = 0;
     }
 
     if (++hex_index >= hex_finish && column > 0)
     {
-        printf("\n");
+    	m_printf("\n");
     }
 }
 
@@ -285,13 +289,13 @@ EXP_FUNC void STDCALL print_blob(const char *format,
     va_list(ap);
 
     va_start(ap, size);
-    sprintf(tmp, "%s\n", format);
-    vprintf(tmp, ap);
-    print_hex_init(size);
+    m_snprintf(tmp, sizeof(tmp), "SSL: %s\n", format);
+    m_vprintf(tmp, ap);
+    /*print_hex_init(size);
     for (i = 0; i < size; i++)
     {
         print_hex(data[i]);
-    }
+    }*/
 
     va_end(ap);
     TTY_FLUSH();
@@ -371,7 +375,7 @@ EXP_FUNC int STDCALL base64_decode(const char *in, int len,
 error:
 #ifdef CONFIG_SSL_FULL_MODE
     if (ret < 0)
-        printf("Error: Invalid base64\n"); TTY_FLUSH();
+    	m_printf("Error: Invalid base64\n"); TTY_FLUSH();
 #endif
     TTY_FLUSH();
     return ret;

@@ -55,6 +55,29 @@ int m_snprintf(char* buf, int length, const char *fmt, ...)
 	return n;
 }
 
+int m_vprintf ( const char * format, va_list arg )
+{
+	if(!cbc_printchar)
+	{
+		return 0;
+	}
+
+	char buf[MPRINTF_BUF_SIZE], *p;
+
+	int n = 0;
+	m_vsnprintf(buf, sizeof(buf), format, arg);
+
+	p = buf;
+	while (p && n < sizeof(buf) && *p)
+	{
+		cbc_printchar(*p);
+		n++;
+		p++;
+	}
+
+	return n;
+}
+
 /**
  * @fn int m_printf(const char *fmt, ...);
  *
@@ -64,26 +87,17 @@ int m_snprintf(char* buf, int length, const char *fmt, ...)
  */
 int m_printf(const char *fmt, ...)
 {
-	if(!cbc_printchar)
-	{
+	int n=0;
+
+	if(!fmt)
 		return 0;
-	}
 
-	char buf[MPRINTF_BUF_SIZE], *p;
 	va_list args;
-	int n = 0;
-
 	va_start(args, fmt);
-	m_vsnprintf(buf, sizeof(buf), fmt, args);
-	va_end(args);
 
-	p = buf;
-	while (*p)
-	{
-		cbc_printchar(*p);
-		n++;
-		p++;
-	}
+	n = m_vprintf(fmt, args);
+
+	va_end(args);
 
 	return n;
 }
