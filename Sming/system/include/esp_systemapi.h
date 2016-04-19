@@ -19,8 +19,8 @@
 #include <user_config.h>
 
 #include "m_printf.h"
-
 #include "FakePgmSpace.h"
+#include "debug_progmem.h"
 
 void* malloc(size_t);
 void free(void*);
@@ -41,8 +41,7 @@ void free(void*);
 #undef assert
 //#define debugf(fmt, ...) m_printf(fmt"\r\n", ##__VA_ARGS__)
 
-#define debugf(fmt, ...)  \
-		({static const char __attribute__((aligned(4))) __attribute__((section(".irom.text"))) _fmt##__FUNCTION__##__LINE__[] = fmt; printf_P(_fmt##__FUNCTION__##__LINE__, ##__VA_ARGS__);})
+#define debugf LOG_E
 
 #define assert(condition) if (!(condition)) SYSTEM_ERROR("ASSERT: %s %d", __FUNCTION__, __LINE__)
 #define SYSTEM_ERROR(fmt, ...) m_printf("ERROR: " fmt "\r\n", ##__VA_ARGS__)

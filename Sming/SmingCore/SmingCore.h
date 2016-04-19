@@ -56,4 +56,6 @@
 #include "../Services/libemqtt/libemqtt.h"
 #include "../Services/FATFS/ff.h"
 
+#include "debug_progmem.h"
+
 #endif

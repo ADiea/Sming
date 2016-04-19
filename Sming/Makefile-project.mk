@@ -161,7 +161,10 @@ LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN) $(LIBSMING) crypto pw
 #axtls
 
 # compiler flags using during compilation of source files
-CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106 $(USER_CFLAGS) -Wl,-wrap,system_restart_local
+CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals \
+			  -finline-functions -fdata-sections -ffunction-sections -D__ets__ \
+			  -DICACHE_FLASH -DARDUINO=106 $(USER_CFLAGS) -Wl,-wrap,system_restart_local \
+			  -DCUST_FILE_BASE=$$(subst /,_,$(subst .,_,$$*))
 ifeq ($(ENABLE_GDB), 1)
 	CFLAGS += -Og -ggdb -DGDBSTUB_FREERTOS=0 -DENABLE_GDB=1
 	MODULES		 += $(SMING_HOME)/gdbstub

@@ -1,7 +1,6 @@
 #ifndef DEBUG_PROGMEM_H
 #define DEBUG_PROGMEM_H
 
-//#include <SmingCore/SmingCore.h>
 #include "FakePgmSpace.h"
 
 #define DEBUG_BUILD 1
@@ -12,11 +11,29 @@
 #define DBG 3
 
 #if DEBUG_BUILD
-	#define VERBOSE_LEVEL INFO
+#define VERBOSE_LEVEL INFO
 
-	#define LOG_E(fmt, ...) \
-		({const char _fmt[] __attribute__((aligned(4))) __attribute__((section(".irom.text"))) = fmt; \
-		printf_P(_fmt, ##__VA_ARGS__);})
+#define TOKEN_PASTE(x,y,z) x##y##z
+#define TOKEN_PASTE2(x,y, z) TOKEN_PASTE(x,y,z)
+
+#define ATTR_PASTE(x,y) MAKE_STRING(x##y)
+#define ATTR_PASTE2(x,y) ATTR_PASTE(x,y)
+
+#define MAKE_STRING(x) #x
+
+#define READONLY_SECTION .irom.
+
+//#define XSTR(x) S_TR(x)
+//#define S_TR(x) #x
+//#pragma message "File name is: " XSTR(CUST_FILE_BASE)
+
+//This has to be one liner for the _log##TOKEN_PASTE2(__FUNCTION__, __LINE__) to work !!!
+//({static const char TOKEN_PASTE2(log, __COUNTER__)[] PROGMEM = fmt; printf_P(TOKEN_PASTE3(log, __COUNTER__), ##__VA_ARGS__);})
+#define LOG_E(fmt, ...) \
+	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
+	__attribute__((aligned(4))) \
+	__attribute__((section(ATTR_PASTE2(READONLY_SECTION,CUST_FILE_BASE)))) = fmt; \
+	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), ##__VA_ARGS__);})
 		
 	/*
 		#define LOG_E(fmt, ...) m_printf(_fmt"\n", ##__VA_ARGS__)
