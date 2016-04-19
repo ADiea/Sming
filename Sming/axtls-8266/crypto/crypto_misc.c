@@ -47,7 +47,7 @@
 uint32_t phy_get_rand();
 extern int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args);
 extern int m_vprintf ( const char * format, va_list arg );
-extern int m_printf(const char *fmt, ...);
+extern int m_printf(const char* fmt, ...);
 extern int m_snprintf(char* buf, int length, const char *fmt, ...);
 #endif
 
@@ -65,8 +65,6 @@ static HCRYPTPROV gCryptProv;
 static uint8_t entropy_pool[ENTROPY_POOL_SIZE];
 #endif
 
-const char * const unsupported_str = "Error: Feature not supported\n";
-
 #ifndef CONFIG_SSL_SKELETON_MODE
 /**
  * Retrieve a file and put it into memory
@@ -82,7 +80,7 @@ int get_file(const char *filename, uint8_t **buf)
     if (stream == NULL)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-    	m_printf("file '%s' does not exist\n", filename); TTY_FLUSH();
+    	printf("file '%s' does not exist\n", filename); TTY_FLUSH();
 #endif
         return -1;
     }
@@ -125,7 +123,7 @@ EXP_FUNC void STDCALL RNG_initialize()
                        PROV_RSA_FULL,
                        CRYPT_NEWKEYSET))
         {
-            printf("CryptoLib: %x\n", unsupported_str, GetLastError());
+        	printf("CryptoLib: Error: Feature not supported %x\n", GetLastError());
             exit(1);
         }
     }
@@ -375,7 +373,7 @@ EXP_FUNC int STDCALL base64_decode(const char *in, int len,
 error:
 #ifdef CONFIG_SSL_FULL_MODE
     if (ret < 0)
-    	m_printf("Error: Invalid base64\n"); TTY_FLUSH();
+    	printf("Error: Invalid base64\n"); TTY_FLUSH();
 #endif
     TTY_FLUSH();
     return ret;

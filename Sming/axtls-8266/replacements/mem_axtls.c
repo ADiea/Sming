@@ -22,28 +22,24 @@
 
 */
 
-#include <stdint.h>
-#include "espinc/c_types_compatible.h"
+#include "debug_progmem.h"
 
-// Those Espressif functions are needed
-extern void *pvPortMalloc(size_t xWantedSize, const char *file, uint32 line);
-extern void *pvPortRealloc(void* ptr, size_t xWantedSize, const char *file, uint32 line);
-extern void vPortFree(void *ptr, const char *file, uint32 line);
+extern void *pvPortMalloc( size_t xWantedSize );
+extern void vPortFree( void *pv );
+extern void *pvPortZalloc(size_t size);
 extern void *ets_memset(void *s, int c, size_t n);
-
-#define system_get_free_heap_size xPortGetFreeHeapSize
 extern size_t xPortGetFreeHeapSize(void);
+extern void *pvPortCalloc(unsigned int n, unsigned int count);
+extern void *pvPortRealloc(void * p, size_t size);
 
-#include "mem_manager.h"
-
-#define free os_free
-#define malloc os_malloc
-#define realloc os_realloc
+#define free vPortFree
+#define malloc pvPortMalloc
+#define realloc pvPortRealloc
 #define memset ets_memset
+#define system_get_free_heap_size xPortGetFreeHeapSize
 
 #ifdef DEBUG_TLS_MEM
-extern int m_printf(const char *fmt, ...);
-#define DEBUG_TLS_MEM_PRINT(...) m_printf(__VA_ARGS__)
+#define DEBUG_TLS_MEM_PRINT LOG_I
 #else
 #define DEBUG_TLS_MEM_PRINT(...)
 #endif

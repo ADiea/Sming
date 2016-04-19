@@ -1,7 +1,11 @@
 #ifndef __FAKE_PGMSPACE_H_
 #define __FAKE_PGMSPACE_H_
 
-#include "WiringFrameworkDependencies.h"
+//#include "WiringFrameworkDependencies.h"
+#include <espinc/c_types_compatible.h>
+#include "m_printf.h"
+#include <string.h>
+
 
 #define PGM_P  const char *
 #define PSTR(str) (str)
@@ -49,6 +53,7 @@ extern "C"
 	void *memcpy_P(void *dest, const void *src_P, size_t length);
 	size_t strlen_P(const char * src_P);
 	char *strcpy_P(char * dest, const char * src_P);
+	char *strncpy_P(char * dest, size_t size, const char * src_P);
 	int strcmp_P(const char *str1, const char *str2_P);
 	char *strstr_P(char *haystack, const char *needle_P);
 	#define sprintf_P(s, f_P, ...) \
@@ -62,11 +67,8 @@ extern "C"
 		})
 	#define printf_P(f_P, ...) \
 		({ \
-			int __result=0;char *__localF = (char *)malloc(strlen_P(f_P) + 1); \
-			if(__localF) { strcpy_P(__localF, (f_P)); \
-			__result = m_printf(__localF, ##__VA_ARGS__); \
-			/*__result += m_printf("\n");*/ \
-			free(__localF);} \
+			int __result=0;char __localF[256]; \
+			__result = m_printf(strncpy_P(__localF, sizeof(__localF), (f_P)), ##__VA_ARGS__); \
 			__result; \
 		})
 #ifdef __cplusplus

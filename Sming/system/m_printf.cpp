@@ -85,7 +85,7 @@ int m_vprintf ( const char * format, va_list arg )
  *
  * @retval int - number of characters written to console
  */
-int m_printf(const char *fmt, ...)
+int m_printf(const char* fmt, ...)
 {
 	int n=0;
 

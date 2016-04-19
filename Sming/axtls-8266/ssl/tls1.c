@@ -1999,8 +1999,24 @@ void DISPLAY_STATE(SSL *ssl, int is_send, uint8_t state, int not_ok)
     if (!IS_SET_SSL_FLAG(SSL_DISPLAY_STATES))
         return;
 
-    printf(not_ok ? "Error - invalid State:\t" : "State:\t");
-    printf(is_send ? "sending " : "receiving ");
+    if(not_ok)
+    {
+    	printf("Error - invalid State:\t");
+    }
+    else
+    {
+    	printf("State:\t");
+    }
+
+    if(is_send)
+    {
+    	printf("sending ");
+    }
+    else
+    {
+    	printf("receiving ");
+    }
+
 
     switch (state)
     {
@@ -2259,7 +2275,7 @@ EXP_FUNC void STDCALL ssl_display_error(int error_code) {}
 EXP_FUNC SSL * STDCALL ssl_client_new(SSL_CTX *ssl_ctx, int client_fd, const
         uint8_t *session_id, uint8_t sess_id_size)
 {
-    printf(unsupported_str);
+    printf("Error: Feature not supported\n");
     return NULL;
 }
 #endif
@@ -2267,20 +2283,20 @@ EXP_FUNC SSL * STDCALL ssl_client_new(SSL_CTX *ssl_ctx, int client_fd, const
 #if !defined(CONFIG_SSL_CERT_VERIFICATION)
 EXP_FUNC int STDCALL ssl_verify_cert(const SSL *ssl)
 {
-    printf(unsupported_str);
+    printf("Error: Feature not supported\n");
     return -1;
 }
 
 
 EXP_FUNC const char * STDCALL ssl_get_cert_dn(const SSL *ssl, int component)
 {
-    printf(unsupported_str);
+    printf("Error: Feature not supported\n");
     return NULL;
 }
 
 EXP_FUNC const char * STDCALL ssl_get_cert_subject_alt_dnsname(const SSL *ssl, int index)
 {
-    printf(unsupported_str);
+    printf("Error: Feature not supported\n");
     return NULL;
 }
 

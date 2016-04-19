@@ -149,8 +149,6 @@ int asn1_signature_type(const uint8_t *cert,
  **************************************************************************/
 #define SALT_SIZE               8
 
-extern const char * const unsupported_str;
-
 typedef void (*crypt_func)(void *, const uint8_t *, uint8_t *, int);
 typedef void (*hmac_func)(const uint8_t *msg, int length, const uint8_t *key, 
         int key_len, uint8_t *digest);

@@ -156,7 +156,7 @@ LIBMAIN = main
 # libraries used in this project, mainly provided by the SDK
 USER_LIBDIR = $(SMING_HOME)/compiler/lib/
 
-LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN) $(LIBSMING) crypto pwm $(EXTRA_LIBS)
+LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN) crypto pwm $(EXTRA_LIBS) $(LIBSMING)
 
 #axtls
 

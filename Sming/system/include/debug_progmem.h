@@ -1,6 +1,7 @@
 #ifndef DEBUG_PROGMEM_H
 #define DEBUG_PROGMEM_H
 
+#include <stdarg.h>
 #include "FakePgmSpace.h"
 
 #define DEBUG_BUILD 1
@@ -27,12 +28,14 @@
 //#define S_TR(x) #x
 //#pragma message "File name is: " XSTR(CUST_FILE_BASE)
 
+//ATTR_PASTE2(READONLY_SECTION,CUST_FILE_BASE))
+
 //This has to be one liner for the _log##TOKEN_PASTE2(__FUNCTION__, __LINE__) to work !!!
 //({static const char TOKEN_PASTE2(log, __COUNTER__)[] PROGMEM = fmt; printf_P(TOKEN_PASTE3(log, __COUNTER__), ##__VA_ARGS__);})
 #define LOG_E(fmt, ...) \
 	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
 	__attribute__((aligned(4))) \
-	__attribute__((section(ATTR_PASTE2(READONLY_SECTION,CUST_FILE_BASE)))) = fmt; \
+	__attribute__((section(".irom.text"))) = fmt; \
 	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), ##__VA_ARGS__);})
 		
 	/*

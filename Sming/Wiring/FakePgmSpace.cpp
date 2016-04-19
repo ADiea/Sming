@@ -1,5 +1,5 @@
 
-#include "FakePgmSpace.h"
+#include "WiringFrameworkDependencies.h"
 
 #ifdef ICACHE_FLASH
 extern "C" void *memcpy_P(void *dest, const void *src_P, size_t length) {
@@ -30,6 +30,16 @@ extern "C" char *strcpy_P(char * dest, const char * src_P)
 {
 	int len = strlen_P(src_P);
 	memcpy_P(dest, src_P, len);
+	return dest;
+}
+
+extern "C" char *strncpy_P(char * dest, size_t max_len, const char * src_P)
+{
+	int len = strlen_P(src_P);
+	if(len > max_len)
+		len = max_len;
+	memcpy_P(dest, src_P, len-1);
+	dest[len] = 0;
 	return dest;
 }
 

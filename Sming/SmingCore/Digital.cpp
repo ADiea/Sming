@@ -8,6 +8,8 @@
 #include "../SmingCore/Digital.h"
 #include "../Wiring/WiringFrameworkIncludes.h"
 
+const unsigned int A0 = 17;
+
 void pinMode(uint16_t pin, uint8_t mode)
 {
 	if (pin < 16)

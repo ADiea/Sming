@@ -41,8 +41,9 @@
 extern "C" {
 #endif
 
-#include "os_int.h"
+//#include "os_int.h"
 #include <stdio.h>
+#include "debug_progmem.h"
 
 #ifdef WIN32
 #define STDCALL                 __stdcall

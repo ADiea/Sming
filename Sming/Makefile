@@ -126,7 +126,7 @@ LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN)
 # compiler flags using during compilation of source files. Add '-pg' for debugging
 CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections \
 			  -D__ets__ -DICACHE_FLASH -DARDUINO=106 -DUSE_ESPCONN -DLWIP_OPEN_SRC -DUSE_OPEN_DHCPS -DPBUF_RSV_FOR_WLAN -DEBUF_LWIP -DESP8266  -Wl,-wrap,system_restart_local \
-			  -DCUST_FILE_BASE=$$(subst /,_,$(subst .,_,$$*)) -E
+			  -DCUST_FILE_BASE=$$(subst /,_,$(subst .,_,$$*)) 
 			  
 # awk 'END{ var_=FILENAME; n = split(var,a,"/"); print a[n] n var_;}' $$*
 #	$(subst /,_,$(subst .,_,$$*))		  
