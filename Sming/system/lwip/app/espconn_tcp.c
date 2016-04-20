@@ -580,7 +580,7 @@ espconn_recv_hold(struct espconn *pespconn)
     value = espconn_find_connection(pespconn, &pnode);
 	if(value != true)
 	{
-		os_printf("RecvHold, By pespconn,find conn_msg fail\n");
+		LOG_I("RecvHold, By pespconn,find conn_msg fail\n");
 		return ESPCONN_ARG;
 	}
 
@@ -605,7 +605,7 @@ espconn_recv_unhold(struct espconn *pespconn)
     value = espconn_find_connection(pespconn, &pnode);
 	if(value != true)
 	{
-		os_printf("RecvHold, By pespconn,find conn_msg fail\n");
+		LOG_I("RecvHold, By pespconn,find conn_msg fail\n");
 		return ESPCONN_ARG;
 	}
 
@@ -887,7 +887,7 @@ espconn_client_connect(void *arg, struct tcp_pcb *tpcb, err_t err)
 			espconn_keepalive_enable(tpcb);
 
     } else{
-    	os_printf("err in host connected (%s)\n",lwip_strerr(err));
+    	LOG_I("err in host connected (%s)\n",lwip_strerr(err));
     }
     return err;
 }
@@ -1375,7 +1375,7 @@ sint8 ICACHE_FLASH_ATTR espconn_tcp_delete(struct espconn *pdeletecon)
 				/*remove the node from the client's active connection list*/
 				espconn_list_delete(&pserver_list, pdelete_msg);
 				pcb = pdelete_msg->preverse;
-				os_printf("espconn_tcp_delete %d, %d\n",pcb->state, pcb->local_port);
+				LOG_I("espconn_tcp_delete %d, %d\n",pcb->state, pcb->local_port);
 				espconn_kill_pcb(pcb->local_port);
 				err = tcp_close(pcb);
 				os_free(pdelete_msg);

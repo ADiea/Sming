@@ -196,7 +196,7 @@ ip_router(ip_addr_t *dest, ip_addr_t *source){
 	    return NULL;
   	}
   	/* no matching netif found, use default netif */
-  	os_printf("ip_router %d %p\n", __LINE__, netif_default);
+  	LOG_I("ip_router %d %p\n", __LINE__, netif_default);
   	return netif_default;
 }
 

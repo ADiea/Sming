@@ -12,7 +12,7 @@
 #include "os_type.h"
 
 #ifdef LWIP_DEBUG
-#define espconn_printf(fmt, args...) m_printf(fmt,## args)
+#define espconn_printf LOG_I
 #else 
 #define espconn_printf(fmt, args...)
 #endif

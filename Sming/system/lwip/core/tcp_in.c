@@ -446,7 +446,7 @@ aborted:
     extern char RxNodeNum(void);
     if (RxNodeNum() < 2){
     	extern void pbuf_free_ooseq_new(void* arg);
-//    	os_printf("reclaim some memory from queued\n");
+//    	LOG_I("reclaim some memory from queued\n");
     	pbuf_free_ooseq_new(NULL);
     }
 #endif

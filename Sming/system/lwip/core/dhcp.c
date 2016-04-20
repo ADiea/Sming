@@ -66,7 +66,7 @@
  *
  */
 
-/* Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ� Ð¸ Ð´Ð¾Ð¿Ð¾Ð»ÐµÐ½Ð¸Ñ�:
+/* Ã�Â¸Ã�Â·Ã�Â¼Ã�ÂµÃ�Â½Ã�ÂµÃ�Â½Ã�Â¸Ã‘ï¿½ Ã�Â¸ Ã�Â´Ã�Â¾Ã�Â¿Ã�Â¾Ã�Â»Ã�ÂµÃ�Â½Ã�Â¸Ã‘ï¿½:
  pvvx , Vitaly (http://esp8266.ru/forum/threads/razrabotka-biblioteki-malogo-webservera-na-esp8266.56/page-43#post-10192)
 */ 
 
@@ -405,7 +405,7 @@ dhcp_fine_tmr()
       /*add DHCP retries processing by LiuHan*/
       if (DHCP_MAXRTX != 0) {
     	  if (netif->dhcp->tries >= DHCP_MAXRTX){
-			  os_printf("DHCP timeout\n");
+    		  LOG_I("DHCP timeout\n");
 			  if (netif->dhcp_event != NULL)
 				  netif->dhcp_event();
 			  break;

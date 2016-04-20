@@ -93,7 +93,7 @@ void system_restart();
 void __wrap_system_restart_local() {
     register uint32_t sp asm("a1");
 
-    ets_printf("\n***RESET***\n");
+    ets_printf("\n*RESET*\n");
 
     struct rst_info rst_info = {0};
     system_rtc_mem_read(0, &rst_info, sizeof(rst_info));
@@ -101,13 +101,11 @@ void __wrap_system_restart_local() {
         rst_info.reason != REASON_EXCEPTION_RST &&
         rst_info.reason != REASON_WDT_RST)
     {
-    	ets_printf("Normal reset\n");
         return;
     }
 
     if(bResetInProgress)
     {
-    	ets_printf("Resetting...\n");
     	return;
     }
 
@@ -123,7 +121,7 @@ void __wrap_system_restart_local() {
     }
     else if (rst_info.reason == REASON_EXCEPTION_RST) {
     	//see https://github.com/esp8266/Arduino/blob/master/doc/exception_causes.md
-        ets_printf("\nException (%d):\nepc1=0x%08x epc2=0x%08x epc3=0x%08x excvaddr=0x%08x depc=0x%08x\n",
+        ets_printf("\nEx(%d):epc1=0x%08x epc2=0x%08x epc3=0x%08x excvaddr=0x%08x depc=0x%08x\n",
             rst_info.exccause, rst_info.epc1, rst_info.epc2, rst_info.epc3, rst_info.excvaddr, rst_info.depc);
     }
     else if (rst_info.reason == REASON_SOFT_WDT_RST) {
@@ -175,7 +173,7 @@ void __wrap_system_restart_local() {
 
 
 static void print_stack(uint32_t start, uint32_t end) {
-    ets_printf("\n>>>stack>>>\n");
+    ets_printf("stack:\n");
     for (uint32_t pos = start; pos < end; pos += 0x10) {
         uint32_t* values = (uint32_t*)(pos);
 
@@ -185,7 +183,6 @@ static void print_stack(uint32_t start, uint32_t end) {
         ets_printf("%08x:  %08x %08x %08x %08x %c\n",
             pos, values[0], values[1], values[2], values[3], (looksLikeStackFrame)?'<':' ');
     }
-    ets_printf("<<<stack<<<\n");
 }
 
 /*

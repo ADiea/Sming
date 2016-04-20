@@ -89,8 +89,8 @@ extern "C"
 #define strcpy_P(dest, src) strcpy((dest), (src))
 #define strcmp_P(a, b) strcmp((a), (b))
 #define strstr_P(a, b) strstr((a), (b))
-#define sprintf_P(s, f, ...) sprintf((s), (f), ##__VA_ARGS__)
-#define printf_P(f, ...) os_printf_plus((f), ##__VA_ARGS__)
+#define sprintf_P(s, f, ...) m_sprintf((s), (f), ##__VA_ARGS__)
+#define printf_P(f, ...) m_printf((f), ##__VA_ARGS__)
 
 #endif
 

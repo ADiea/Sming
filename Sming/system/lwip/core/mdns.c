@@ -540,7 +540,7 @@ mdns_answer(u16_t type, const char* name, u8_t id) {
 				p_sta = pbuf_alloc(PBUF_TRANSPORT,
 							SIZEOF_DNS_HDR + MDNS_MAX_NAME_LENGTH * 2 + SIZEOF_DNS_QUERY, PBUF_RAM);
 			  if (pbuf_copy (p_sta,p) != ERR_OK) {
-				  os_printf("mdns_answer copying to new pbuf failed\n");
+				  LOG_I("mdns_answer copying to new pbuf failed\n");
 				  return -1;
 			  }
 			  netif_set_default(sta_netif);
@@ -840,7 +840,7 @@ mdns_send_service(struct mdns_info *info, u8_t id) {
 				p_sta = pbuf_alloc(PBUF_TRANSPORT,
 							SIZEOF_DNS_HDR + MDNS_MAX_NAME_LENGTH * 2 + SIZEOF_DNS_QUERY, PBUF_RAM);
 			  if (pbuf_copy (p_sta,p) != ERR_OK) {
-				  os_printf("mdns_send_service copying to new pbuf failed\n");
+				  LOG_I("mdns_send_service copying to new pbuf failed\n");
 				  return -1;
 			  }
 			  netif_set_default(sta_netif);
@@ -854,7 +854,7 @@ mdns_send_service(struct mdns_info *info, u8_t id) {
 		/* free pbuf */
 		pbuf_free(p);
 	} else {
-		os_printf("ERR_MEM \n");
+		LOG_I("ERR_MEM \n");
 		err = ERR_MEM;
 	}
 
@@ -1015,14 +1015,14 @@ mdns_server_unregister(void) {
 	struct ip_info ipconfig;
 	if(register_flag == 1){
 		if (igmp_leavegroup(&host_addr, &multicast_addr) != ERR_OK) {
-			os_printf("sta udp_leave_multigrup failed!\n");
+			LOG_I("sta udp_leave_multigrup failed!\n");
 			return;
 		};
 		if(wifi_get_opmode() == 0x03 || wifi_get_opmode() == 0x02) {
 		   wifi_get_ip_info(SOFTAP_IF, &ipconfig);
 		   ap_host_addr.addr = ipconfig.ip.addr;
 		   if (igmp_leavegroup(&ap_host_addr, &multicast_addr) != ERR_OK) {
-				os_printf("ap udp_join_multigrup failed!\n");
+				LOG_I("ap udp_join_multigrup failed!\n");
 				return;
 			};
 		}
@@ -1034,10 +1034,10 @@ void ICACHE_FLASH_ATTR
 mdns_server_register(void) {
 
 	if (register_flag == 1) {
-		os_printf("mdns server is already registered !\n");
+		LOG_I("mdns server is already registered !\n");
 		return;
 	} else if (igmp_joingroup(&host_addr, &multicast_addr) != ERR_OK) {
-		os_printf("udp_join_multigrup failed!\n");
+		LOG_I("udp_join_multigrup failed!\n");
 		return;
 	};
 	register_flag = 1;
@@ -1066,7 +1066,7 @@ mdns_init(struct mdns_info *info) {
 	struct ip_addr ap_host_addr;
 	struct ip_info ipconfig;
 	if (info->ipAddr == 0) {
-		os_printf("mdns ip error!\n ");
+		LOG_I("mdns ip error!\n ");
 		return;
 	}
 	host_addr.addr = info->ipAddr ;
@@ -1078,8 +1078,8 @@ mdns_init(struct mdns_info *info) {
 
 	// get the host name as instrumentName_serialNumber for MDNS
 	// set the name of the service, the same as host name
-	os_printf("host_name = %s\n", host_name);
-	os_printf("server_name = %s\n", PUCK_SERVICE);
+	LOG_I("host_name = %s\n", host_name);
+	LOG_I("server_name = %s\n", PUCK_SERVICE);
 	if (info->server_port == 0)
 	{
 		PUCK_PORT = 80;
@@ -1094,7 +1094,7 @@ mdns_init(struct mdns_info *info) {
 		/* join to the multicast address 224.0.0.251 */
 		if(wifi_get_opmode() == 0x03 || wifi_get_opmode() == 0x01) {
 			if (igmp_joingroup(&host_addr, &multicast_addr) != ERR_OK) {
-				os_printf("sta udp_join_multigrup failed!\n");
+				LOG_I("sta udp_join_multigrup failed!\n");
 				return;
 			};
 		}
@@ -1102,14 +1102,14 @@ mdns_init(struct mdns_info *info) {
 		   wifi_get_ip_info(SOFTAP_IF, &ipconfig);
 		   ap_host_addr.addr = ipconfig.ip.addr;
 		   if (igmp_joingroup(&ap_host_addr, &multicast_addr) != ERR_OK) {
-				os_printf("ap udp_join_multigrup failed!\n");
+				LOG_I("ap udp_join_multigrup failed!\n");
 				return;
 			};
 		}
 		register_flag = 1;
 		/* join to any IP address at the port 5353 */
 		if (udp_bind(mdns_pcb, IP_ADDR_ANY, DNS_MDNS_PORT) != ERR_OK) {
-			os_printf("udp_bind failed!\n");
+			LOG_I("udp_bind failed!\n");
 			return;
 		};
 

@@ -312,7 +312,7 @@ $(TARGET_OUT): $(APP_AR)
 	$(vecho) "LD $@"	
 #http://stackoverflow.com/questions/5651869/gcc-what-are-the-start-group-and-end-group-command-line-options	
 	
-	$(Q) $(LD) -L$(USER_LIBDIR) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS)  -o $@ -Wl,--start-group  $(APP_AR) $(LIBS) -Wl,--end-group
+	$(Q) $(LD) -L$(USER_LIBDIR) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS) -Wl,--start-group  $(APP_AR) $(LIBS) -Wl,--end-group -o $@ 
 
 	$(vecho) ""	
 	$(vecho) "#Memory / Section info:"	

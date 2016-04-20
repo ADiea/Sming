@@ -458,7 +458,7 @@ tcp_bind(struct tcp_pcb *pcb, ip_addr_t *ipaddr, u16_t port)
           if (ip_addr_isany(&(cpcb->local_ip)) ||
               ip_addr_isany(ipaddr) ||
               ip_addr_cmp(&(cpcb->local_ip), ipaddr)) {
-              //os_printf("Address in use\n");
+              //LOG_I("Address in use\n");
             return ERR_USE;
           }
         }
@@ -1211,7 +1211,7 @@ tcp_alloc(u8_t prio)
   
   pcb = (struct tcp_pcb *)memp_malloc(MEMP_TCP_PCB);//�����ڴ�ؿռ�
   if (pcb == NULL) {
-	//os_printf("tcp_pcb memory is fail\n");
+	//LOG_I("tcp_pcb memory is fail\n");
 	/* Try killing oldest connection in TIME-WAIT. */
     LWIP_DEBUGF(TCP_DEBUG, ("tcp_alloc: killing off oldest TIME-WAIT connection\n"));
     tcp_kill_timewait();

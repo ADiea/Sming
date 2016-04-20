@@ -42,7 +42,7 @@
  * Author: Simon Goldschmidt (lwIP raw API part)
  */
 
-/* Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ� Ð¸ Ð´Ð¾Ð¿Ð¾Ð»ÐµÐ½Ð¸Ñ�:
+/* Ã�Â¸Ã�Â·Ã�Â¼Ã�ÂµÃ�Â½Ã�ÂµÃ�Â½Ã�Â¸Ã‘ï¿½ Ã�Â¸ Ã�Â´Ã�Â¾Ã�Â¿Ã�Â¾Ã�Â»Ã�ÂµÃ�Â½Ã�Â¸Ã‘ï¿½:
  pvvx , Vitaly (http://esp8266.ru/forum/threads/razrabotka-biblioteki-malogo-webservera-na-esp8266.56/page-43#post-10192)
 */ 
 
@@ -58,9 +58,9 @@
 #include "lwip/ip_addr.h"
 #include "lwip/pbuf.h"
 //#include "sdk/add_func.h"
-//#include "sdk/os_printf.h"
+//#include "sdk/LOG_I.h"
 
-#define os_sprintf ets_sprintf
+//#define os_sprintf ets_sprintf
 //#include <string.h>
 #if LWIP_UDP
 
@@ -330,7 +330,9 @@ LOCAL os_timer_t sntp_timer LWIP_DATA_IRAM_ATTR;
 
 int __tznorth;
 int __tzyear;
-char reult[100];
+
+#define RESULT_SIZE 100
+char reult[RESULT_SIZE];
 static const int mon_lengths[2][12] = {
   {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
   {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
@@ -526,7 +528,7 @@ sntp_mktm_r(const time_t * tim_p ,struct tm *res ,int is_gmtime)
     }
   else
     res->tm_isdst = 0;
-//  os_printf("res %d %d %d %d %d\n",res->tm_year,res->tm_mon,res->tm_mday,res->tm_yday,res->tm_hour);
+//  LOG_I("res %d %d %d %d %d\n",res->tm_year,res->tm_mon,res->tm_mday,res->tm_yday,res->tm_hour);
   return (res);
 }
 struct tm * ICACHE_FLASH_ATTR
@@ -609,7 +611,7 @@ sntp_asctime_r(struct tm *tim_p ,char *result)
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   };
-  os_sprintf (result, "%s %s %02d %02d:%02d:%02d %02d\n",
+  m_snprintf (result, RESULT_SIZE, "%s %s %02d %02d:%02d:%02d %02d\n",
 	   day_name[tim_p->tm_wday],
 	   mon_name[tim_p->tm_mon],
 	   tim_p->tm_mday, tim_p->tm_hour, tim_p->tm_min,
@@ -626,7 +628,7 @@ sntp_asctime(struct tm *tim_p)
 uint32 sntp_get_current_timestamp()
 {
 	if(realtime_stamp == 0){
-		os_printf("please start sntp first !\n");
+		debugf("please start sntp first !\n");
 		return 0;
 	} else {
 		return realtime_stamp;
@@ -692,8 +694,8 @@ sntp_process(u32_t *receive_timestamp)
   os_timer_disarm(&sntp_timer);
   os_timer_setfn(&sntp_timer, (os_timer_func_t *)sntp_time_inc, NULL);
   os_timer_arm(&sntp_timer, 1000, 1);
-  os_printf("%s\n",sntp_asctime(sntp_localtime (&t)));
-//  os_printf("%s\n",ctime(&t));
+  LOG_I("%s\n",sntp_asctime(sntp_localtime (&t)));
+//  LOG_I("%s\n",ctime(&t));
 //  LWIP_DEBUGF(SNTP_DEBUG_TRACE, ("sntp_process: %s", ctime(&t)));
 #endif /* SNTP_CALC_TIME_US */
 }
@@ -803,7 +805,7 @@ sntp_recv(void *arg, struct udp_pcb* pcb, struct pbuf *p, ip_addr_t *addr, u16_t
   u8_t stratum;
   u32_t receive_timestamp[SNTP_RECEIVE_TIME_SIZE];
   err_t err;
-//os_printf("sntp_recv\n");
+//LOG_I("sntp_recv\n");
   LWIP_UNUSED_ARG(arg);
   LWIP_UNUSED_ARG(pcb);
 
@@ -886,7 +888,7 @@ static void ICACHE_FLASH_ATTR
 sntp_send_request(ip_addr_t *server_addr)
 {
   struct pbuf* p;
-//  os_printf("sntp_send_request\n");
+//  LOG_I("sntp_send_request\n");
   p = pbuf_alloc(PBUF_TRANSPORT, SNTP_MSG_LEN, PBUF_RAM);
   if (p != NULL) {
     struct sntp_msg *sntpmsg = (struct sntp_msg *)p->payload;
@@ -965,7 +967,7 @@ sntp_request(void *arg)
 #endif /* SNTP_SERVER_DNS */
   {
     sntp_server_address = sntp_servers[sntp_current_server].addr;
-//    os_printf("sntp_server_address ip %d\n",sntp_server_address.addr);
+//    LOG_I("sntp_server_address ip %d\n",sntp_server_address.addr);
     err = (sntp_server_address.addr == IPADDR_ANY) ? ERR_ARG : ERR_OK; //   err = (ip_addr_isany(&sntp_server_address)) ? ERR_ARG : ERR_OK;
   }
 
@@ -1052,7 +1054,7 @@ sntp_setserver(u8_t idx, ip_addr_t *server)
   if (idx < SNTP_MAX_SERVERS) {
     if (server != NULL) {
       sntp_servers[idx].addr = (*server);
-//      os_printf("server ip %d\n",server->addr);
+//      LOG_I("server ip %d\n",server->addr);
     } else {
       ip_addr_set_any(&sntp_servers[idx].addr);
     }

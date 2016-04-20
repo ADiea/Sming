@@ -10,15 +10,15 @@
 extern "C" {
 #endif
 #include "espinc/c_types_compatible.h"
+#include "debug_progmem.h"
 #ifdef __cplusplus
 }
 #endif
 
 void ets_intr_lock();
 void ets_intr_unlock();
-int ets_printf(const char *format, ...)  __attribute__ ((format (printf, 1, 2)));
 
-#define printf ets_printf
+#define printf LOG_I
 
 /*
  * There are a number of defines you can set at compile time that affect how

@@ -94,7 +94,7 @@ void ICACHE_FLASH_ATTR espconn_list_creat(espconn_msg **phead, espconn_msg* pins
 
 /*	ptest = *phead;
 	while(ptest != NULL){
-		os_printf("espconn_list_creat %p\n", ptest);
+		LOG_I("espconn_list_creat %p\n", ptest);
 		ptest = ptest->pnext;
 	}*/
 }
@@ -128,7 +128,7 @@ void ICACHE_FLASH_ATTR espconn_list_delete(espconn_msg **phead, espconn_msg* pde
 	}
 /*	ptest = *phead;
 	while(ptest != NULL){
-		os_printf("espconn_list_delete %p\n", ptest);
+		LOG_I("espconn_list_delete %p\n", ptest);
 		ptest = ptest->pnext;
 	}*/
 }

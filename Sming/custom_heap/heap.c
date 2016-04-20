@@ -39,13 +39,13 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr)
 	   heapOpIndex >= gHeapOpFlushAfter - 1)
 	{
 		//Need to flush
-		ets_printf("\n");
+		m_printf("\n");
 		for(i=0; i <= heapOpIndex; i++)
 		{
 			if(gLastHeapOp[i].op == 'f')
-				ets_printf("hl{f,%x,0} %d\n", gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
+				LOG_I("hl{f,%x,0} %d\n", gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 			else
-				ets_printf("hl{%c,%d,0,%x} %d\n", gLastHeapOp[i].op, gLastHeapOp[i].size, gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
+				LOG_I("hl{%c,%d,0,%x} %d\n", gLastHeapOp[i].op, gLastHeapOp[i].size, gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 		}
 		heapOpIndex = -1;
 	}
