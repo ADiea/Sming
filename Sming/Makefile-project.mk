@@ -155,15 +155,16 @@ LIBMAIN = main
 
 # libraries used in this project, mainly provided by the SDK
 USER_LIBDIR = $(SMING_HOME)/compiler/lib/
-
-LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN) crypto pwm $(EXTRA_LIBS) $(LIBSMING)
+EXTRA_LIBS = 
+LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN) crypto pwm $(EXTRA_LIBS) $(LIBSMING) 
 
 #axtls
 
 # compiler flags using during compilation of source files
+#-Wl,-wrap,system_restart_local 
 CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals \
 			  -finline-functions -fdata-sections -ffunction-sections -D__ets__ \
-			  -DICACHE_FLASH -DARDUINO=106 $(USER_CFLAGS) -Wl,-wrap,system_restart_local \
+			  -DICACHE_FLASH -DARDUINO=106 $(USER_CFLAGS) \
 			  -DCUST_FILE_BASE=$$(subst /,_,$(subst .,_,$$*))
 ifeq ($(ENABLE_GDB), 1)
 	CFLAGS += -Og -ggdb -DGDBSTUB_FREERTOS=0 -DENABLE_GDB=1
@@ -172,7 +173,7 @@ ifeq ($(ENABLE_GDB), 1)
 else
 	CFLAGS += -Os -g
 endif
-CXXFLAGS	= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++11 -felide-constructors
+CXXFLAGS	= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++11 -felide-constructors 
 
 # SSL support using axTLS
 EXTRA_INCDIR += $(SMING_HOME)/axtls-8266 $(SMING_HOME)/axtls-8266/ssl $(SMING_HOME)/axtls-8266/crypto 
@@ -199,6 +200,7 @@ ifeq ($(DISABLE_SPIFFS), 1)
 endif
 
 # linker flags used to generate the main object file
+#-Wl,-verbose 
 LDFLAGS		= -nostdlib -u call_user_start -Wl,-static -Wl,--gc-sections -Wl,-Map=$(FW_BASE)/firmware.map
 
 # linker script used for the above linkier step
@@ -308,7 +310,9 @@ spiff_update: spiff_clean $(SPIFF_BIN_OUT)
 
 $(TARGET_OUT): $(APP_AR)
 	$(vecho) "LD $@"	
-	$(Q) $(LD) -L$(USER_LIBDIR) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
+#http://stackoverflow.com/questions/5651869/gcc-what-are-the-start-group-and-end-group-command-line-options	
+	
+	$(Q) $(LD) -L$(USER_LIBDIR) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS)  -o $@ -Wl,--start-group  $(APP_AR) $(LIBS) -Wl,--end-group
 
 	$(vecho) ""	
 	$(vecho) "#Memory / Section info:"	
