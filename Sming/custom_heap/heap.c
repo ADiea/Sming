@@ -25,6 +25,8 @@ typedef struct _heapOp
 	uint16_t opCounter;
 }heapOp;
 
+
+
 heapOp gLastHeapOp[HEAP_OP_SIZE];
 uint16_t gTotalHeapOp = 0;
 uint8_t gHeapOpFlushAfter = 63;
@@ -44,7 +46,7 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 		for(i=0; i <= heapOpIndex; i++)
 		{
 			if(gLastHeapOp[i].op == 'f')
-				LOG_I("hl{f,%x,0} %d", gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
+				m_printf("hl{f,%x,0} %d\n", gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 			else if(gLastHeapOp[i].op == 'r')
 			{
 				if(gLastHeapOp[i].addrOld == 0)
@@ -56,9 +58,9 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 				}
 			}
 			else
-				LOG_I("hl{%c,%d,0,%x} %d", gLastHeapOp[i].op, gLastHeapOp[i].size, gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
+				m_printf("hl{%c,%d,0,%x} %d\n", gLastHeapOp[i].op, gLastHeapOp[i].size, gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 		}
-		LOG_I("hl flush %d", gTotalHeapOp);
+		LOG_I("hl flush %d - remains %d", gTotalHeapOp, umm_free_heap_size());
 		heapOpIndex = -1;
 	}
 	++heapOpIndex;

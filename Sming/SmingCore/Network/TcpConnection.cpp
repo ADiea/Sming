@@ -50,7 +50,7 @@ bool TcpConnection::connect(String server, int port, boolean useSsl /* = false *
 	this->sslOptions |= sslOptions;
 	hostname = server;
 
-	debugf("connect to: %s", server.c_str());
+	debugf("TCP connect() to: %s:%d", server.c_str(), port);
 	canSend = false; // Wait for connection
 	DnsLookup *look = new DnsLookup { this, port };
 	err_t dnslook = dns_gethostbyname(server.c_str(), &addr, staticDnsResponse, look);
@@ -89,17 +89,21 @@ err_t TcpConnection::onReceive(pbuf *buf)
 	if (buf == NULL)
 		debugf("TCP received: (null)");
 	else
-		debugf("TCP received: %d bytes", buf->tot_len);
+	{
+//		debugf("TCP received: %d bytes", buf->tot_len);
 
-	if (buf != NULL && getAvailableWriteSize() > 0)
-		onReadyToSendData(eTCE_Received);
+		if (getAvailableWriteSize() > 0)
+		{
+			onReadyToSendData(eTCE_Received);
+		}
+	}
 
 	return ERR_OK;
 }
 
 err_t TcpConnection::onSent(uint16_t len)
 {
-	debugf("TCP sent: %d", len);
+	//debugf("TCP sent: %d", len);
 
 	//debugf("%d %d", tcp->state, tcp->flags); // WRONG!
 	if (len >= 0 && tcp != NULL && getAvailableWriteSize() > 0)
@@ -230,7 +234,7 @@ int TcpConnection::write(IDataSourceStream* stream)
 		space = (tcp_sndqueuelen(tcp) < TCP_SND_QUEUELEN);
 		if (!space)
 		{
-			debugf("WAIT FOR FREE SPACE");
+			//debugf("WAIT FOR FREE SPACE");
 			flush();
 			break; // don't try to send buffers if no free space available
 		}
@@ -251,7 +255,7 @@ int TcpConnection::write(IDataSourceStream* stream)
 				int written = write(buffer, available, TCP_WRITE_FLAG_COPY | TCP_WRITE_FLAG_MORE);
 				total += written;
 				stream->seek(max(written, 0));
-				debugf("Written: %d, Available: %d, isFinished: %d, PushCount: %d", written, available, (stream->isFinished()?1:0), pushCount);
+				//debugf("Written: %d, Available: %d, isFinished: %d, PushCount: %d", written, available, (stream->isFinished()?1:0), pushCount);
 				repeat = written == available && !stream->isFinished() && pushCount < 25;
 			}
 			else
@@ -395,7 +399,9 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 			debugf("SSL: handshake start (%d ms)", millis());
 			con->sslContext = ssl_ctx_new(SSL_CONNECT_IN_PARTS | sslOptions, 1);
 
-			if (con->clientKeyCert.keyLength && con->clientKeyCert.certificateLength) {
+			if (con->clientKeyCert.keyLength && con->clientKeyCert.certificateLength)
+			{
+				debugf("SSL: Loading custom client cert & key");
 				// if we have client certificate -> try to use it.
 				if (ssl_obj_memory_load(con->sslContext, SSL_OBJ_RSA_KEY,
 						con->clientKeyCert.key, con->clientKeyCert.keyLength,
@@ -458,7 +464,7 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 
 	if (err != ERR_OK /*&& err != ERR_CLSD && err != ERR_RST*/)
 	{
-		debugf("Received ERROR %d", err);
+		debugf("staticOnReceive: Received ERROR %d", err);
 		/* exit and free resources, for unknown reason */
 		if (p != NULL)
 		{
@@ -479,7 +485,7 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 		tcp_recved(tcp, p->tot_len);
 	}
 	else {
-		debugf("TcpConnection::staticOnReceive: pbuf is NULL");
+		debugf("staticOnReceive: pbuf is NULL");
 	}
 
 #ifdef ENABLE_SSL
@@ -532,7 +538,7 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 		}
 
 		// we got some decrypted bytes...
-		debugf("SSL: Decrypted data len %d", read_bytes);
+		//debugf("SSL: Decrypted data len %d", read_bytes);
 
 		// put the decrypted data in a brand new pbuf
 		p = pout;

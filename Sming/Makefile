@@ -158,8 +158,8 @@ SDK_INCDIR	= include include/json
 	MODULES		 += axtls-8266/compat axtls-8266/replacements axtls-8266/crypto axtls-8266/ssl
 	EXTRA_INCDIR += axtls-8266 axtls-8266/ssl axtls-8266/crypto 
 	AXTLS_FLAGS = -DLWIP_RAW=1 -DENABLE_SSL=1
-	ifeq ($(SSL_DEBUG),1) # 
-		AXTLS_FLAGS += -DSSL_DEBUG=1 -DDEBUG_TLS_MEM=1 -DAXL_DEBUG=1
+	ifeq ($(SSL_DEBUG),1) 
+		AXTLS_FLAGS += -DSSL_DEBUG=1 -DDEBUG_TLS_MEM=0 -DAXL_DEBUG=0
 	endif 
 
 

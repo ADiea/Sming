@@ -412,6 +412,27 @@ int load_key_certs(SSL_CTX *ssl_ctx)
 {
     int ret = SSL_OK;
     uint32_t options = ssl_ctx->options;
+    printf("SSL: load key certs");
+#if defined(CONFIG_SSL_USE_DEFAULT_KEY) || defined(CONFIG_SSL_SKELETON_MODE)
+    printf("SSL: loading default private key 1/2");
+    extern const unsigned char* default_private_key;
+    extern const unsigned int default_private_key_len;
+    unsigned char localKey[default_private_key_len];
+
+    if (default_private_key != NULL && default_private_key_len > 0)
+    	memcpy_P(localKey, default_private_key, default_private_key_len);
+#endif
+
+#if defined(CONFIG_SSL_USE_DEFAULT_KEY) || defined(CONFIG_SSL_SKELETON_MODE)
+    printf("SSL: loading default cert 1/2");
+    extern const unsigned char* default_certificate;
+	extern const unsigned int default_certificate_len;
+    unsigned char localCert[default_certificate_len];
+
+    if (default_certificate != NULL && default_certificate_len > 0)
+    	memcpy_P(localCert, default_certificate, default_certificate_len);
+#endif
+
 #ifdef CONFIG_SSL_GENERATE_X509_CERT 
     uint8_t *cert_data = NULL;
     int cert_size;
@@ -426,6 +447,7 @@ int load_key_certs(SSL_CTX *ssl_ctx)
     /* do the private key first */
     if (strlen(CONFIG_SSL_PRIVATE_KEY_LOCATION) > 0)
     {
+    	printf("SSL: key %s", CONFIG_SSL_PRIVATE_KEY_LOCATION);
         if ((ret = ssl_obj_load(ssl_ctx, SSL_OBJ_RSA_KEY, 
                                 CONFIG_SSL_PRIVATE_KEY_LOCATION,
                                 CONFIG_SSL_PRIVATE_KEY_PASSWORD)) < 0)
@@ -434,11 +456,12 @@ int load_key_certs(SSL_CTX *ssl_ctx)
     else if (!(options & SSL_NO_DEFAULT_KEY))
     {
 #if defined(CONFIG_SSL_USE_DEFAULT_KEY) || defined(CONFIG_SSL_SKELETON_MODE)
-        extern const unsigned char* default_private_key;
-        extern const unsigned int default_private_key_len;
+    	printf("SSL: loading default private key 2/2");
         if (default_private_key != NULL && default_private_key_len > 0)
-            ssl_obj_memory_load(ssl_ctx, SSL_OBJ_RSA_KEY, default_private_key,
+        {
+            ssl_obj_memory_load(ssl_ctx, SSL_OBJ_RSA_KEY, localKey,
                 default_private_key_len, NULL);
+        }
 #endif
     }
 
@@ -449,7 +472,7 @@ int load_key_certs(SSL_CTX *ssl_ctx)
         ret = cert_size;
         goto error;
     }
-
+    printf("SSL: gen cert");
     ssl_obj_memory_load(ssl_ctx, SSL_OBJ_X509_CERT, cert_data, cert_size, NULL);
     free(cert_data);
 #else
@@ -462,11 +485,12 @@ int load_key_certs(SSL_CTX *ssl_ctx)
     else if (!(options & SSL_NO_DEFAULT_KEY))
     {
 #if defined(CONFIG_SSL_USE_DEFAULT_KEY) || defined(CONFIG_SSL_SKELETON_MODE)
-        extern const unsigned char* default_certificate;
-        extern const unsigned int default_certificate_len;
+    	printf("SSL: loading default cert 2/2");
         if (default_certificate != NULL && default_certificate_len > 0)
+        {
             ssl_obj_memory_load(ssl_ctx, SSL_OBJ_X509_CERT,
-                    default_certificate, default_certificate_len, NULL);
+            		localCert, default_certificate_len, NULL);
+        }
 #endif
     }
 #endif
@@ -477,6 +501,8 @@ error:
     {
         printf("Error: Certificate or key not loaded\n"); TTY_FLUSH();
     }
+    else printf("SSL: Cert and key loaded.");
+
 #endif
 
     return ret;

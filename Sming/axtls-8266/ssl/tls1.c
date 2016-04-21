@@ -70,7 +70,7 @@ const uint8_t ssl_prot_prefs[NUM_PROTOCOLS] =
 #ifdef CONFIG_SSL_PROT_LOW                  /* low security, fast speed */
 { SSL_AES128_SHA, SSL_AES256_SHA};
 #elif CONFIG_SSL_PROT_MEDIUM                /* medium security, medium speed */
-{ SSL_AES128_SHA, SSL_AES256_SHA};
+{ SSL_AES256_SHA, SSL_AES128_SHA};
 #else /* CONFIG_SSL_PROT_HIGH */            /* high security, low speed */
 { SSL_AES256_SHA, SSL_AES128_SHA};
 #endif
@@ -151,6 +151,8 @@ EXP_FUNC SSL_CTX *STDCALL ssl_ctx_new(uint32_t options, int num_sessions)
         return NULL;
     }
 
+    printf("SSL: building context");
+
 #ifndef CONFIG_SSL_SKELETON_MODE
     ssl_ctx->num_sessions = num_sessions;
 #endif
@@ -165,6 +167,7 @@ EXP_FUNC SSL_CTX *STDCALL ssl_ctx_new(uint32_t options, int num_sessions)
     }
 #endif
 
+    printf("SSL: context built");
     return ssl_ctx;
 }
 
