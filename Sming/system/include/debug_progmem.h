@@ -35,7 +35,7 @@
 #define LOG_E(fmt, ...) \
 	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
 	__attribute__((aligned(4))) \
-	__attribute__((section(".irom.text"))) = fmt; \
+	__attribute__((section(".irom.text"))) = fmt"\n"; \
 	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), ##__VA_ARGS__);})
 		
 	/*

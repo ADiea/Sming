@@ -384,7 +384,7 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 		else {
 			uint32_t sslOptions = con->sslOptions;
 #ifdef SSL_DEBUG
-			sslOptions |= SSL_DISPLAY_STATES | SSL_DISPLAY_BYTES | SSL_DISPLAY_CERTS;
+			sslOptions |= SSL_DISPLAY_STATES /*| SSL_DISPLAY_BYTES*/ | SSL_DISPLAY_CERTS | SSL_DISPLAY_RSA;
 			debugf("SSL: Show debug data ...");
 #endif
 			debugf("SSL: Starting connection...");

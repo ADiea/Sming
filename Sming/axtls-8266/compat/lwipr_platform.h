@@ -21,7 +21,7 @@
 #ifndef AXL_DEBUG
 	#define AXL_DEBUG_PRINT(...)
 #else
-	#define AXL_DEBUG_PRINT(...)  debugf(__VA_ARGS__)
+	#define AXL_DEBUG_PRINT  debugf
 #endif
 
 
