@@ -28,19 +28,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include "ssl/ssl_config.h"
 
 #ifdef CONFIG_SSL_GENERATE_X509_CERT
 #include <string.h>
 #include <stdlib.h>
-#include "os_port.h"
-#include "ssl.h"
+#include "ssl/ssl_os_port.h"
+#include "ssl/ssl_ssl.h"
 
 /**
  * Generate a basic X.509 certificate
  */
 
-static uint8_t set_gen_length(int len, uint8_t *buf, int *offset)
+static uint8_t ICACHE_FLASH_ATTR set_gen_length(int len, uint8_t *buf, int *offset)
 {
     if (len < 0x80) /* short form */
     {
@@ -71,7 +71,7 @@ static uint8_t set_gen_length(int len, uint8_t *buf, int *offset)
     }
 }
 
-static int pre_adjust_with_size(uint8_t type,
+static int ICACHE_FLASH_ATTR pre_adjust_with_size(uint8_t type,
         int *seq_offset, uint8_t *buf, int *offset)
 {
     buf[(*offset)++] = type;
@@ -80,7 +80,7 @@ static int pre_adjust_with_size(uint8_t type,
     return *offset;
 }
 
-static void adjust_with_size(int seq_size, int seq_start, 
+static void ICACHE_FLASH_ATTR adjust_with_size(int seq_size, int seq_start, 
                 uint8_t *buf, int *offset)
 {
     uint8_t seq_byte_size; 
@@ -98,14 +98,14 @@ static void adjust_with_size(int seq_size, int seq_start,
     }
 }
 
-static void gen_serial_number(uint8_t *buf, int *offset)
+static void ICACHE_FLASH_ATTR gen_serial_number(uint8_t *buf, int *offset)
 {
     static const uint8_t ser_oid[] = { ASN1_INTEGER, 1, 0x7F };
     memcpy(&buf[*offset], ser_oid , sizeof(ser_oid));
     *offset += sizeof(ser_oid);
 }
 
-static void gen_signature_alg(uint8_t *buf, int *offset)
+static void ICACHE_FLASH_ATTR gen_signature_alg(uint8_t *buf, int *offset)
 {
     /* OBJECT IDENTIFIER sha1withRSAEncryption (1 2 840 113549 1 1 5) */
     static const uint8_t sig_oid[] = 
@@ -119,7 +119,7 @@ static void gen_signature_alg(uint8_t *buf, int *offset)
     *offset += sizeof(sig_oid);
 }
 
-static int gen_dn(const char *name, uint8_t dn_type, 
+static int ICACHE_FLASH_ATTR gen_dn(const char *name, uint8_t dn_type, 
                         uint8_t *buf, int *offset)
 {
     int ret = X509_OK;
@@ -142,14 +142,14 @@ static int gen_dn(const char *name, uint8_t dn_type,
     buf[(*offset)++] = dn_type;
     buf[(*offset)++] = ASN1_PRINTABLE_STR;
     buf[(*offset)++] = name_size;
-    strcpy((char *)&buf[*offset], name);
+    strcpy(&buf[*offset], name);
     *offset += name_size;
 
 error:
     return ret;
 }
 
-static int gen_issuer(const char * dn[], uint8_t *buf, int *offset)
+static int ICACHE_FLASH_ATTR gen_issuer(const char * dn[], uint8_t *buf, int *offset)
 {
     int ret = X509_OK;
     int seq_offset;
@@ -190,7 +190,7 @@ static int gen_issuer(const char * dn[], uint8_t *buf, int *offset)
     }
 
     if (dn[X509_ORGANIZATIONAL_UNIT] != NULL &&
-                                strlen(dn[X509_ORGANIZATIONAL_UNIT]) > 0)
+    		strlen(dn[X509_ORGANIZATIONAL_UNIT]) > 0)
     {
         if ((ret = gen_dn(dn[X509_ORGANIZATIONAL_UNIT], 11, buf, offset)))
             goto error;
@@ -202,7 +202,7 @@ error:
     return ret;
 }
 
-static void gen_utc_time(uint8_t *buf, int *offset)
+static void ICACHE_FLASH_ATTR gen_utc_time(uint8_t *buf, int *offset)
 {
     static const uint8_t time_seq[] = 
     {
@@ -218,7 +218,7 @@ static void gen_utc_time(uint8_t *buf, int *offset)
     *offset += sizeof(time_seq);
 }
 
-static void gen_pub_key2(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
+static void ICACHE_FLASH_ATTR gen_pub_key2(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
 {
     static const uint8_t pub_key_seq[] = 
     {
@@ -227,7 +227,7 @@ static void gen_pub_key2(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
 
     int seq_offset;
     int pub_key_size = rsa_ctx->num_octets;
-    uint8_t *block = (uint8_t *)malloc(pub_key_size);
+    uint8_t *block = (uint8_t *)alloca(pub_key_size);
     int seq_size = pre_adjust_with_size(
                             ASN1_SEQUENCE, &seq_offset, buf, offset);
     buf[(*offset)++] = ASN1_INTEGER;
@@ -242,14 +242,13 @@ static void gen_pub_key2(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
         set_gen_length(pub_key_size, buf, offset);
 
     memcpy(&buf[*offset], block, pub_key_size);
-    free(block);
     *offset += pub_key_size;
     memcpy(&buf[*offset], pub_key_seq, sizeof(pub_key_seq));
     *offset += sizeof(pub_key_seq);
     adjust_with_size(seq_size, seq_offset, buf, offset);
 }
 
-static void gen_pub_key1(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
+static void ICACHE_FLASH_ATTR gen_pub_key1(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
 {
     int seq_offset;
     int seq_size = pre_adjust_with_size(
@@ -259,7 +258,7 @@ static void gen_pub_key1(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
     adjust_with_size(seq_size, seq_offset, buf, offset);
 }
 
-static void gen_pub_key(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
+static void ICACHE_FLASH_ATTR gen_pub_key(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
 {
     /*  OBJECT IDENTIFIER rsaEncryption (1 2 840 113549 1 1 1) */
     static const uint8_t rsa_enc_oid[] =
@@ -279,7 +278,7 @@ static void gen_pub_key(const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset)
     adjust_with_size(seq_size, seq_offset, buf, offset);
 }
 
-static void gen_signature(const RSA_CTX *rsa_ctx, const uint8_t *sha_dgst, 
+static void ICACHE_FLASH_ATTR gen_signature(const RSA_CTX *rsa_ctx, const uint8_t *sha_dgst, 
                         uint8_t *buf, int *offset)
 {
     static const uint8_t asn1_sig[] = 
@@ -289,8 +288,8 @@ static void gen_signature(const RSA_CTX *rsa_ctx, const uint8_t *sha_dgst,
         ASN1_NULL, 0x00, ASN1_OCTET_STRING, 0x14 
     };
 
-    uint8_t *enc_block = (uint8_t *)malloc(rsa_ctx->num_octets);
-    uint8_t *block = (uint8_t *)malloc(sizeof(asn1_sig) + SHA1_SIZE);
+    uint8_t *enc_block = (uint8_t *)alloca(rsa_ctx->num_octets);
+    uint8_t *block = (uint8_t *)alloca(sizeof(asn1_sig) + SHA1_SIZE);
     int sig_size;
 
     /* add the digest as an embedded asn.1 sequence */
@@ -304,12 +303,10 @@ static void gen_signature(const RSA_CTX *rsa_ctx, const uint8_t *sha_dgst,
     set_gen_length(sig_size+1, buf, offset);
     buf[(*offset)++] = 0;   /* bit string is multiple of 8 */
     memcpy(&buf[*offset], enc_block, sig_size);
-    free(enc_block);
-    free(block);
     *offset += sig_size;
 }
 
-static int gen_tbs_cert(const char * dn[],
+static int ICACHE_FLASH_ATTR gen_tbs_cert(const char * dn[],
                     const RSA_CTX *rsa_ctx, uint8_t *buf, int *offset,
                     uint8_t *sha_dgst)
 {
@@ -347,11 +344,11 @@ error:
 /**
  * Create a new certificate.
  */
-EXP_FUNC int STDCALL ssl_x509_create(SSL_CTX *ssl_ctx, uint32_t options, const char * dn[], uint8_t **cert_data)
+EXP_FUNC int ICACHE_FLASH_ATTR STDCALL ssl_x509_create(SSL_CTX *ssl_ctx, uint32_t options, const char * dn[], uint8_t **cert_data)
 {
     int ret = X509_OK, offset = 0, seq_offset;
     /* allocate enough space to load a new certificate */
-    uint8_t *buf = (uint8_t *)malloc(ssl_ctx->rsa_ctx->num_octets*2 + 512);
+    uint8_t *buf = (uint8_t *)alloca(ssl_ctx->rsa_ctx->num_octets*2 + 512);
     uint8_t sha_dgst[SHA1_SIZE];
     int seq_size = pre_adjust_with_size(ASN1_SEQUENCE, 
                                     &seq_offset, buf, &offset);
@@ -362,11 +359,10 @@ EXP_FUNC int STDCALL ssl_x509_create(SSL_CTX *ssl_ctx, uint32_t options, const c
     gen_signature_alg(buf, &offset);
     gen_signature(ssl_ctx->rsa_ctx, sha_dgst, buf, &offset);
     adjust_with_size(seq_size, seq_offset, buf, &offset);
-    *cert_data = (uint8_t *)malloc(offset); /* create the exact memory for it */
+    *cert_data = (uint8_t *)SSL_MALLOC(offset); /* create the exact memory for it */
     memcpy(*cert_data, buf, offset);
 
 error:
-    free(buf);
     return ret < 0 ? ret : offset;
 }
 

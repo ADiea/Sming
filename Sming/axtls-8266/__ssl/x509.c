@@ -34,18 +34,17 @@
  * Certificate processing.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "os_port.h"
-#include "crypto_misc.h"
+#include "ssl/ssl_os_port.h"
+#include "ssl/ssl_ssl.h"
+#include "ssl/ssl_crypto_misc.h"
+
+#include "lwip/sockets.h"
 
 #ifdef CONFIG_SSL_CERT_VERIFICATION
 /**
  * Retrieve the signature from a certificate.
  */
-static const uint8_t *get_signature(const uint8_t *asn1_sig, int *len)
+static const uint8_t * ICACHE_FLASH_ATTR get_signature(const uint8_t *asn1_sig, int *len)
 {
     int offset = 0;
     const uint8_t *ptr = NULL;
@@ -69,14 +68,14 @@ end_get_sig:
  * Construct a new x509 object.
  * @return 0 if ok. < 0 if there was a problem.
  */
-int x509_new(const uint8_t *cert, int *len, X509_CTX **ctx)
+int ICACHE_FLASH_ATTR x509_new(const uint8_t *cert, int *len, X509_CTX **ctx)
 {
     int begin_tbs, end_tbs;
     int ret = X509_NOT_OK, offset = 0, cert_size = 0;
     X509_CTX *x509_ctx;
     BI_CTX *bi_ctx;
 
-    *ctx = (X509_CTX *)calloc(1, sizeof(X509_CTX));
+    *ctx = (X509_CTX *)SSL_ZALLOC(sizeof(X509_CTX));
     x509_ctx = *ctx;
 
     /* get the certificate size */
@@ -118,13 +117,6 @@ int x509_new(const uint8_t *cert, int *len, X509_CTX **ctx)
     }
 
     bi_ctx = x509_ctx->rsa_ctx->bi_ctx;
-
-    x509_ctx->fingerprint = malloc(SHA1_SIZE);
-    SHA1_CTX sha_fp_ctx;
-    SHA1_Init(&sha_fp_ctx);
-    SHA1_Update(&sha_fp_ctx, &cert[0], cert_size);
-    SHA1_Final(x509_ctx->fingerprint, &sha_fp_ctx);
-
 #ifdef CONFIG_SSL_CERT_VERIFICATION /* only care if doing verification */
     /* use the appropriate signature algorithm */
     switch (x509_ctx->sig_type)
@@ -212,12 +204,12 @@ int x509_new(const uint8_t *cert, int *len, X509_CTX **ctx)
                         if (type == ASN1_CONTEXT_DNSNAME)
                         {
                             x509_ctx->subject_alt_dnsnames = (char**)
-                                    realloc(x509_ctx->subject_alt_dnsnames, 
+                                    SSL_REALLOC(x509_ctx->subject_alt_dnsnames,
                                        (totalnames + 2) * sizeof(char*));
                             x509_ctx->subject_alt_dnsnames[totalnames] = 
-                                    (char*)malloc(dnslen + 1);
+                                    (char*)SSL_MALLOC(dnslen + 1);
                             x509_ctx->subject_alt_dnsnames[totalnames+1] = NULL;
-                            memcpy(x509_ctx->subject_alt_dnsnames[totalnames], 
+                            memcpy(x509_ctx->subject_alt_dnsnames[totalnames],
                                     cert + suboffset, dnslen);
                             x509_ctx->subject_alt_dnsnames[
                                     totalnames][dnslen] = 0;
@@ -246,7 +238,7 @@ end_cert:
     if (ret)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: Invalid X509 ASN.1 file (%s)\n",
+        ssl_printf("Error: Invalid X509 ASN.1 file (%s)\n",
                         x509_display_error(ret));
 #endif
         x509_free(x509_ctx);
@@ -259,7 +251,7 @@ end_cert:
 /**
  * Free an X.509 object's resources.
  */
-void x509_free(X509_CTX *x509_ctx)
+void ICACHE_FLASH_ATTR x509_free(X509_CTX *x509_ctx)
 {
     X509_CTX *next;
     int i;
@@ -269,11 +261,11 @@ void x509_free(X509_CTX *x509_ctx)
 
     for (i = 0; i < X509_NUM_DN_TYPES; i++)
     {
-        free(x509_ctx->ca_cert_dn[i]);
-        free(x509_ctx->cert_dn[i]);
+    	SSL_FREE(x509_ctx->ca_cert_dn[i]);
+    	SSL_FREE(x509_ctx->cert_dn[i]);
     }
 
-    free(x509_ctx->signature);
+    SSL_FREE(x509_ctx->signature);
 
 #ifdef CONFIG_SSL_CERT_VERIFICATION 
     if (x509_ctx->digest)
@@ -281,23 +273,18 @@ void x509_free(X509_CTX *x509_ctx)
         bi_free(x509_ctx->rsa_ctx->bi_ctx, x509_ctx->digest);
     }
 
-    if (x509_ctx->fingerprint)
-    {
-        free(x509_ctx->fingerprint);
-    }
-
     if (x509_ctx->subject_alt_dnsnames)
     {
         for (i = 0; x509_ctx->subject_alt_dnsnames[i]; ++i)
-            free(x509_ctx->subject_alt_dnsnames[i]);
+        	SSL_FREE(x509_ctx->subject_alt_dnsnames[i]);
 
-        free(x509_ctx->subject_alt_dnsnames);
+        SSL_FREE(x509_ctx->subject_alt_dnsnames);
     }
 #endif
 
     RSA_free(x509_ctx->rsa_ctx);
     next = x509_ctx->next;
-    free(x509_ctx);
+    SSL_FREE(x509_ctx);
     x509_free(next);        /* clear the chain */
 }
 
@@ -305,13 +292,13 @@ void x509_free(X509_CTX *x509_ctx)
 /**
  * Take a signature and decrypt it.
  */
-static bigint *sig_verify(BI_CTX *ctx, const uint8_t *sig, int sig_len,
+static bigint *ICACHE_FLASH_ATTR sig_verify(BI_CTX *ctx, const uint8_t *sig, int sig_len,
         bigint *modulus, bigint *pub_exp)
 {
     int i, size;
     bigint *decrypted_bi, *dat_bi;
     bigint *bir = NULL;
-    uint8_t *block = (uint8_t *)malloc(sig_len);
+    uint8_t *block = (uint8_t *)SSL_MALLOC(sig_len);
 
     /* decrypt */
     dat_bi = bi_import(ctx, sig, sig_len);
@@ -338,9 +325,11 @@ static bigint *sig_verify(BI_CTX *ctx, const uint8_t *sig, int sig_len,
             bir = bi_import(ctx, sig_ptr, len);
         }
     }
-    free(block);
+
     /* save a few bytes of memory */
     bi_clear_cache(ctx);
+
+    SSL_FREE(block);
     return bir;
 }
 
@@ -355,7 +344,7 @@ static bigint *sig_verify(BI_CTX *ctx, const uint8_t *sig, int sig_len,
  * - The certificate chain is valid.
  * - The signature of the certificate is valid.
  */
-int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert) 
+int ICACHE_FLASH_ATTR x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert) 
 {
     int ret = X509_OK, i = 0;
     bigint *cert_sig;
@@ -377,7 +366,7 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
     if (asn1_compare_dn(cert->ca_cert_dn, cert->cert_dn) == 0)
     {
 #if CONFIG_SSL_DISPLAY_MODE
-    	printf("SSL: a self-signed certificate that is not in the CA store\n");
+    	os_printf("a self-signed certificate that is not in the CA store\n");
 #endif
         is_self_signed = 1;
         ctx = cert->rsa_ctx->bi_ctx;
@@ -385,8 +374,10 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
         expn = cert->rsa_ctx->e;
     }
 
-    gettimeofday(&tv, NULL);
-
+    gettimeofday(&tv, &cert->not_before);
+#if CONFIG_SSL_DISPLAY_MODE
+    os_printf("before %u, tv_sec %u, after %u\n",cert->not_before, tv.tv_sec, cert->not_after);
+#endif
     /* check the not before date */
     if (tv.tv_sec < cert->not_before)
     {
@@ -409,7 +400,7 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
        if (ca_cert_ctx != NULL) 
        {
 #if CONFIG_SSL_DISPLAY_MODE
-    	   printf("SSL: look for a trusted cert\n");
+    	   os_printf("look for a trusted cert\n");
 #endif
             /* go thu the CA store */
             while (i < CONFIG_X509_MAX_CA_CERTS && ca_cert_ctx->cert[i])
@@ -419,7 +410,7 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
                 {
                     /* use this CA certificate for signature verification */
 #if CONFIG_SSL_DISPLAY_MODE
-                	printf("SSL: use the CA certificate for signature verification\n");
+                	os_printf("use the CA certificate for signature verification\n");
 #endif
                     match_ca_cert = 1;
                     ctx = ca_cert_ctx->cert[i]->rsa_ctx->bi_ctx;
@@ -470,7 +461,7 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
             ret = X509_VFY_ERROR_BAD_SIGNATURE;
 
 #if CONFIG_SSL_DISPLAY_MODE
-        printf("check the signature ok\n");
+        os_printf("check the signature ok\n");
 #endif
 //        bi_free(ctx, cert_sig);//comment the line for check signature by LiuH at 20150.06.11
     }
@@ -501,69 +492,69 @@ end_verify:
  * Used for diagnostics.
  */
 static const char *not_part_of_cert = "<Not Part Of Certificate>";
-void x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert_ctx) 
+void ICACHE_FLASH_ATTR x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert_ctx) 
 {
     if (cert == NULL)
         return;
 
-    printf("=== CERTIFICATE ISSUED TO ===\n");
-    printf("Common Name (CN):\t\t");
-    printf("%s\n", cert->cert_dn[X509_COMMON_NAME] ?
+    ssl_printf("=== CERTIFICATE ISSUED TO ===\n");
+    ssl_printf("Common Name (CN):\t\t");
+    ssl_printf("%s\n", cert->cert_dn[X509_COMMON_NAME] ?
                     cert->cert_dn[X509_COMMON_NAME] : not_part_of_cert);
 
-    printf("Organization (O):\t\t");
-    printf("%s\n", cert->cert_dn[X509_ORGANIZATION] ?
+    ssl_printf("Organization (O):\t\t");
+    ssl_printf("%s\n", cert->cert_dn[X509_ORGANIZATION] ?
         cert->cert_dn[X509_ORGANIZATION] : not_part_of_cert);
 
-    printf("Organizational Unit (OU):\t");
-    printf("%s\n", cert->cert_dn[X509_ORGANIZATIONAL_UNIT] ?
+    ssl_printf("Organizational Unit (OU):\t");
+    ssl_printf("%s\n", cert->cert_dn[X509_ORGANIZATIONAL_UNIT] ?
         cert->cert_dn[X509_ORGANIZATIONAL_UNIT] : not_part_of_cert);
 
-    printf("=== CERTIFICATE ISSUED BY ===\n");
-    printf("Common Name (CN):\t\t");
-    printf("%s\n", cert->ca_cert_dn[X509_COMMON_NAME] ?
+    ssl_printf("=== CERTIFICATE ISSUED BY ===\n");
+    ssl_printf("Common Name (CN):\t\t");
+    ssl_printf("%s\n", cert->ca_cert_dn[X509_COMMON_NAME] ?
                     cert->ca_cert_dn[X509_COMMON_NAME] : not_part_of_cert);
 
-    printf("Organization (O):\t\t");
-    printf("%s\n", cert->ca_cert_dn[X509_ORGANIZATION] ?
+    ssl_printf("Organization (O):\t\t");
+    ssl_printf("%s\n", cert->ca_cert_dn[X509_ORGANIZATION] ?
         cert->ca_cert_dn[X509_ORGANIZATION] : not_part_of_cert);
 
-    printf("Organizational Unit (OU):\t");
-    printf("%s\n", cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] ?
+    ssl_printf("Organizational Unit (OU):\t");
+    ssl_printf("%s\n", cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] ?
         cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] : not_part_of_cert);
 
-    printf("Not Before:\t\t\t%s", ctime(&cert->not_before));
-    printf("Not After:\t\t\t%s", ctime(&cert->not_after));
-    printf("RSA bitsize:\t\t\t%d\n", cert->rsa_ctx->num_octets*8);
-    printf("Sig Type:\t\t\t");
+    ssl_printf("Not Before:\t\t\t%d\n", cert->not_before);   
+    ssl_printf("Not After:\t\t\t%d\n", cert->not_after);    
+    ssl_printf("RSA bitsize:\t\t\t%d\n", cert->rsa_ctx->num_octets*8);
+    ssl_printf("Sig Type:\t\t\t");
     switch (cert->sig_type)
     {
         case SIG_TYPE_MD2:
-            printf("MD2\n");
+            ssl_printf("MD2\n");
             break;
         case SIG_TYPE_MD5:
-            printf("MD5\n");
+            ssl_printf("MD5\n");
             break;
         case SIG_TYPE_SHA1:
-            printf("SHA1\n");
+            ssl_printf("SHA1\n");
             break;
         case SIG_TYPE_SHA256:
-            printf("SHA256\n");
+            ssl_printf("SHA256\n");
             break;
         case SIG_TYPE_SHA384:
-            printf("SHA384\n");
+            ssl_printf("SHA384\n");
             break;
         case SIG_TYPE_SHA512:
-            printf("SHA512\n");
+            ssl_printf("SHA512\n");
             break;
         default:
-            printf("Unrecognized: %d\n", cert->sig_type);
+            ssl_printf("Unrecognized: %d\n", cert->sig_type);
             break;
     }
 
     if (ca_cert_ctx)
     {
-        printf("Verify:\t\t\t\t%s\n",
+        ssl_printf("Verify:\t\t\t\t%s\n",
                 x509_display_error(x509_verify(ca_cert_ctx, cert)));
     }
 
@@ -578,10 +569,11 @@ void x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert_ctx)
         x509_print(cert->next, ca_cert_ctx);
     }
 
-    TTY_FLUSH();
+    //TTY_FLUSH();
 }
 
-const char * x509_display_error(int error)
+#if 0
+const char * ICACHE_FLASH_ATTR x509_display_error(int error)
 {
     switch (error)
     {
@@ -619,5 +611,7 @@ const char * x509_display_error(int error)
             return "Unknown";
     }
 }
+#endif
+
 #endif      /* CONFIG_SSL_FULL_MODE */
 

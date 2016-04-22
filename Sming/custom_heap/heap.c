@@ -45,6 +45,7 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 		{
 			if(gLastHeapOp[i].op == 'f')
 				m_printf("hl{f,%x,0} %d\n", gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
+			/*
 			else if(gLastHeapOp[i].op == 'r')
 			{
 				if(gLastHeapOp[i].addrOld == 0)
@@ -55,6 +56,7 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 					LOG_I("hl{m,%d,0,%x} (r)%d", gLastHeapOp[i].size, gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 				}
 			}
+			*/
 			else
 				m_printf("hl{%c,%d,0,%x} %d\n", gLastHeapOp[i].op, gLastHeapOp[i].size, gLastHeapOp[i].addr, gLastHeapOp[i].opCounter);
 		}

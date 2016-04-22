@@ -29,71 +29,63 @@
  */
 
 /**
- * @file os_port.c
- *
- * OS specific functions.
+ * An implementation of the RC4/ARC4 algorithm.
+ * Originally written by Christophe Devine.
  */
-#include <time.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <string.h>
-#include "os_port.h"
 
-#ifdef WIN32
+#include "ssl/ssl_os_port.h"
+#include "ssl/ssl_crypto.h"
+
 /**
- * gettimeofday() not in Win32 
+ * Get ready for an encrypt/decrypt operation
  */
-EXP_FUNC void STDCALL gettimeofday(struct timeval* t, void* timezone)
-{       
-#if defined(_WIN32_WCE)
-    t->tv_sec = time(NULL);
-    t->tv_usec = 0;                         /* 1sec precision only */ 
-#else
-    struct _timeb timebuffer;
-    _ftime(&timebuffer);
-    t->tv_sec = (long)timebuffer.time;
-    t->tv_usec = 1000 * timebuffer.millitm; /* 1ms precision */
-#endif
+void ICACHE_FLASH_ATTR RC4_setup(RC4_CTX *ctx, const uint8_t *key, int length)
+{
+    int i, j = 0, k = 0, a;
+    uint8_t *m;
+
+    ctx->x = 0;
+    ctx->y = 0;
+    m = ctx->m;
+
+    for (i = 0; i < 256; i++)
+        m[i] = i;
+
+    for (i = 0; i < 256; i++)
+    {
+        a = m[i];
+        j = (uint8_t)(j + a + key[k]);
+        m[i] = m[j]; 
+        m[j] = a;
+
+        if (++k >= length) 
+            k = 0;
+    }
 }
 
 /**
- * strcasecmp() not in Win32
+ * Perform the encrypt/decrypt operation (can use it for either since
+ * this is a stream cipher).
+ * NOTE: *msg and *out must be the same pointer (performance tweak)
  */
-EXP_FUNC int STDCALL strcasecmp(const char *s1, const char *s2)
-{
-    while (tolower(*s1) == tolower(*s2++))
+void ICACHE_FLASH_ATTR RC4_crypt(RC4_CTX *ctx, const uint8_t *msg, uint8_t *out, int length)
+{ 
+    int i;
+    uint8_t *m, x, y, a, b;
+
+    x = ctx->x;
+    y = ctx->y;
+    m = ctx->m;
+
+    for (i = 0; i < length; i++)
     {
-        if (*s1++ == '\0')
-        {
-            return 0;
-        }
+        a = m[++x];
+        y += a;
+        m[x] = b = m[y];
+        m[y] = a;
+        out[i] ^= m[(uint8_t)(a + b)];
     }
 
-    return *(unsigned char *)s1 - *(unsigned char *)(s2 - 1);
+    ctx->x = x;
+    ctx->y = y;
 }
-
-
-EXP_FUNC int STDCALL getdomainname(char *buf, int buf_size)
-{
-    HKEY hKey;
-    unsigned long datatype;
-    unsigned long bufferlength = buf_size;
-
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-            TEXT("SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters"),
-                        0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
-        return -1;
-
-    RegQueryValueEx(hKey, "Domain", NULL, &datatype, buf, &bufferlength);
-    RegCloseKey(hKey);
-    return 0; 
-}
-#endif
-
-#undef malloc
-#undef realloc
-#undef calloc
-
-static const char * out_of_mem_str = "out of memory";
-static const char * file_open_str = "Could not open file \"%s\"";

@@ -167,8 +167,9 @@ extern void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld
 
 /* ------------------------------------------------------------------------- */
 
-//
+#define DBG_MEM_OP( format, ... )
 
+/*
 uint32_t sizeBufLog = 0, printSz;
 #define SZ_LOG_BUF 2048
 char bufLog[SZ_LOG_BUF];
@@ -184,7 +185,7 @@ char printed=0;
 											 m_putc(bufLog[printSz]); \
 										 } \
 									}
-
+*/
 
 #if DBG_LOG_LEVEL >= 6
 #  define DBG_LOG_TRACE( format, ... ) { if(gTotalHeapOp < MAX_LOG_OP_LIMIT) LOG_II( format, ## __VA_ARGS__ ); }

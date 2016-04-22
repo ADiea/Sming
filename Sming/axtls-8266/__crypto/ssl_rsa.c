@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, Cameron Rich
+ * Copyright (c) 2007-2014, Cameron Rich
  * 
  * All rights reserved.
  * 
@@ -33,14 +33,10 @@
  * perform its calculations.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <stdlib.h>
-#include "os_port.h"
-#include "crypto.h"
+#include "ssl/ssl_os_port.h"
+#include "ssl/ssl_crypto.h"
 
-void RSA_priv_key_new(RSA_CTX **ctx, 
+void ICACHE_FLASH_ATTR RSA_priv_key_new(RSA_CTX **ctx, 
         const uint8_t *modulus, int mod_len,
         const uint8_t *pub_exp, int pub_len,
         const uint8_t *priv_exp, int priv_len
@@ -75,7 +71,7 @@ void RSA_priv_key_new(RSA_CTX **ctx,
 #endif
 }
 
-void RSA_pub_key_new(RSA_CTX **ctx, 
+void ICACHE_FLASH_ATTR RSA_pub_key_new(RSA_CTX **ctx, 
         const uint8_t *modulus, int mod_len,
         const uint8_t *pub_exp, int pub_len)
 {
@@ -86,7 +82,7 @@ void RSA_pub_key_new(RSA_CTX **ctx,
         RSA_free(*ctx);
 
     bi_ctx = bi_initialize();
-    *ctx = (RSA_CTX *)calloc(1, sizeof(RSA_CTX));
+    *ctx = (RSA_CTX *)SSL_ZALLOC(sizeof(RSA_CTX));
     rsa_ctx = *ctx;
     rsa_ctx->bi_ctx = bi_ctx;
     rsa_ctx->num_octets = mod_len;
@@ -99,7 +95,7 @@ void RSA_pub_key_new(RSA_CTX **ctx,
 /**
  * Free up any RSA context resources.
  */
-void RSA_free(RSA_CTX *rsa_ctx)
+void ICACHE_FLASH_ATTR RSA_free(RSA_CTX *rsa_ctx)
 {
     BI_CTX *bi_ctx;
     if (rsa_ctx == NULL)                /* deal with ptrs that are null */
@@ -128,7 +124,7 @@ void RSA_free(RSA_CTX *rsa_ctx)
     }
 
     bi_terminate(bi_ctx);
-    free(rsa_ctx);
+    SSL_FREE(rsa_ctx);
 }
 
 /**
@@ -141,19 +137,18 @@ void RSA_free(RSA_CTX *rsa_ctx)
  * @return  The number of bytes that were originally encrypted. -1 on error.
  * @see http://www.rsasecurity.com/rsalabs/node.asp?id=2125
  */
-int RSA_decrypt(const RSA_CTX *ctx, const uint8_t *in_data, 
+int ICACHE_FLASH_ATTR RSA_decrypt(const RSA_CTX *ctx, const uint8_t *in_data, 
                             uint8_t *out_data, int out_len, int is_decryption)
 {
     const int byte_size = ctx->num_octets;
-    int i = 0, size = -1;
+    int i = 0, size;
     bigint *decrypted_bi, *dat_bi;
-    uint8_t *block = (uint8_t *)malloc(byte_size);
+    uint8_t *block = (uint8_t *)SSL_MALLOC(byte_size);
     int pad_count = 0;
 
     if (out_len < byte_size)        /* check output has enough size */
-       goto error;
-
-    memset(out_data, 0, out_len);   /* initialise */
+        return -1;
+    memset(out_data, 0, out_len); /* initialise */
 
     /* decrypt */
     dat_bi = bi_import(ctx->bi_ctx, in_data, byte_size);
@@ -168,13 +163,13 @@ int RSA_decrypt(const RSA_CTX *ctx, const uint8_t *in_data,
     bi_export(ctx->bi_ctx, decrypted_bi, block, byte_size);
 
     if (block[i++] != 0)             /* leading 0? */
-        goto error;
+        return -1;
 
 #ifdef CONFIG_SSL_CERT_VERIFICATION
     if (is_decryption == 0) /* PKCS1.5 signing pads with "0xff"s */
     {
         if (block[i++] != 0x01)     /* BT correct? */
-            goto error;
+            return -1;
 
         while (block[i++] == 0xff && i < byte_size)
             pad_count++;
@@ -183,7 +178,7 @@ int RSA_decrypt(const RSA_CTX *ctx, const uint8_t *in_data,
 #endif
     {
         if (block[i++] != 0x02)     /* BT correct? */
-            goto error;
+            return -1;
 
         while (block[i++] && i < byte_size)
             pad_count++;
@@ -191,22 +186,22 @@ int RSA_decrypt(const RSA_CTX *ctx, const uint8_t *in_data,
 
     /* check separator byte 0x00 - and padding must be 8 or more bytes */
     if (i == byte_size || pad_count < 8) 
-        goto error;
+        return -1;
 
     size = byte_size - i;
 
     /* get only the bit we want */
-    memcpy(out_data, &block[i], size);
+    if (size > 0)
+        memcpy(out_data, &block[i], size);
 
-error:
-	free(block);
-    return size;
+    SSL_FREE(block);
+    return size ? size : -1;
 }
 
 /**
  * Performs m = c^d mod n
  */
-bigint *RSA_private(const RSA_CTX *c, bigint *bi_msg)
+bigint *ICACHE_FLASH_ATTR RSA_private(const RSA_CTX *c, bigint *bi_msg)
 {
 #ifdef CONFIG_BIGINT_CRT
     return bi_crt(c->bi_ctx, bi_msg, c->dP, c->dQ, c->p, c->q, c->qInv);
@@ -218,27 +213,29 @@ bigint *RSA_private(const RSA_CTX *c, bigint *bi_msg)
 }
 
 #ifdef CONFIG_SSL_FULL_MODE
+#if 0
 /**
  * Used for diagnostics.
  */
-void RSA_print(const RSA_CTX *rsa_ctx) 
+void ICACHE_FLASH_ATTR RSA_print(const RSA_CTX *rsa_ctx) 
 {
     if (rsa_ctx == NULL)
         return;
 
-    printf("-----------------   RSA DEBUG   ----------------\n");
-    printf("Size:\t%d\n", rsa_ctx->num_octets);
+    ssl_printf("-----------------   RSA DEBUG   ----------------\n");
+    ssl_printf("Size:\t%d\n", rsa_ctx->num_octets);
     bi_print("Modulus", rsa_ctx->m);
     bi_print("Public Key", rsa_ctx->e);
     bi_print("Private Key", rsa_ctx->d);
 }
+#endif
 #endif
 
 #if defined(CONFIG_SSL_CERT_VERIFICATION) || defined(CONFIG_SSL_GENERATE_X509_CERT)
 /**
  * Performs c = m^e mod n
  */
-bigint *RSA_public(const RSA_CTX * c, bigint *bi_msg)
+bigint *ICACHE_FLASH_ATTR RSA_public(const RSA_CTX * c, bigint *bi_msg)
 {
     c->bi_ctx->mod_offset = BIGINT_M_OFFSET;
     return bi_mod_power(c->bi_ctx, bi_msg, c->e);
@@ -248,7 +245,7 @@ bigint *RSA_public(const RSA_CTX * c, bigint *bi_msg)
  * Use PKCS1.5 for encryption/signing.
  * see http://www.rsasecurity.com/rsalabs/node.asp?id=2125
  */
-int RSA_encrypt(const RSA_CTX *ctx, const uint8_t *in_data, uint16_t in_len, 
+int ICACHE_FLASH_ATTR RSA_encrypt(const RSA_CTX *ctx, const uint8_t *in_data, uint16_t in_len, 
         uint8_t *out_data, int is_signing)
 {
     int byte_size = ctx->num_octets;

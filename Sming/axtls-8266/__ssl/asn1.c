@@ -32,15 +32,34 @@
  * Some primitive asn methods for extraction ASN.1 data.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "os_port.h"
-#include "crypto.h"
-#include "crypto_misc.h"
+#include "ssl/ssl_os_port.h"
+#include "ssl/ssl_ssl.h"
+#include "ssl/ssl_crypto.h"
+#include "ssl/ssl_crypto_misc.h"
 
-/* 1.2.840.113549.1.1 OID prefix - handle the following */
+struct tm
+{
+  int tm_sec;                   /* Seconds.     [0-60] (1 leap second) */
+  int tm_min;                   /* Minutes.     [0-59] */
+  int tm_hour;                  /* Hours.       [0-23] */
+  int tm_mday;                  /* Day.         [1-31] */
+  int tm_mon;                   /* Month.       [0-11] */
+  int tm_year;                  /* Year - 1900.  */
+  int tm_wday;                  /* Day of week. [0-6] */
+  int tm_yday;                  /* Days in year.[0-365] */
+  int tm_isdst;                 /* DST.         [-1/0/1]*/
+
+#ifdef  __USE_BSD
+  long int tm_gmtoff;           /* Seconds east of UTC.  */
+  __const char *tm_zone;        /* Timezone abbreviation.  */
+#else
+  long int __tm_gmtoff;         /* Seconds east of UTC.  */
+  __const char *__tm_zone;      /* Timezone abbreviation.  */
+#endif
+};
+
+
+ /*1.2.840.113549.1.1 OID prefix - handle the following */
 /* md5WithRSAEncryption(4) */
 /* sha1WithRSAEncryption(5) */
 /* sha256WithRSAEncryption (11) */
@@ -63,6 +82,7 @@ static const uint8_t sig_sha256[] =
     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01
 };
 
+
 /* 2.16.840.1.101.3.4.2.2 SHA-384 */
 static const uint8_t sig_sha384[] =
 {
@@ -83,7 +103,7 @@ static const uint8_t sig_subject_alt_name[] =
 /* CN, O, OU */
 static const uint8_t g_dn_types[] = { 3, 10, 11 };
 
-uint32_t get_asn1_length(const uint8_t *buf, int *offset)
+uint32_t ICACHE_FLASH_ATTR get_asn1_length(const uint8_t *buf, int *offset)
 {
     int i;
     uint32_t len;
@@ -113,7 +133,7 @@ uint32_t get_asn1_length(const uint8_t *buf, int *offset)
  * Skip the ASN1.1 object type and its length. Get ready to read the object's
  * data.
  */
-int asn1_next_obj(const uint8_t *buf, int *offset, int obj_type)
+int ICACHE_FLASH_ATTR asn1_next_obj(const uint8_t *buf, int *offset, int obj_type)
 {
     if (buf[*offset] != obj_type)
         return X509_NOT_OK;
@@ -125,7 +145,7 @@ int asn1_next_obj(const uint8_t *buf, int *offset, int obj_type)
  * Skip over an ASN.1 object type completely. Get ready to read the next
  * object.
  */
-int asn1_skip_obj(const uint8_t *buf, int *offset, int obj_type)
+int ICACHE_FLASH_ATTR asn1_skip_obj(const uint8_t *buf, int *offset, int obj_type)
 {
     int len;
 
@@ -141,7 +161,7 @@ int asn1_skip_obj(const uint8_t *buf, int *offset, int obj_type)
  * Read an integer value for ASN.1 data
  * Note: This function allocates memory which must be freed by the user.
  */
-int asn1_get_int(const uint8_t *buf, int *offset, uint8_t **object)
+int ICACHE_FLASH_ATTR asn1_get_int(const uint8_t *buf, int *offset, uint8_t **object)
 {
     int len;
 
@@ -154,7 +174,7 @@ int asn1_get_int(const uint8_t *buf, int *offset, uint8_t **object)
         (*offset)++;
     }
 
-    *object = (uint8_t *)malloc(len);
+    *object = (uint8_t *)SSL_MALLOC(len);
     memcpy(*object, &buf[*offset], len);
     *offset += len;
 
@@ -165,7 +185,7 @@ end_int_array:
 /**
  * Get all the RSA private key specifics from an ASN.1 encoded file 
  */
-int asn1_get_private_key(const uint8_t *buf, int len, RSA_CTX **rsa_ctx)
+int ICACHE_FLASH_ATTR asn1_get_private_key(const uint8_t *buf, int len, RSA_CTX **rsa_ctx)
 {
     int offset = 7;
     uint8_t *modulus = NULL, *priv_exp = NULL, *pub_exp = NULL;
@@ -179,7 +199,7 @@ int asn1_get_private_key(const uint8_t *buf, int len, RSA_CTX **rsa_ctx)
     if (buf[0] != ASN1_SEQUENCE) /* basic sanity check */
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: This is not a valid ASN.1 file\n");
+        ssl_printf("Error: This is not a valid ASN.1 file\n");
 #endif
         return X509_INVALID_PRIV_KEY;
     }
@@ -208,26 +228,52 @@ int asn1_get_private_key(const uint8_t *buf, int len, RSA_CTX **rsa_ctx)
             modulus, mod_len, pub_exp, pub_len, priv_exp, priv_len,
             p, p_len, q, p_len, dP, dP_len, dQ, dQ_len, qInv, qInv_len);
 
-    free(p);
-    free(q);
-    free(dP);
-    free(dQ);
-    free(qInv);
+    SSL_FREE(p);
+    SSL_FREE(q);
+    SSL_FREE(dP);
+    SSL_FREE(dQ);
+    SSL_FREE(qInv);
 #else
     RSA_priv_key_new(rsa_ctx, 
             modulus, mod_len, pub_exp, pub_len, priv_exp, priv_len);
 #endif
 
-    free(modulus);
-    free(priv_exp);
-    free(pub_exp);
+    SSL_FREE(modulus);
+    SSL_FREE(priv_exp);
+    SSL_FREE(pub_exp);
     return X509_OK;
+}
+
+static time_t ICACHE_FLASH_ATTR mktime(struct tm *ptm)
+{
+	uint16 year = 0,mon = 0,day = 0,hour = 0,min = 0,sec = 0;
+	if (ptm == NULL)
+		return 0;
+
+	year = ptm->tm_year;
+	mon = ptm->tm_mon;
+	day = ptm->tm_mday;
+	hour = ptm->tm_hour;
+	min = ptm->tm_min;
+	sec = ptm->tm_sec;
+
+	if (0 >= (int)(mon -= 2)){/*1..12 ->11,12,1..10*/
+		mon += 12;			/*Puts Feb last since it has leap day*/
+		year -= 1;
+	}
+
+	return (((
+			 (unsigned long)(year/4 - year/100 + year/400 +367*mon/12 +day) +
+			 year*365 -719499
+			)*24 + hour/*now have hours*/
+		)*60 + min/*now have minutes*/
+	)*60 + sec;/*finally seconds*/
 }
 
 /**
  * Get the time of a certificate. Ignore hours/minutes/seconds.
  */
-static int asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
+static int ICACHE_FLASH_ATTR asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
 {
     int ret = X509_NOT_OK, len, t_offset, abs_year;
     struct tm tm;
@@ -240,8 +286,8 @@ static int asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
         len = get_asn1_length(buf, offset);
         t_offset = *offset;
 
-        memset(&tm, 0, sizeof(struct tm));
-        tm.tm_year = (buf[t_offset] - '0')*10 + (buf[t_offset+1] - '0');
+    memset(&tm, 0, sizeof(struct tm));
+    tm.tm_year = (buf[t_offset] - '0')*10 + (buf[t_offset+1] - '0');
 
         if (tm.tm_year <= 50)    /* 1951-2050 thing */
         {
@@ -250,6 +296,7 @@ static int asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
 
         tm.tm_mon = (buf[t_offset+2] - '0')*10 + (buf[t_offset+3] - '0') - 1;
         tm.tm_mday = (buf[t_offset+4] - '0')*10 + (buf[t_offset+5] - '0');
+		// LiuH : add mktime interface in function at 2015.06.11
         *t = mktime(&tm);
         *offset += len;
         ret = X509_OK;
@@ -293,7 +340,7 @@ static int asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
 /**
  * Get the version type of a certificate (which we don't actually care about)
  */
-int asn1_version(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int ICACHE_FLASH_ATTR asn1_version(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK;
 
@@ -309,7 +356,7 @@ end_version:
 /**
  * Retrieve the notbefore and notafter certificate times.
  */
-int asn1_validity(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int ICACHE_FLASH_ATTR asn1_validity(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     return (asn1_next_obj(cert, offset, ASN1_SEQUENCE) < 0 ||
               asn1_get_utc_time(cert, offset, &x509_ctx->not_before) ||
@@ -319,7 +366,7 @@ int asn1_validity(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 /**
  * Get the components of a distinguished name 
  */
-static int asn1_get_oid_x520(const uint8_t *buf, int *offset)
+static int ICACHE_FLASH_ATTR asn1_get_oid_x520(const uint8_t *buf, int *offset)
 {
     int dn_type = 0;
     int len;
@@ -343,7 +390,7 @@ end_oid:
 /**
  * Obtain an ASN.1 printable string type.
  */
-static int asn1_get_printable_str(const uint8_t *buf, int *offset, char **str)
+static int ICACHE_FLASH_ATTR asn1_get_printable_str(const uint8_t *buf, int *offset, char **str)
 {
     int len = X509_NOT_OK;
     int asn1_type = buf[*offset];
@@ -362,7 +409,7 @@ static int asn1_get_printable_str(const uint8_t *buf, int *offset, char **str)
     if (asn1_type == ASN1_UNICODE_STR)
     {
         int i;
-        *str = (char *)malloc(len/2+1);     /* allow for null */
+        *str = (char *)SSL_MALLOC(len/2+1);     /* allow for null */
 
         for (i = 0; i < len; i += 2)
             (*str)[i/2] = buf[*offset + i + 1];
@@ -371,7 +418,7 @@ static int asn1_get_printable_str(const uint8_t *buf, int *offset, char **str)
     }
     else
     {
-        *str = (char *)malloc(len+1);       /* allow for null */
+        *str = (char *)SSL_MALLOC(len+1);       /* allow for null */
         memcpy(*str, &buf[*offset], len);
         (*str)[len] = 0;                    /* null terminate */
     }
@@ -385,7 +432,7 @@ end_pnt_str:
 /**
  * Get the subject name (or the issuer) of a certificate.
  */
-int asn1_name(const uint8_t *cert, int *offset, char *dn[])
+int ICACHE_FLASH_ATTR asn1_name(const uint8_t *cert, int *offset, char *dn[])
 {
     int ret = X509_NOT_OK;
     int dn_type;
@@ -406,7 +453,7 @@ int asn1_name(const uint8_t *cert, int *offset, char *dn[])
 
         if (asn1_get_printable_str(cert, offset, &tmp) < 0)
         {
-            free(tmp);
+        	SSL_FREE(tmp);
             goto end_name;
         }
 
@@ -426,7 +473,7 @@ int asn1_name(const uint8_t *cert, int *offset, char *dn[])
 
         if (found == 0) /* not found so get rid of it */
         {
-            free(tmp);
+        	SSL_FREE(tmp);
         }
     }
 
@@ -438,7 +485,7 @@ end_name:
 /**
  * Read the modulus and public exponent of a certificate.
  */
-int asn1_public_key(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int ICACHE_FLASH_ATTR asn1_public_key(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK, mod_len, pub_len;
     uint8_t *modulus = NULL, *pub_exp = NULL;
@@ -458,8 +505,8 @@ int asn1_public_key(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 
     RSA_pub_key_new(&x509_ctx->rsa_ctx, modulus, mod_len, pub_exp, pub_len);
 
-    free(modulus);
-    free(pub_exp);
+    SSL_FREE(modulus);
+    SSL_FREE(pub_exp);
     ret = X509_OK;
 
 end_pub_key:
@@ -470,7 +517,7 @@ end_pub_key:
 /**
  * Read the signature of the certificate.
  */
-int asn1_signature(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int ICACHE_FLASH_ATTR asn1_signature(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK;
 
@@ -479,7 +526,7 @@ int asn1_signature(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 
     x509_ctx->sig_len = get_asn1_length(cert, offset)-1;
     (*offset)++;            /* ignore bit string padding bits */
-    x509_ctx->signature = (uint8_t *)malloc(x509_ctx->sig_len);
+    x509_ctx->signature = (uint8_t *)SSL_MALLOC(x509_ctx->sig_len);
     memcpy(x509_ctx->signature, &cert[*offset], x509_ctx->sig_len);
     *offset += x509_ctx->sig_len;
     ret = X509_OK;
@@ -492,7 +539,7 @@ end_sig:
  * Compare 2 distinguished name components for equality 
  * @return 0 if a match
  */
-static int asn1_compare_dn_comp(const char *dn1, const char *dn2)
+static int ICACHE_FLASH_ATTR asn1_compare_dn_comp(const char *dn1, const char *dn2)
 {
     int ret;
 
@@ -507,7 +554,7 @@ static int asn1_compare_dn_comp(const char *dn1, const char *dn2)
 /**
  * Clean up all of the CA certificates.
  */
-void remove_ca_certs(CA_CERT_CTX *ca_cert_ctx)
+void ICACHE_FLASH_ATTR remove_ca_certs(CA_CERT_CTX *ca_cert_ctx)
 {
     int i = 0;
 
@@ -520,19 +567,22 @@ void remove_ca_certs(CA_CERT_CTX *ca_cert_ctx)
         ca_cert_ctx->cert[i++] = NULL;
     }
 
-    free(ca_cert_ctx);
+    SSL_FREE(ca_cert_ctx);
 }
 
 /*
  * Compare 2 distinguished names for equality 
  * @return 0 if a match
  */
-int asn1_compare_dn(char * const dn1[], char * const dn2[])
+int ICACHE_FLASH_ATTR asn1_compare_dn(char * const dn1[], char * const dn2[])
 {
     int i;
 
     for (i = 0; i < X509_NUM_DN_TYPES; i++)
     {
+#if CONFIG_SSL_DISPLAY_MODE
+    	os_printf("distinguished names: [%s], [%s]\n", dn1[i], dn2[i]);
+#endif
         if (asn1_compare_dn_comp(dn1[i], dn2[i]))
             return 1;
     }
@@ -540,7 +590,7 @@ int asn1_compare_dn(char * const dn1[], char * const dn2[])
     return 0;       /* all good */
 }
 
-int asn1_find_oid(const uint8_t* cert, int* offset, 
+int ICACHE_FLASH_ATTR asn1_find_oid(const uint8_t* cert, int* offset, 
                     const uint8_t* oid, int oid_length)
 {
     int seqlen;
@@ -574,7 +624,7 @@ int asn1_find_oid(const uint8_t* cert, int* offset,
     return 0;
 }
 
-int asn1_find_subjectaltname(const uint8_t* cert, int offset)
+int ICACHE_FLASH_ATTR asn1_find_subjectaltname(const uint8_t* cert, int offset)
 {
     if (asn1_find_oid(cert, &offset, sig_subject_alt_name, 
                                 sizeof(sig_subject_alt_name)))
@@ -591,7 +641,7 @@ int asn1_find_subjectaltname(const uint8_t* cert, int offset)
  * Read the signature type of the certificate. We only support RSA-MD5 and
  * RSA-SHA1 signature types.
  */
-int asn1_signature_type(const uint8_t *cert, 
+int ICACHE_FLASH_ATTR asn1_signature_type(const uint8_t *cert, 
                                 int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK, len;
@@ -628,18 +678,7 @@ int asn1_signature_type(const uint8_t *cert,
     else
     {
         if (memcmp(sig_oid_prefix, &cert[*offset], sizeof(sig_oid_prefix)))
-        {
-#ifdef CONFIG_SSL_FULL_MODE
-            int i;
-            printf("SSL: invalid digest: ");
-
-            for (i = 0; i < len; i++)
-                printf("%02x ", cert[*offset + i]);
-
-            printf("\n");
-#endif
             goto end_check_sig;     /* unrecognised cert type */
-        }
 
         x509_ctx->sig_type = cert[*offset + sizeof(sig_oid_prefix)];
     }

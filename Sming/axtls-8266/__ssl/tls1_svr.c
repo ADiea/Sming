@@ -28,13 +28,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "os_port.h"
-#include "ssl.h"
+#include "ssl/ssl_os_port.h"
+#include "ssl/ssl_ssl.h"
 
-static const uint8_t g_hello_done[] = { HS_SERVER_HELLO_DONE, 0, 0, 0 };
+static const uint8_t g_hello_done[] ICACHE_RODATA_ATTR STORE_ATTR = { HS_SERVER_HELLO_DONE, 0, 0, 0 };
 
 static int process_client_hello(SSL *ssl);
 static int send_server_hello_sequence(SSL *ssl);
@@ -49,7 +46,7 @@ static int process_cert_verify(SSL *ssl);
 /*
  * Establish a new SSL connection to an SSL client.
  */
-EXP_FUNC SSL * STDCALL ssl_server_new(SSL_CTX *ssl_ctx, int client_fd)
+EXP_FUNC SSL * ICACHE_FLASH_ATTR STDCALL ICACHE_FLASH_ATTR ssl_server_new(SSL_CTX *ssl_ctx, int client_fd)
 {
     SSL *ssl;
 
@@ -58,7 +55,7 @@ EXP_FUNC SSL * STDCALL ssl_server_new(SSL_CTX *ssl_ctx, int client_fd)
 
 #ifdef CONFIG_SSL_FULL_MODE
     if (ssl_ctx->chain_length == 0)
-        printf("Warning - no server certificate defined\n"); TTY_FLUSH();
+        ssl_printf("Warning - no server certificate defined\n"); //TTY_FLUSH();
 #endif
 
     return ssl;
@@ -67,12 +64,13 @@ EXP_FUNC SSL * STDCALL ssl_server_new(SSL_CTX *ssl_ctx, int client_fd)
 /*
  * Process the handshake record.
  */
-int do_svr_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len)
+int ICACHE_FLASH_ATTR do_svr_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len)
 {
     int ret = SSL_OK;
     ssl->hs_status = SSL_NOT_OK;            /* not connected */
 
     /* To get here the state must be valid */
+//	ssl_printf("%d %s %d\n",handshake_type, __func__, __LINE__);
     switch (handshake_type)
     {
         case HS_CLIENT_HELLO:
@@ -114,7 +112,7 @@ int do_svr_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len)
 /* 
  * Process a client hello message.
  */
-static int process_client_hello(SSL *ssl)
+static int ICACHE_FLASH_ATTR process_client_hello(SSL *ssl)
 {
     uint8_t *buf = ssl->bm_data;
     int pkt_size = ssl->bm_index;
@@ -132,7 +130,7 @@ static int process_client_hello(SSL *ssl)
     else if (version < SSL_PROTOCOL_MIN_VERSION)  /* old version supported? */
     {
         ret = SSL_ERROR_INVALID_VERSION;
-        ssl_display_error(ret);
+        //ssl_display_error(ret);
         goto error;
     }
 
@@ -162,9 +160,9 @@ static int process_client_hello(SSL *ssl)
     {
         for (j = 0; j < NUM_PROTOCOLS; j++)
         {
-            if (ssl_prot_prefs[j] == buf[offset+i])   /* got a match? */
+            if (system_get_data_of_array_8(ssl_prot_prefs, j) == ((buf[offset+i]<<8) + buf[offset+i+1]))   /* got a match? */
             {
-                ssl->cipher = ssl_prot_prefs[j];
+                ssl->cipher = system_get_data_of_array_8(ssl_prot_prefs, j);
                 goto do_state;
             }
         }
@@ -252,7 +250,7 @@ error:
 /*
  * Send the entire server hello sequence
  */
-static int send_server_hello_sequence(SSL *ssl)
+static int ICACHE_FLASH_ATTR send_server_hello_sequence(SSL *ssl)
 {
     int ret;
 
@@ -297,7 +295,7 @@ static int send_server_hello_sequence(SSL *ssl)
 /*
  * Send a server hello message.
  */
-static int send_server_hello(SSL *ssl)
+static int ICACHE_FLASH_ATTR send_server_hello(SSL *ssl)
 {
     uint8_t *buf = ssl->bm_data;
     int offset = 0;
@@ -312,7 +310,6 @@ static int send_server_hello(SSL *ssl)
     /* server random value */
     if (get_random(SSL_RANDOM_SIZE, &buf[6]) < 0)
         return SSL_NOT_OK;
-
     memcpy(ssl->dc->server_random, &buf[6], SSL_RANDOM_SIZE);
     offset = 6 + SSL_RANDOM_SIZE;
 
@@ -338,7 +335,7 @@ static int send_server_hello(SSL *ssl)
         /* store id in session cache */
         if (ssl->ssl_ctx->num_sessions)
         {
-            memcpy(ssl->session->session_id, 
+            memcpy(ssl->session->session_id,
                     ssl->session_id, SSL_SESSION_ID_SIZE);
         }
 
@@ -358,10 +355,14 @@ static int send_server_hello(SSL *ssl)
 /*
  * Send the server hello done message.
  */
-static int send_server_hello_done(SSL *ssl)
+static int ICACHE_FLASH_ATTR send_server_hello_done(SSL *ssl)
 {
+    uint8_t g_hello_done_ram[4];
+
+    memcpy(g_hello_done_ram, g_hello_done, sizeof(g_hello_done));
+
     return send_packet(ssl, PT_HANDSHAKE_PROTOCOL, 
-                            g_hello_done, sizeof(g_hello_done));
+            g_hello_done_ram, sizeof(g_hello_done));
 }
 
 /*
@@ -369,12 +370,13 @@ static int send_server_hello_done(SSL *ssl)
  * our RSA private key) and then work out the master key. Initialise the
  * ciphers.
  */
-static int process_client_key_xchg(SSL *ssl)
+static int ICACHE_FLASH_ATTR process_client_key_xchg(SSL *ssl)
 {
     uint8_t *buf = &ssl->bm_data[ssl->dc->bm_proc_index];
     int pkt_size = ssl->bm_index;
     int premaster_size, secret_length = (buf[2] << 8) + buf[3];
-    uint8_t premaster_secret[MAX_KEY_BYTE_SIZE];
+//    uint8_t premaster_secret[MAX_KEY_BYTE_SIZE];
+    uint8*	premaster_secret = (uint8*)SSL_ZALLOC(MAX_KEY_BYTE_SIZE);
     RSA_CTX *rsa_ctx = ssl->ssl_ctx->rsa_ctx;
     int offset = 4;
     int ret = SSL_OK;
@@ -394,7 +396,7 @@ static int process_client_key_xchg(SSL *ssl)
     /* rsa_ctx->bi_ctx is not thread-safe */
     SSL_CTX_LOCK(ssl->ssl_ctx->mutex);
     premaster_size = RSA_decrypt(rsa_ctx, &buf[offset], premaster_secret,
-            sizeof(premaster_secret), 1);
+    		MAX_KEY_BYTE_SIZE, 1);
     SSL_CTX_UNLOCK(ssl->ssl_ctx->mutex);
 
     if (premaster_size != SSL_SECRET_SIZE || 
@@ -424,41 +426,47 @@ static int process_client_key_xchg(SSL *ssl)
 
     ssl->dc->bm_proc_index += rsa_ctx->num_octets+offset;
 error:
+	SSL_FREE(premaster_secret);
     return ret;
 }
 
 #ifdef CONFIG_SSL_CERT_VERIFICATION
-static const uint8_t g_cert_request[] = { HS_CERT_REQ, 0, 0, 4, 1, 0, 0, 0 };
+static const uint8_t g_cert_request[] ICACHE_RODATA_ATTR STORE_ATTR = { HS_CERT_REQ, 0, 0, 4, 1, 0, 0, 0 };
 
 /*
  * Send the certificate request message.
  */
-static int send_certificate_request(SSL *ssl)
+static int ICACHE_FLASH_ATTR send_certificate_request(SSL *ssl)
 {
+    uint8_t g_cert_request_ram[8];
+
+    memcpy(g_cert_request_ram, g_cert_request, sizeof(g_cert_request));
+
     return send_packet(ssl, PT_HANDSHAKE_PROTOCOL, 
-            g_cert_request, sizeof(g_cert_request));
+            g_cert_request_ram, sizeof(g_cert_request));
 }
 
 /*
  * Ensure the client has the private key by first decrypting the packet and
  * then checking the packet digests.
  */
-static int process_cert_verify(SSL *ssl)
+static int ICACHE_FLASH_ATTR process_cert_verify(SSL *ssl)
 {
     uint8_t *buf = &ssl->bm_data[ssl->dc->bm_proc_index];
     int pkt_size = ssl->bm_index;
-    uint8_t dgst_buf[MAX_KEY_BYTE_SIZE];
+//    uint8_t dgst_buf[MAX_KEY_BYTE_SIZE];
+    uint8* dgst_buf = (uint8*)SSL_ZALLOC(MAX_KEY_BYTE_SIZE);
     uint8_t dgst[MD5_SIZE+SHA1_SIZE];
     X509_CTX *x509_ctx = ssl->x509_ctx;
     int ret = SSL_OK;
     int n;
 
     PARANOIA_CHECK(pkt_size, x509_ctx->rsa_ctx->num_octets+6);
-    DISPLAY_RSA(ssl, x509_ctx->rsa_ctx);
+    //DISPLAY_RSA(ssl, x509_ctx->rsa_ctx);
 
     /* rsa_ctx->bi_ctx is not thread-safe */
     SSL_CTX_LOCK(ssl->ssl_ctx->mutex);
-    n = RSA_decrypt(x509_ctx->rsa_ctx, &buf[6], dgst_buf, sizeof(dgst_buf), 0);
+    n = RSA_decrypt(x509_ctx->rsa_ctx, &buf[6], dgst_buf, MAX_KEY_BYTE_SIZE, 0);
     SSL_CTX_UNLOCK(ssl->ssl_ctx->mutex);
 
     if (n != SHA1_SIZE + MD5_SIZE)
@@ -476,6 +484,7 @@ static int process_cert_verify(SSL *ssl)
 end_cert_vfy:
     ssl->next_state = HS_FINISHED;
 error:
+	SSL_FREE(dgst_buf);
     return ret;
 }
 
