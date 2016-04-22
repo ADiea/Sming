@@ -25,8 +25,6 @@ typedef struct _heapOp
 	uint16_t opCounter;
 }heapOp;
 
-
-
 heapOp gLastHeapOp[HEAP_OP_SIZE];
 uint16_t gTotalHeapOp = 0;
 uint8_t gHeapOpFlushAfter = 63;
@@ -77,35 +75,32 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 void* IRAM_ATTR pvPortMalloc(size_t size, const char* file, int line)
 {
     void* ret =  malloc(size);
-    recordHeapOp('m', size, (uint32_t)ret, 0);
     return ret;
 }
 
 void IRAM_ATTR vPortFree(void *ptr, const char* file, int line)
 {
-	recordHeapOp('f', 0, (uint32_t)ptr, 0);
-
 	free(ptr);
 }
 
 void* IRAM_ATTR pvPortCalloc(size_t count, size_t size, const char* file, int line)
 {
 	void* ret = calloc(count, size);
-    recordHeapOp('c', size*count, (uint32_t)ret, 0);
+    //recordHeapOp('c', size*count, (uint32_t)ret, 0);
     return ret;
 }
 
 void* IRAM_ATTR pvPortRealloc(void *ptr, size_t size, const char* file, int line)
 {
 	void* ret = realloc(ptr, size);
-    recordHeapOp('r', size, (uint32_t)ret, (uint32_t)ptr);
+    //recordHeapOp('r', size, (uint32_t)ret, (uint32_t)ptr);
     return ret;
 }
 
 void* IRAM_ATTR pvPortZalloc(size_t size, const char* file, int line)
 {
 	void* ret = calloc(1, size);
-	recordHeapOp('z', size, (uint32_t)ret, 0);
+	//recordHeapOp('z', size, (uint32_t)ret, 0);
     return ret;
 }
 

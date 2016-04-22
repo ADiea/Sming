@@ -110,6 +110,7 @@
 #include "umm_malloc_cfg.h"   /* user-dependent */
 
 extern uint16_t gTotalHeapOp; //total heap operations
+extern void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld);
 
 #ifndef UMM_FIRST_FIT
 #  ifndef UMM_BEST_FIT
@@ -168,13 +169,21 @@ extern uint16_t gTotalHeapOp; //total heap operations
 
 //
 
-uint32_t sizeBufLog = 0;
-#define SZ_LOG_BUF 512
+uint32_t sizeBufLog = 0, printSz;
+#define SZ_LOG_BUF 2048
 char bufLog[SZ_LOG_BUF];
 char printed=0;
 
-#define DBG_MEM_OP( format, ... ) { if(sizeBufLog+30 < SZ_LOG_BUF) sizeBufLog += m_snprintf(bufLog+sizeBufLog, SZ_LOG_BUF - sizeBufLog,  format, ## __VA_ARGS__ ); \
-										 else if(gTotalHeapOp > 80 && !printed) {printed=1;m_printf("%s", bufLog);}}
+#define DBG_MEM_OP( format, ... ) { \
+										if(sizeBufLog+30 < SZ_LOG_BUF) \
+											sizeBufLog += m_snprintf(bufLog+sizeBufLog, SZ_LOG_BUF - sizeBufLog,  format, ## __VA_ARGS__ ); \
+										 else if(gTotalHeapOp > 80 && !printed) \
+										 { \
+											 printed=1; \
+											 for(printSz=0; printSz<sizeBufLog; printSz++) \
+											 m_putc(bufLog[printSz]); \
+										 } \
+									}
 
 
 #if DBG_LOG_LEVEL >= 6
@@ -957,6 +966,8 @@ static void _umm_free( void *ptr ) {
 
   /* Release the critical section... */
   UMM_CRITICAL_EXIT();
+
+  recordHeapOp('f', 0, (uint32_t)ptr, 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1090,6 +1101,7 @@ static void *_umm_malloc( size_t size ) {
   /* Release the critical section... */
   UMM_CRITICAL_EXIT();
 
+  recordHeapOp('m', size, (uint32_t)UMM_DATA(cf), 0);
   return( (void *)&UMM_DATA(cf) );
 }
 
@@ -1118,7 +1130,6 @@ static void *_umm_realloc( void *ptr, size_t size ) {
 
   if( ((void *)NULL == ptr) ) {
     DBG_LOG_DEBUG( "MEM: realloc NULL => malloc\n" );
-
     return( _umm_malloc(size) );
   }
 
@@ -1130,9 +1141,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
 
   if( 0 == size ) {
     DBG_LOG_DEBUG( "MEM: realloc sz 0, => free\n" );
-
     _umm_free( ptr );
-
     return( (void *)NULL );
   }
 

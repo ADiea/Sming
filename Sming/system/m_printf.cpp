@@ -33,6 +33,12 @@ void setMPrintfPrinterCbc(void (*callback)(char))
 	cbc_printchar = callback;
 }
 
+void m_putc(char c)
+{
+	if (cbc_printchar)
+		cbc_printchar(c);
+}
+
 /**
  * @fn int m_snprintf(char* buf, int length, const char *fmt, ...);
  *
