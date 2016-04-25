@@ -252,6 +252,11 @@ EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ ssl_free(SSL *ssl)
     disposable_free(ssl);
     certificate_free(ssl);
     free(ssl->bm_all_data);
+
+    if(ssl->host_name != NULL) {
+        free(ssl->host_name);
+    }
+
     free(ssl);
 }
 
