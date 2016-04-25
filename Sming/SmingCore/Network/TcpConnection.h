@@ -105,6 +105,8 @@ public:
 	SSL* getSsl();
 #endif
 
+	unsigned long debugSSLConnStartMillis;
+
 protected:
 	bool internalTcpConnect(IPAddress addr, uint16_t port);
 	virtual err_t onConnected(err_t err);

@@ -47,7 +47,7 @@ static int send_cert_verify(SSL *ssl);
 /*
  * Establish a new SSL connection to an SSL server.
  */
-EXP_FUNC SSL * STDCALL ssl_client_new(SSL_CTX *ssl_ctx, int client_fd, const
+EXP_FUNC SSL * STDCALL /*ICACHE_FLASH_ATTR*/ ssl_client_new(SSL_CTX *ssl_ctx, int client_fd, const
         uint8_t *session_id, uint8_t sess_id_size)
 {
     SSL *ssl = ssl_new(ssl_ctx, client_fd);
@@ -74,8 +74,9 @@ EXP_FUNC SSL * STDCALL ssl_client_new(SSL_CTX *ssl_ctx, int client_fd, const
 /*
  * Process the handshake record.
  */
-int do_clnt_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len)
+int /*ICACHE_FLASH_ATTR*/ do_clnt_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len)
 {
+	printf("SSL > %s %d", __FUNCTION__, handshake_type);
     int ret;
 
     /* To get here the state must be valid */
@@ -140,7 +141,7 @@ int do_clnt_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len)
 /*
  * Do the handshaking from the beginning.
  */
-int do_client_connect(SSL *ssl)
+int /*ICACHE_FLASH_ATTR*/ do_client_connect(SSL *ssl)
 {
     int ret = SSL_OK;
 
@@ -169,7 +170,7 @@ int do_client_connect(SSL *ssl)
 /*
  * Send the initial client hello.
  */
-static int send_client_hello(SSL *ssl)
+static int /*ICACHE_FLASH_ATTR*/ send_client_hello(SSL *ssl)
 {
     uint8_t *buf = ssl->bm_data;
     time_t tm = time(NULL);
@@ -239,6 +240,8 @@ static int send_client_hello(SSL *ssl)
         strncpy((char*) &buf[offset], ssl->host_name, host_len);
         offset += host_len;
     }
+	
+	//size negociation https://tools.ietf.org/html/rfc6066#page-8
 
     buf[3] = offset - 4;            /* handshake size */
 
@@ -248,7 +251,7 @@ static int send_client_hello(SSL *ssl)
 /*
  * Process the server hello.
  */
-static int process_server_hello(SSL *ssl)
+static int /*ICACHE_FLASH_ATTR*/ process_server_hello(SSL *ssl)
 {
     uint8_t *buf = ssl->bm_data;
     int pkt_size = ssl->bm_index;
@@ -316,7 +319,7 @@ error:
 /**
  * Process the server hello done message.
  */
-static int process_server_hello_done(SSL *ssl)
+static int /*ICACHE_FLASH_ATTR*/ process_server_hello_done(SSL *ssl)
 {
     ssl->next_state = HS_FINISHED;
     return SSL_OK;
@@ -325,8 +328,10 @@ static int process_server_hello_done(SSL *ssl)
 /*
  * Send a client key exchange message.
  */
-static int send_client_key_xchg(SSL *ssl)
+static int /*ICACHE_FLASH_ATTR*/ send_client_key_xchg(SSL *ssl)
 {
+	printf("SSL > %s", __FUNCTION__);
+
     uint8_t *buf = ssl->bm_data;
     uint8_t premaster_secret[SSL_SECRET_SIZE];
     int enc_secret_size = -1;
@@ -359,7 +364,7 @@ static int send_client_key_xchg(SSL *ssl)
 /*
  * Process the certificate request.
  */
-static int process_cert_req(SSL *ssl)
+static int /*ICACHE_FLASH_ATTR*/ process_cert_req(SSL *ssl)
 {
     uint8_t *buf = &ssl->bm_data[ssl->dc->bm_proc_index];
     int ret = SSL_OK;
@@ -378,7 +383,7 @@ error:
 /*
  * Send a certificate verify message.
  */
-static int send_cert_verify(SSL *ssl)
+static int /*ICACHE_FLASH_ATTR*/ send_cert_verify(SSL *ssl)
 {
     uint8_t *buf = ssl->bm_data;
     uint8_t dgst[MD5_SIZE+SHA1_SIZE];

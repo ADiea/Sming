@@ -28,7 +28,7 @@ extern "C" {
  * #define SNTP_SERVER_ADDRESS "pool.ntp.org"
  */
 uint32 sntp_get_current_timestamp();
-char* sntp_get_real_time(long t);
+char* sntp_get_real_time(time_t t, char* buf, size_t maxSize);
 
 void sntp_init(void);
 void sntp_stop(void);

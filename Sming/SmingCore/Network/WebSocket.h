@@ -14,6 +14,7 @@
 #include "../../Wiring/WVector.h"
 #include "../Delegate.h"
 #include "../../Services/cWebsocket/websocket.h"
+#include "crypto_misc.h"
 
 class HttpServer;
 class CommandExecutor;

@@ -845,7 +845,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
 
 /** DNS maximum host name length supported in the name table. */
 #ifndef DNS_MAX_NAME_LENGTH
-#define DNS_MAX_NAME_LENGTH             256
+#define DNS_MAX_NAME_LENGTH             128
 #endif
 
 /** The maximum of DNS servers */
@@ -2096,7 +2096,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * DNS_DEBUG: Enable debugging for DNS.
  */
 #ifndef DNS_DEBUG
-#define DNS_DEBUG                       LWIP_DBG_OFF
+#define DNS_DEBUG                       (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
 #endif
 
 /**

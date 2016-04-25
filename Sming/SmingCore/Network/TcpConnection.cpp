@@ -50,16 +50,20 @@ bool TcpConnection::connect(String server, int port, boolean useSsl /* = false *
 	this->sslOptions |= sslOptions;
 	hostname = server;
 
-	debugf("TCP connect() to: %s:%d", server.c_str(), port);
+	debugf("TCP connect() to: %s:%d %s", server.c_str(), port, useSsl?"SSL":"NO-SSL");
 	canSend = false; // Wait for connection
 	DnsLookup *look = new DnsLookup { this, port };
 	err_t dnslook = dns_gethostbyname(server.c_str(), &addr, staticDnsResponse, look);
 	if (dnslook != ERR_OK)
 	{
 		if (dnslook == ERR_INPROGRESS)
+		{
+			debugf("DNS lookup in progress...");
 			return true;
+		}
 		else
 		{
+			debugf("DNS lookup failed: %d", dnslook);
 			delete look;
 			return false;
 		}
@@ -396,7 +400,8 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 			debugf("SSL: Switching to 160 MHz");
 			System.setCpuFrequency(eCF_160MHz); // For shorter waiting time, more power consumption.
 #endif
-			debugf("SSL: handshake start (%d ms)", millis());
+			debugf("SSL: handshake start");
+			con->debugSSLConnStartMillis = millis();
 			con->sslContext = ssl_ctx_new(SSL_CONNECT_IN_PARTS | sslOptions, 1);
 
 			if (con->clientKeyCert.keyLength && con->clientKeyCert.certificateLength)
@@ -514,7 +519,7 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 		if (read_bytes == 0) {
 			if(!con->sslConnected && ssl_handshake_status(con->ssl) == SSL_OK) {
 				con->sslConnected = true;
-				debugf("SSL: Handshake done (%d ms).", millis());
+				debugf("SSL: Handshake done (%d ms).", millis() - con->debugSSLConnStartMillis);
 #ifndef SSL_SLOW_CONNECT
 				debugf("SSL: Switching back to 80 MHz");
 				System.setCpuFrequency(eCF_80MHz); // Preserve some CPU cycles

@@ -17,7 +17,7 @@
 #include "../Delegate.h"
 #include "URL.h"
 #include "../../Services/WebHelpers/aw-sha1.h"
-#include "../../Services/WebHelpers/base64.h"
+#include "crypto_misc.h"
 #include "../../Wiring/WString.h"
 
 enum wsMode

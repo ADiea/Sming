@@ -60,8 +60,12 @@ extern "C" {
 
 #if defined(ESP8266)
 
-extern int ets_putc(int character);
-extern void ets_printf(const char*, ...);
+//(aes_str[0], aes_str_0_ram, 24);
+#define system_get_string_from_flash(src, dest, sz) \
+		({ \
+			strncpy_P((dest), (sz), (src)); \
+		})
+
 extern int ax_port_read(int clientfd, uint8_t *buf, int bytes_needed);
 extern int ax_port_write(int clientfd, uint8_t *buf, uint16_t bytes_needed);
 
@@ -75,11 +79,12 @@ extern void gettimeofday(struct timeval* t,void* timezone);
 #ifdef putc
 #undef putc
 #endif
-#define putc(x, f)   ets_putc(x)
+#define putc(x, f)   m_printf("%c", x)
 #ifdef printf
 #undef printf
 #endif
-#define printf(...)  ets_printf(__VA_ARGS__)
+
+#define printf  LOG_I
 
 #define SOCKET_READ(A,B,C)      ax_port_read(A,B,C)
 #define SOCKET_WRITE(A,B,C)     ax_port_write(A,B,C)
@@ -177,11 +182,11 @@ EXP_FUNC int STDCALL getdomainname(char *buf, int buf_size);
 #endif  /* Not Win32 */
 
 /* some functions to mutate the way these work */
-#define malloc(A)       ax_port_malloc(A, "", __LINE__)
+#define malloc(A)       ax_port_malloc(A, __FILE__, __LINE__)
 #ifndef realloc
-#define realloc(A,B)    ax_port_realloc(A,B, "", __LINE__)
+#define realloc(A,B)    ax_port_realloc(A,B, __FILE__, __LINE__)
 #endif
-#define calloc(A,B)     ax_port_calloc(A,B, "", __LINE__)
+#define calloc(A,B)     ax_port_calloc(A,B, __FILE__, __LINE__)
 #define free(x)         ax_port_free(x)
 
 EXP_FUNC void * STDCALL ax_port_malloc(size_t s, const char*, int);
@@ -190,8 +195,8 @@ EXP_FUNC void * STDCALL ax_port_calloc(size_t n, size_t s, const char*, int);
 EXP_FUNC void * STDCALL ax_port_free(void*);
 EXP_FUNC int STDCALL ax_open(const char *pathname, int flags);
 
-extern int ets_vprintf(const char *format, ...);
-#define vprintf ets_vprintf
+//extern int ets_vprintf(const char *format, ...);
+//#define vprintf ets_vprintf
 
 // gettimeofday
 // mktime
@@ -202,6 +207,11 @@ extern int ets_vprintf(const char *format, ...);
 
 // ================================================
 
+extern char system_get_data_of_array_8(const char *ps);
+#define _system_get_data_of_array_8(a,b) system_get_data_of_array_8(&a[b])
+
+
+
 inline uint32_t htonl(uint32_t n){
   return ((n & 0xff) << 24) |
     ((n & 0xff00) << 8) |
@@ -211,10 +221,38 @@ inline uint32_t htonl(uint32_t n){
 
 #define ntohl htonl
 
+#define tls_ntohl ntohl
+
 #ifdef CONFIG_PLATFORM_LINUX
 void exit_now(const char *format, ...) __attribute((noreturn));
 #else
 void exit_now(const char *format, ...);
+#endif
+
+#ifndef be16toh
+#define be16toh(x) ((uint16)tls_ntohs((uint16)(x)))
+#endif
+
+#ifndef htobe16
+#define htobe16(x) ((uint16)tls_htons((uint16)(x)))
+#endif
+
+#ifndef be32toh
+#define be32toh(x) ((uint32)tls_ntohl((uint32)(x)))
+#endif
+
+#ifndef htobe32
+#define htobe32(x) ((uint32)tls_htonl((uint32)(x)))
+#endif
+
+#ifndef be64toh
+static __inline__ uint64 be64toh(uint64 __x);
+static __inline__ uint64 be64toh(uint64 __x) {return (((uint64)be32toh(__x & (uint64)0xFFFFFFFFULL)) << 32) | ((uint64)be32toh((__x & (uint64)0xFFFFFFFF00000000ULL) >> 32));}
+#define be64toh(x) be64toh(x)
+#endif
+
+#ifndef htobe64
+#define htobe64(x) be64toh(x)
 #endif
 
 /* Mutexing definitions */

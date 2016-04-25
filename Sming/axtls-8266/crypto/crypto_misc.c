@@ -28,6 +28,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* base64.c : base-64 / MIME encode/decode */
+/* PUBLIC DOMAIN - Jon Mayo - November 13, 2003 */
+/* $Id: base64.c 156 2007-07-12 23:29:10Z orange $ */
+
+
 /**
  * Some misc. routines to help things out
  */
@@ -70,7 +75,7 @@ static uint8_t entropy_pool[ENTROPY_POOL_SIZE];
  * Retrieve a file and put it into memory
  * @return The size of the file, or -1 on failure.
  */
-int get_file(const char *filename, uint8_t **buf)
+int /*ICACHE_FLASH_ATTR*/ get_file(const char *filename, uint8_t **buf)
 {
     int total_bytes = 0;
     int bytes_read = 0; 
@@ -108,7 +113,7 @@ int get_file(const char *filename, uint8_t **buf)
  * - On Linux use /dev/urandom
  * - If none of these work then use a custom RNG.
  */
-EXP_FUNC void STDCALL RNG_initialize()
+EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ RNG_initialize()
 {
 #if !defined(WIN32) && defined(CONFIG_USE_DEV_URANDOM)
     rng_fd = ax_open("/dev/urandom", O_RDONLY);
@@ -139,7 +144,7 @@ EXP_FUNC void STDCALL RNG_initialize()
 /**
  * If no /dev/urandom, then initialise the RNG with something interesting.
  */
-EXP_FUNC void STDCALL RNG_custom_init(const uint8_t *seed_buf, int size)
+EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ RNG_custom_init(const uint8_t *seed_buf, int size)
 {
 #if defined(WIN32) || defined(CONFIG_WIN32_USE_CRYPTO_LIB)
     int i;
@@ -152,7 +157,7 @@ EXP_FUNC void STDCALL RNG_custom_init(const uint8_t *seed_buf, int size)
 /**
  * Terminate the RNG engine.
  */
-EXP_FUNC void STDCALL RNG_terminate(void)
+EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ RNG_terminate(void)
 {
 #if defined(CONFIG_USE_DEV_URANDOM)
     close(rng_fd);
@@ -164,8 +169,8 @@ EXP_FUNC void STDCALL RNG_terminate(void)
 /**
  * Set a series of bytes with a random number. Individual bytes can be 0
  */
-EXP_FUNC int STDCALL get_random(int num_rand_bytes, uint8_t *rand_data)
-{   
+EXP_FUNC int STDCALL /*ICACHE_FLASH_ATTR*/ get_random(int num_rand_bytes, uint8_t *rand_data)
+{
 #if !defined(WIN32) && defined(CONFIG_USE_DEV_URANDOM)
     /* use the Linux default - read from /dev/urandom */
     if (read(rng_fd, rand_data, num_rand_bytes) < 0) 
@@ -220,7 +225,7 @@ EXP_FUNC int STDCALL get_random(int num_rand_bytes, uint8_t *rand_data)
 /**
  * Set a series of bytes with a random number. Individual bytes are not zero.
  */
-int get_random_NZ(int num_rand_bytes, uint8_t *rand_data)
+int /*ICACHE_FLASH_ATTR*/ get_random_NZ(int num_rand_bytes, uint8_t *rand_data)
 {
     int i;
     if (get_random(num_rand_bytes, rand_data))
@@ -242,13 +247,13 @@ int get_random_NZ(int num_rand_bytes, uint8_t *rand_data)
 int hex_finish;
 int hex_index;
 
-static void print_hex_init(int finish)
+static void /*ICACHE_FLASH_ATTR*/ print_hex_init(int finish)
 {
     hex_finish = finish;
     hex_index = 0;
 }
 
-static void print_hex(uint8_t hex)
+static void /*ICACHE_FLASH_ATTR*/ print_hex(uint8_t hex)
 {
     static int column;
 
@@ -283,7 +288,7 @@ static void print_hex(uint8_t hex)
  * @param data     [in]    The start of data to use
  * @param ...      [in]    Any additional arguments
  */
-EXP_FUNC void STDCALL print_blob(const char *format, 
+EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ print_blob(const char *format, 
         const uint8_t *data, int size, ...)
 {
     int i;
@@ -308,9 +313,10 @@ EXP_FUNC void STDCALL print_blob(const char *format, const unsigned char *data,
         int size, ...) {}
 #endif
 
-#if defined(CONFIG_SSL_HAS_PEM) || defined(CONFIG_HTTP_HAS_AUTHORIZATION)
+static const uint8_t base64enc_tab[]= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
 /* base64 to binary lookup table */
-static const uint8_t map[128] =
+static const uint8_t map[128] ICACHE_RODATA_ATTR STORE_ATTR =
 {
     255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
     255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -325,17 +331,19 @@ static const uint8_t map[128] =
     49,  50,  51, 255, 255, 255, 255, 255
 };
 
-EXP_FUNC int STDCALL base64_decode(const char *in, int len,
+EXP_FUNC int STDCALL /*ICACHE_FLASH_ATTR*/ base64_decode(const char *in, int len,
                     uint8_t *out, int *outlen)
 {
     int g, t, x, y, z;
     uint8_t c;
     int ret = -1;
+    uint8 base64_map[128];
+    memcpy(base64_map, map, 128);
 
     g = 3;
     for (x = y = z = t = 0; x < len; x++)
     {
-        if ((c = map[in[x]&0x7F]) == 0xff)
+        if ((c = base64_map[in[x]&0x7F]) == 0xff)
             continue;
 
         if (c == 254)   /* this is the end... */
@@ -379,9 +387,48 @@ error:
     if (ret < 0)
         printf("Error: Invalid base64\n"); TTY_FLUSH();
 #endif
-    TTY_FLUSH();
+    //TTY_FLUSH();
     return ret;
 
 }
-#endif
+
+
+void base64encode(const unsigned char in[3], unsigned char out[4], int count)
+{
+	out[0]=base64enc_tab[(in[0]>>2)];
+	out[1]=base64enc_tab[((in[0]&3)<<4)|(in[1]>>4)];
+	out[2]=count<2 ? '=' : base64enc_tab[((in[1]&15)<<2)|(in[2]>>6)];
+	out[3]=count<3 ? '=' : base64enc_tab[(in[2]&63)];
+}
+
+
+int base64_encode(size_t in_len, const unsigned char *in, size_t out_len, char *out) {
+	unsigned ii, io;
+	uint_least32_t v;
+	unsigned rem;
+
+	for(io=0,ii=0,v=0,rem=0;ii<in_len;ii++) {
+		unsigned char ch;
+		ch=in[ii];
+		v=(v<<8)|ch;
+		rem+=8;
+		while(rem>=6) {
+			rem-=6;
+			if(io>=out_len) return -1; /* truncation is failure */
+			out[io++]=base64enc_tab[(v>>rem)&63];
+		}
+	}
+	if(rem) {
+		v<<=(6-rem);
+		if(io>=out_len) return -1; /* truncation is failure */
+		out[io++]=base64enc_tab[v&63];
+	}
+	while(io&3) {
+		if(io>=out_len) return -1; /* truncation is failure */
+		out[io++]='=';
+	}
+	if(io>=out_len) return -1; /* no room for null terminator */
+	out[io]=0;
+	return io;
+}
 

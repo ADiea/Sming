@@ -60,7 +60,7 @@ static void MD5Transform(uint32_t state[4], const uint8_t block[64]);
 static void Encode(uint8_t *output, uint32_t *input, uint32_t len);
 static void Decode(uint32_t *output, const uint8_t *input, uint32_t len);
 
-static const uint8_t PADDING[64] = 
+static const uint8_t PADDING[64] ICACHE_RODATA_ATTR STORE_ATTR =
 {
     0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -103,7 +103,7 @@ static const uint8_t PADDING[64] =
 /**
  * MD5 initialization - begins an MD5 operation, writing a new ctx.
  */
-EXP_FUNC void STDCALL MD5_Init(MD5_CTX *ctx)
+EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ MD5_Init(MD5_CTX *ctx)
 {
     ctx->count[0] = ctx->count[1] = 0;
 
@@ -118,7 +118,7 @@ EXP_FUNC void STDCALL MD5_Init(MD5_CTX *ctx)
 /**
  * Accepts an array of octets as the next portion of the message.
  */
-EXP_FUNC void STDCALL MD5_Update(MD5_CTX *ctx, const uint8_t * msg, int len)
+EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ MD5_Update(MD5_CTX *ctx, const uint8_t * msg, int len)
 {
     uint32_t x;
     int i, partLen;
@@ -154,10 +154,13 @@ EXP_FUNC void STDCALL MD5_Update(MD5_CTX *ctx, const uint8_t * msg, int len)
 /**
  * Return the 128-bit message digest into the user's array
  */
-EXP_FUNC void STDCALL MD5_Final(uint8_t *digest, MD5_CTX *ctx)
+EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ MD5_Final(uint8_t *digest, MD5_CTX *ctx)
 {
     uint8_t bits[8];
     uint32_t x, padLen;
+	uint8 PADDING_stack[64];
+	
+	memcpy(PADDING_stack, PADDING, 64);
 
     /* Save number of bits */
     Encode(bits, ctx->count, 8);
@@ -166,7 +169,7 @@ EXP_FUNC void STDCALL MD5_Final(uint8_t *digest, MD5_CTX *ctx)
      */
     x = (uint32_t)((ctx->count[0] >> 3) & 0x3f);
     padLen = (x < 56) ? (56 - x) : (120 - x);
-    MD5_Update(ctx, PADDING, padLen);
+    MD5_Update(ctx, PADDING_stack, padLen);
 
     /* Append length (before padding) */
     MD5_Update(ctx, bits, 8);
@@ -178,7 +181,7 @@ EXP_FUNC void STDCALL MD5_Final(uint8_t *digest, MD5_CTX *ctx)
 /**
  * MD5 basic transformation. Transforms state based on block.
  */
-static void MD5Transform(uint32_t state[4], const uint8_t block[64])
+static void /*ICACHE_FLASH_ATTR*/ MD5Transform(uint32_t state[4], const uint8_t block[64])
 {
     uint32_t a = state[0], b = state[1], c = state[2], 
              d = state[3], x[MD5_SIZE];
@@ -267,7 +270,7 @@ static void MD5Transform(uint32_t state[4], const uint8_t block[64])
  * Encodes input (uint32_t) into output (uint8_t). Assumes len is
  *   a multiple of 4.
  */
-static void Encode(uint8_t *output, uint32_t *input, uint32_t len)
+static void /*ICACHE_FLASH_ATTR*/ Encode(uint8_t *output, uint32_t *input, uint32_t len)
 {
     uint32_t i, j;
 
@@ -284,7 +287,7 @@ static void Encode(uint8_t *output, uint32_t *input, uint32_t len)
  *  Decodes input (uint8_t) into output (uint32_t). Assumes len is
  *   a multiple of 4.
  */
-static void Decode(uint32_t *output, const uint8_t *input, uint32_t len)
+static void /*ICACHE_FLASH_ATTR*/ Decode(uint32_t *output, const uint8_t *input, uint32_t len)
 {
     uint32_t i, j;
 

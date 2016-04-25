@@ -47,7 +47,7 @@ struct timeval {
 };
 #endif
 
-extern char* sntp_asctime(const struct tm *t);
+extern char* sntp_asctime_r(struct tm *tim_p ,char *result, size_t maxSize);
 extern struct tm* sntp_localtime(const time_t *clock);
 
 // time gap in seconds from 01.01.1900 (NTP time) to 01.01.1970 (UNIX time)
@@ -118,21 +118,14 @@ time_t time(time_t * t)
     return seconds;
 }
 
-char* asctime(const struct tm *t)
+char* asctime_x(const struct tm *t, char* buf, size_t maxSize)
 {
-    return sntp_asctime(t);
+    return sntp_asctime_r((struct tm*)t, buf, maxSize);
 }
 
 struct tm* localtime(const time_t *clock)
 {
     return sntp_localtime(clock);
-}
-
-char* ctime(const time_t *t)
-{
-    struct tm* p_tm = localtime(t);
-    char* result = asctime(p_tm);
-    return result;
 }
 
 int gettimeofday(struct timeval *tp, void *tzp)

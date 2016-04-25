@@ -83,7 +83,7 @@ static const uint8_t sig_subject_alt_name[] =
 /* CN, O, OU */
 static const uint8_t g_dn_types[] = { 3, 10, 11 };
 
-uint32_t get_asn1_length(const uint8_t *buf, int *offset)
+uint32_t /*ICACHE_FLASH_ATTR*/ get_asn1_length(const uint8_t *buf, int *offset)
 {
     int i;
     uint32_t len;
@@ -113,7 +113,7 @@ uint32_t get_asn1_length(const uint8_t *buf, int *offset)
  * Skip the ASN1.1 object type and its length. Get ready to read the object's
  * data.
  */
-int asn1_next_obj(const uint8_t *buf, int *offset, int obj_type)
+int /*ICACHE_FLASH_ATTR*/ asn1_next_obj(const uint8_t *buf, int *offset, int obj_type)
 {
     if (buf[*offset] != obj_type)
         return X509_NOT_OK;
@@ -125,7 +125,7 @@ int asn1_next_obj(const uint8_t *buf, int *offset, int obj_type)
  * Skip over an ASN.1 object type completely. Get ready to read the next
  * object.
  */
-int asn1_skip_obj(const uint8_t *buf, int *offset, int obj_type)
+int /*ICACHE_FLASH_ATTR*/ asn1_skip_obj(const uint8_t *buf, int *offset, int obj_type)
 {
     int len;
 
@@ -141,7 +141,7 @@ int asn1_skip_obj(const uint8_t *buf, int *offset, int obj_type)
  * Read an integer value for ASN.1 data
  * Note: This function allocates memory which must be freed by the user.
  */
-int asn1_get_int(const uint8_t *buf, int *offset, uint8_t **object)
+int /*ICACHE_FLASH_ATTR*/ asn1_get_int(const uint8_t *buf, int *offset, uint8_t **object)
 {
     int len;
 
@@ -165,7 +165,7 @@ end_int_array:
 /**
  * Get all the RSA private key specifics from an ASN.1 encoded file 
  */
-int asn1_get_private_key(const uint8_t *buf, int len, RSA_CTX **rsa_ctx)
+int /*ICACHE_FLASH_ATTR*/ asn1_get_private_key(const uint8_t *buf, int len, RSA_CTX **rsa_ctx)
 {
     int offset = 7;
     uint8_t *modulus = NULL, *priv_exp = NULL, *pub_exp = NULL;
@@ -227,7 +227,7 @@ int asn1_get_private_key(const uint8_t *buf, int len, RSA_CTX **rsa_ctx)
 /**
  * Get the time of a certificate. Ignore hours/minutes/seconds.
  */
-static int asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
+static int /*ICACHE_FLASH_ATTR*/ asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
 {
     int ret = X509_NOT_OK, len, t_offset, abs_year;
     struct tm tm;
@@ -293,7 +293,7 @@ static int asn1_get_utc_time(const uint8_t *buf, int *offset, time_t *t)
 /**
  * Get the version type of a certificate (which we don't actually care about)
  */
-int asn1_version(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int /*ICACHE_FLASH_ATTR*/ asn1_version(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK;
 
@@ -309,7 +309,7 @@ end_version:
 /**
  * Retrieve the notbefore and notafter certificate times.
  */
-int asn1_validity(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int /*ICACHE_FLASH_ATTR*/ asn1_validity(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     return (asn1_next_obj(cert, offset, ASN1_SEQUENCE) < 0 ||
               asn1_get_utc_time(cert, offset, &x509_ctx->not_before) ||
@@ -319,7 +319,7 @@ int asn1_validity(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 /**
  * Get the components of a distinguished name 
  */
-static int asn1_get_oid_x520(const uint8_t *buf, int *offset)
+static int /*ICACHE_FLASH_ATTR*/ asn1_get_oid_x520(const uint8_t *buf, int *offset)
 {
     int dn_type = 0;
     int len;
@@ -343,7 +343,7 @@ end_oid:
 /**
  * Obtain an ASN.1 printable string type.
  */
-static int asn1_get_printable_str(const uint8_t *buf, int *offset, char **str)
+static int /*ICACHE_FLASH_ATTR*/ asn1_get_printable_str(const uint8_t *buf, int *offset, char **str)
 {
     int len = X509_NOT_OK;
     int asn1_type = buf[*offset];
@@ -385,7 +385,7 @@ end_pnt_str:
 /**
  * Get the subject name (or the issuer) of a certificate.
  */
-int asn1_name(const uint8_t *cert, int *offset, char *dn[])
+int /*ICACHE_FLASH_ATTR*/ asn1_name(const uint8_t *cert, int *offset, char *dn[])
 {
     int ret = X509_NOT_OK;
     int dn_type;
@@ -438,7 +438,7 @@ end_name:
 /**
  * Read the modulus and public exponent of a certificate.
  */
-int asn1_public_key(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int /*ICACHE_FLASH_ATTR*/ asn1_public_key(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK, mod_len, pub_len;
     uint8_t *modulus = NULL, *pub_exp = NULL;
@@ -470,7 +470,7 @@ end_pub_key:
 /**
  * Read the signature of the certificate.
  */
-int asn1_signature(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
+int /*ICACHE_FLASH_ATTR*/ asn1_signature(const uint8_t *cert, int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK;
 
@@ -492,7 +492,7 @@ end_sig:
  * Compare 2 distinguished name components for equality 
  * @return 0 if a match
  */
-static int asn1_compare_dn_comp(const char *dn1, const char *dn2)
+static int /*ICACHE_FLASH_ATTR*/ asn1_compare_dn_comp(const char *dn1, const char *dn2)
 {
     int ret;
 
@@ -507,7 +507,7 @@ static int asn1_compare_dn_comp(const char *dn1, const char *dn2)
 /**
  * Clean up all of the CA certificates.
  */
-void remove_ca_certs(CA_CERT_CTX *ca_cert_ctx)
+void /*ICACHE_FLASH_ATTR*/ remove_ca_certs(CA_CERT_CTX *ca_cert_ctx)
 {
     int i = 0;
 
@@ -527,7 +527,7 @@ void remove_ca_certs(CA_CERT_CTX *ca_cert_ctx)
  * Compare 2 distinguished names for equality 
  * @return 0 if a match
  */
-int asn1_compare_dn(char * const dn1[], char * const dn2[])
+int /*ICACHE_FLASH_ATTR*/ asn1_compare_dn(char * const dn1[], char * const dn2[])
 {
     int i;
 
@@ -540,7 +540,7 @@ int asn1_compare_dn(char * const dn1[], char * const dn2[])
     return 0;       /* all good */
 }
 
-int asn1_find_oid(const uint8_t* cert, int* offset, 
+int /*ICACHE_FLASH_ATTR*/ asn1_find_oid(const uint8_t* cert, int* offset, 
                     const uint8_t* oid, int oid_length)
 {
     int seqlen;
@@ -574,7 +574,7 @@ int asn1_find_oid(const uint8_t* cert, int* offset,
     return 0;
 }
 
-int asn1_find_subjectaltname(const uint8_t* cert, int offset)
+int /*ICACHE_FLASH_ATTR*/ asn1_find_subjectaltname(const uint8_t* cert, int offset)
 {
     if (asn1_find_oid(cert, &offset, sig_subject_alt_name, 
                                 sizeof(sig_subject_alt_name)))
@@ -591,7 +591,7 @@ int asn1_find_subjectaltname(const uint8_t* cert, int offset)
  * Read the signature type of the certificate. We only support RSA-MD5 and
  * RSA-SHA1 signature types.
  */
-int asn1_signature_type(const uint8_t *cert, 
+int /*ICACHE_FLASH_ATTR*/ asn1_signature_type(const uint8_t *cert, 
                                 int *offset, X509_CTX *x509_ctx)
 {
     int ret = X509_NOT_OK, len;

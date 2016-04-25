@@ -169,6 +169,13 @@ EXP_FUNC void STDCALL print_blob(const char *format, const uint8_t *data, int si
 EXP_FUNC int STDCALL base64_decode(const char *in,  int len,
                     uint8_t *out, int *outlen);
 
+/* used to encode 3 bytes into 4 base64 digits */
+EXP_FUNC void STDCALL base64encode(const unsigned char in[3], unsigned char out[4], int count);
+
+/* encode binary data into base64 digits with MIME style === pads */
+EXP_FUNC int STDCALL base64_encode(size_t in_len, const unsigned char *in, size_t out_len, char *out);
+
+
 #ifdef __cplusplus
 }
 #endif

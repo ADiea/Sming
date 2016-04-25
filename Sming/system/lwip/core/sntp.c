@@ -331,8 +331,6 @@ LOCAL os_timer_t sntp_timer LWIP_DATA_IRAM_ATTR;
 int __tznorth;
 int __tzyear;
 
-#define RESULT_SIZE 100
-char reult[RESULT_SIZE];
 static const int mon_lengths[2][12] = {
   {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
   {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
@@ -602,7 +600,7 @@ sntp__tzcalc_limits(int year)
 }
 
 char * ICACHE_FLASH_ATTR
-sntp_asctime_r(struct tm *tim_p ,char *result)
+sntp_asctime_r(struct tm *tim_p ,char *result, size_t maxSize)
 {
   static const char day_name[7][4] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -611,18 +609,12 @@ sntp_asctime_r(struct tm *tim_p ,char *result)
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   };
-  m_snprintf (result, RESULT_SIZE, "%s %s %02d %02d:%02d:%02d %02d\n",
+  m_snprintf (result, maxSize, "%s %s %02d %02d:%02d:%02d %02d\n",
 	   day_name[tim_p->tm_wday],
 	   mon_name[tim_p->tm_mon],
 	   tim_p->tm_mday, tim_p->tm_hour, tim_p->tm_min,
 	   tim_p->tm_sec, 1900 + tim_p->tm_year);
   return result;
-}
-char *ICACHE_FLASH_ATTR
-sntp_asctime(struct tm *tim_p)
-{
-
-    return sntp_asctime_r (tim_p, reult);
 }
 
 uint32 sntp_get_current_timestamp()
@@ -635,9 +627,9 @@ uint32 sntp_get_current_timestamp()
 	}
 }
 
-char* sntp_get_real_time(time_t t)
+char* sntp_get_real_time(time_t t, char* buf, size_t maxSize)
 {
-	return sntp_asctime(sntp_localtime (&t));
+	return sntp_asctime_r(sntp_localtime (&t), buf, maxSize);
 }
 /**
  * SNTP get time_zone default GMT + 8
@@ -682,7 +674,7 @@ sntp_process(u32_t *receive_timestamp)
   u32_t us = ntohl(receive_timestamp[1]) / 4295;
   SNTP_SET_SYSTEM_TIME_US(t, us);
   /* display local time from GMT time */
-  LWIP_DEBUGF(SNTP_DEBUG_TRACE, ("sntp_process: %s, %"U32_F" us", ctime(&t), us));
+  //LWIP_DEBUGF(SNTP_DEBUG_TRACE, ("sntp_process: %s, %"U32_F" us", ctime(&t), us));
 
 #else /* SNTP_CALC_TIME_US */
 
@@ -694,7 +686,7 @@ sntp_process(u32_t *receive_timestamp)
   os_timer_disarm(&sntp_timer);
   os_timer_setfn(&sntp_timer, (os_timer_func_t *)sntp_time_inc, NULL);
   os_timer_arm(&sntp_timer, 1000, 1);
-  LOG_I("%s\n",sntp_asctime(sntp_localtime (&t)));
+  //LOG_I("%s\n",sntp_asctime(sntp_localtime (&t)));
 //  LOG_I("%s\n",ctime(&t));
 //  LWIP_DEBUGF(SNTP_DEBUG_TRACE, ("sntp_process: %s", ctime(&t)));
 #endif /* SNTP_CALC_TIME_US */

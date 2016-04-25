@@ -88,6 +88,19 @@ extern "C" {
 #define PARANOIA_CHECK(A, B)        if (A < B) { \
     ret = SSL_ERROR_INVALID_HANDSHAKE; goto error; }
 
+//https://tools.ietf.org/html/rfc6066#page-8
+
+/*Max Fragment Length Negotiation*/
+enum {
+	SSL_MAX_FRAG_LEN_NONE,
+	SSL_MAX_FRAG_LEN_512,
+	SSL_MAX_FRAG_LEN_1024,
+	SSL_MAX_FRAG_LEN_2048,
+	SSL_MAX_FRAG_LEN_4096,
+	SSL_MAX_FRAG_LEN_8192,
+	SSL_MAX_FRAG_LEN_INVALID
+};
+
 /* protocol types */
 enum
 {
@@ -176,6 +189,7 @@ struct _SSL
     void *encrypt_ctx;
     void *decrypt_ctx;
     uint8_t *bm_all_data;
+    uint32_t max_fragme_length;
     uint8_t *bm_data;
     uint16_t bm_index;
     uint16_t bm_read_index;
@@ -291,6 +305,9 @@ SSL_SESSION *ssl_session_update(int max_sessions,
         SSL_SESSION *ssl_sessions[], SSL *ssl,
         const uint8_t *session_id);
 void kill_ssl_session(SSL_SESSION **ssl_sessions, SSL *ssl);
+
+/*Max Fragment Length Negotiation*/
+bool ssl_fragment_length_negotiation(SSL* ssl, int fragmet_level);
 
 #ifdef __cplusplus
 }

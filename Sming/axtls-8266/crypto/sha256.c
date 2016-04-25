@@ -48,7 +48,7 @@
     (b)[(i) + 3] = (uint8_t) ((n)      );       \
 }
 
-static const uint8_t sha256_padding[64] =
+static const uint8_t sha256_padding[64] /*ICACHE_RODATA_ATTR STORE_ATTR*/ =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -59,7 +59,7 @@ static const uint8_t sha256_padding[64] =
 /**
  * Initialize the SHA256 context 
  */
-void SHA256_Init(SHA256_CTX *ctx)
+void /*ICACHE_FLASH_ATTR*/ SHA256_Init(SHA256_CTX *ctx)
 {
     ctx->total[0] = 0;
     ctx->total[1] = 0;
@@ -74,7 +74,7 @@ void SHA256_Init(SHA256_CTX *ctx)
     ctx->state[7] = 0x5BE0CD19;
 }
 
-static void SHA256_Process(const uint8_t digest[64], SHA256_CTX *ctx)
+static void /*ICACHE_FLASH_ATTR*/ SHA256_Process(const uint8_t digest[64], SHA256_CTX *ctx)
 {
     uint32_t temp1, temp2, W[64];
     uint32_t A, B, C, D, E, F, G, H;
@@ -208,7 +208,7 @@ static void SHA256_Process(const uint8_t digest[64], SHA256_CTX *ctx)
 /**
  * Accepts an array of octets as the next portion of the message.
  */
-void SHA256_Update(SHA256_CTX *ctx, const uint8_t * msg, int len)
+void /*ICACHE_FLASH_ATTR*/ SHA256_Update(SHA256_CTX *ctx, const uint8_t * msg, int len)
 {
     uint32_t left = ctx->total[0] & 0x3F;
     uint32_t fill = 64 - left;
@@ -244,11 +244,15 @@ void SHA256_Update(SHA256_CTX *ctx, const uint8_t * msg, int len)
 /**
  * Return the 256-bit message digest into the user's array
  */
-void SHA256_Final(uint8_t *digest, SHA256_CTX *ctx)
+void /*ICACHE_FLASH_ATTR*/ SHA256_Final(uint8_t *digest, SHA256_CTX *ctx)
 {
     uint32_t last, padn;
     uint32_t high, low;
     uint8_t msglen[8];
+	
+   // uint8_t sha256_padding_ram[64];
+
+   // memcpy(sha256_padding_ram, sha256_padding, 64);
 
     high = (ctx->total[0] >> 29)
          | (ctx->total[1] <<  3);
@@ -260,7 +264,7 @@ void SHA256_Final(uint8_t *digest, SHA256_CTX *ctx)
     last = ctx->total[0] & 0x3F;
     padn = (last < 56) ? (56 - last) : (120 - last);
 
-    SHA256_Update(ctx, sha256_padding, padn);
+    SHA256_Update(ctx, sha256_padding/*_ram*/, padn);
     SHA256_Update(ctx, msglen, 8);
 
     PUT_UINT32(ctx->state[0], digest,  0);

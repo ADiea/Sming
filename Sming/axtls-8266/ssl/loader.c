@@ -54,7 +54,7 @@ static int ssl_obj_PEM_load(SSL_CTX *ssl_ctx, int obj_type,
 /*
  * Load a file into memory that is in binary DER (or ascii PEM) format.
  */
-EXP_FUNC int STDCALL ssl_obj_load(SSL_CTX *ssl_ctx, int obj_type, 
+EXP_FUNC int STDCALL /*ICACHE_FLASH_ATTR*/ ssl_obj_load(SSL_CTX *ssl_ctx, int obj_type, 
                             const char *filename, const char *password)
 {
 #ifndef CONFIG_SSL_SKELETON_MODE
@@ -101,15 +101,16 @@ error:
 /*
  * Transfer binary data into the object loader.
  */
-EXP_FUNC int STDCALL ssl_obj_memory_load(SSL_CTX *ssl_ctx, int mem_type, 
+EXP_FUNC int STDCALL /*ICACHE_FLASH_ATTR*/ ssl_obj_memory_load(SSL_CTX *ssl_ctx, int mem_type, 
         const uint8_t *data, int len, const char *password)
 {
     int ret;
     SSLObjLoader *ssl_obj;
+    uint32 sign_len = (len + 3)&(~3);
 
     ssl_obj = (SSLObjLoader *)calloc(1, sizeof(SSLObjLoader));
     ssl_obj->buf = (uint8_t *)malloc(len);
-    memcpy(ssl_obj->buf, data, len);
+    memcpy(ssl_obj->buf, data, sign_len);
     ssl_obj->len = len;
     ret = do_obj(ssl_ctx, mem_type, ssl_obj, password);
     ssl_obj_free(ssl_obj);
@@ -119,7 +120,7 @@ EXP_FUNC int STDCALL ssl_obj_memory_load(SSL_CTX *ssl_ctx, int mem_type,
 /*
  * Actually work out what we are doing 
  */
-static int do_obj(SSL_CTX *ssl_ctx, int obj_type, 
+static int /*ICACHE_FLASH_ATTR*/ do_obj(SSL_CTX *ssl_ctx, int obj_type, 
                     SSLObjLoader *ssl_obj, const char *password)
 {
     int ret = SSL_OK;
@@ -161,7 +162,7 @@ static int do_obj(SSL_CTX *ssl_ctx, int obj_type,
 /*
  * Clean up our mess.
  */
-void ssl_obj_free(SSLObjLoader *ssl_obj)
+void /*ICACHE_FLASH_ATTR*/ ssl_obj_free(SSLObjLoader *ssl_obj)
 {
     if (ssl_obj)
     {
@@ -182,7 +183,7 @@ void ssl_obj_free(SSLObjLoader *ssl_obj)
 #define IS_PRIVATE_KEY              2
 #define IS_CERTIFICATE              3
 
-static const char * const begins[NUM_PEM_TYPES] =
+static const char begins[NUM_PEM_TYPES][40] ICACHE_RODATA_ATTR STORE_ATTR =
 {
     "-----BEGIN RSA PRIVATE KEY-----",
     "-----BEGIN ENCRYPTED PRIVATE KEY-----",
@@ -190,7 +191,7 @@ static const char * const begins[NUM_PEM_TYPES] =
     "-----BEGIN CERTIFICATE-----",
 };
 
-static const char * const ends[NUM_PEM_TYPES] =
+static const char ends[NUM_PEM_TYPES][40]  ICACHE_RODATA_ATTR STORE_ATTR =
 {
     "-----END RSA PRIVATE KEY-----",
     "-----END ENCRYPTED PRIVATE KEY-----",
@@ -198,7 +199,7 @@ static const char * const ends[NUM_PEM_TYPES] =
     "-----END CERTIFICATE-----",
 };
 
-static const char * const aes_str[2] =
+static const char aes_str[2][24]  ICACHE_RODATA_ATTR STORE_ATTR =
 {
     "DEK-Info: AES-128-CBC,",
     "DEK-Info: AES-256-CBC," 
@@ -208,7 +209,7 @@ static const char * const aes_str[2] =
  * Take a base64 blob of data and decrypt it (using AES) into its 
  * proper ASN.1 form.
  */
-static int pem_decrypt(const char *where, const char *end,
+static int /*ICACHE_FLASH_ATTR*/ pem_decrypt(const char *where, const char *end,
                         const char *password, SSLObjLoader *ssl_obj)
 {
     int ret = -1;
@@ -228,14 +229,20 @@ static int pem_decrypt(const char *where, const char *end,
         goto error;
     }
 
-    if ((start = strstr((const char *)where, aes_str[0])))         /* AES128? */
+    char aes_str_0_ram[24];
+    char aes_str_1_ram[24];
+
+    system_get_string_from_flash(aes_str[0], aes_str_0_ram, 24);
+    system_get_string_from_flash(aes_str[1], aes_str_1_ram, 24);
+
+    if ((start = (char *)strstr((const char *)where, aes_str_0_ram)))         /* AES128? */
     {
-        start += strlen(aes_str[0]);
+        start += strlen(aes_str_0_ram);
     }
-    else if ((start = strstr((const char *)where, aes_str[1])))    /* AES256? */
+    else if ((start = (char *)strstr((const char *)where, aes_str_1_ram)))    /* AES256? */
     {
         is_aes_256 = 1;
-        start += strlen(aes_str[1]);
+        start += strlen(aes_str_1_ram);
     }
     else 
     {
@@ -290,11 +297,13 @@ error:
 /**
  * Take a base64 blob of data and turn it into its proper ASN.1 form.
  */
-static int new_pem_obj(SSL_CTX *ssl_ctx, int is_cacert, char *where, 
+static int /*ICACHE_FLASH_ATTR*/ new_pem_obj(SSL_CTX *ssl_ctx, int is_cacert, char *where, 
                     int remain, const char *password)
 {
     int ret = SSL_ERROR_BAD_CERTIFICATE;
     SSLObjLoader *ssl_obj = NULL;
+    char begins_ram [40];
+    char ends_ram [40];
 
     while (remain > 0)
     {
@@ -303,11 +312,13 @@ static int new_pem_obj(SSL_CTX *ssl_ctx, int is_cacert, char *where,
 
         for (i = 0; i < NUM_PEM_TYPES; i++)
         {
-            if ((start = strstr(where, begins[i])) &&
-                    (end = strstr(where, ends[i])))
+            system_get_string_from_flash(begins[i], begins_ram, 40);
+            system_get_string_from_flash(ends[i], ends_ram, 40);
+            if ((start = (char *)strstr(where, begins_ram)) &&
+                    (end = (char *)strstr(where, ends_ram)))
             {
                 remain -= (int)(end-where);
-                start += strlen(begins[i]);
+                start += strlen(begins_ram);
                 pem_size = (int)(end-start);
 
                 ssl_obj = (SSLObjLoader *)calloc(1, sizeof(SSLObjLoader));
@@ -363,8 +374,8 @@ static int new_pem_obj(SSL_CTX *ssl_ctx, int is_cacert, char *where,
                 if ((ret = do_obj(ssl_ctx, obj_type, ssl_obj, password)))
                     goto error;
 
-                end += strlen(ends[i]);
-                remain -= strlen(ends[i]);
+                end += strlen(ends_ram);
+                remain -= strlen(ends_ram);
                 while (remain > 0 && (*end == '\r' || *end == '\n'))
                 {
                     end++;
@@ -389,7 +400,7 @@ error:
 /*
  * Load a file into memory that is in ASCII PEM format.
  */
-static int ssl_obj_PEM_load(SSL_CTX *ssl_ctx, int obj_type, 
+static int /*ICACHE_FLASH_ATTR*/ ssl_obj_PEM_load(SSL_CTX *ssl_ctx, int obj_type, 
                         SSLObjLoader *ssl_obj, const char *password)
 {
     char *start;
@@ -408,7 +419,7 @@ static int ssl_obj_PEM_load(SSL_CTX *ssl_ctx, int obj_type,
  * Load the key/certificates in memory depending on compile-time and user
  * options. 
  */
-int load_key_certs(SSL_CTX *ssl_ctx)
+int /*ICACHE_FLASH_ATTR*/ load_key_certs(SSL_CTX *ssl_ctx)
 {
     int ret = SSL_OK;
     uint32_t options = ssl_ctx->options;

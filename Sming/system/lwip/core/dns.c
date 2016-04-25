@@ -450,7 +450,7 @@ dns_local_addhost(const char *hostname, const ip_addr_t *addr)
  *         better check for failure: != IPADDR_NONE) or IPADDR_NONE if the hostname
  *         was not found in the cached dns_table.
  */
-#if 0
+//#if 0
 static u32_t ICACHE_FLASH_ATTR
 dns_lookup(const char *name)
 {
@@ -482,7 +482,7 @@ dns_lookup(const char *name)
 
   return IPADDR_NONE;
 }
-#endif
+//#endif
 #if DNS_DOES_NAME_CHECK
 /**
  * Compare the "dotted" name "query" with the encoded name "response"
@@ -966,7 +966,7 @@ dns_gethostbyname(const char *hostname, ip_addr_t *addr, dns_found_callback foun
   ipaddr = ipaddr_addr(hostname);
   if (ipaddr == IPADDR_NONE) {
     /* already have this address cached? */
-//    ipaddr = dns_lookup(hostname);
+    ipaddr = dns_lookup(hostname);
   }
   if (ipaddr != IPADDR_NONE) {
     ip4_addr_set_u32(addr, ipaddr);

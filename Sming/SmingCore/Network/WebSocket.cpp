@@ -7,7 +7,6 @@
 
 #include "WebSocket.h"
 #include "../../Services/WebHelpers/aw-sha1.h"
-#include "../../Services/WebHelpers/base64.h"
 #include "../../Services/CommandProcessing/CommandExecutor.h"
 
 WebSocket::WebSocket(HttpServerConnection* conn)

@@ -9,7 +9,7 @@
 
 #define IRAM_ATTR __attribute__((section(".iram.text")))
 
-#define HEAP_OP_SIZE 64
+#define HEAP_OP_SIZE 120
 
 extern void *umm_malloc( size_t size );
 extern void *umm_calloc( size_t num, size_t size );
@@ -27,7 +27,7 @@ typedef struct _heapOp
 
 heapOp gLastHeapOp[HEAP_OP_SIZE];
 uint16_t gTotalHeapOp = 0;
-uint8_t gHeapOpFlushAfter = 63;
+uint8_t gHeapOpFlushAfter = 118;
 
 void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 {

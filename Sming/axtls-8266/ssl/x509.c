@@ -41,11 +41,13 @@
 #include "os_port.h"
 #include "crypto_misc.h"
 
+extern char* asctime_x(const struct tm *t, char* buf, size_t maxSize);
+
 #ifdef CONFIG_SSL_CERT_VERIFICATION
 /**
  * Retrieve the signature from a certificate.
  */
-static const uint8_t *get_signature(const uint8_t *asn1_sig, int *len)
+static const uint8_t * /*ICACHE_FLASH_ATTR*/ get_signature(const uint8_t *asn1_sig, int *len)
 {
     int offset = 0;
     const uint8_t *ptr = NULL;
@@ -69,7 +71,7 @@ end_get_sig:
  * Construct a new x509 object.
  * @return 0 if ok. < 0 if there was a problem.
  */
-int x509_new(const uint8_t *cert, int *len, X509_CTX **ctx)
+int /*ICACHE_FLASH_ATTR*/ x509_new(const uint8_t *cert, int *len, X509_CTX **ctx)
 {
     int begin_tbs, end_tbs;
     int ret = X509_NOT_OK, offset = 0, cert_size = 0;
@@ -259,7 +261,7 @@ end_cert:
 /**
  * Free an X.509 object's resources.
  */
-void x509_free(X509_CTX *x509_ctx)
+void /*ICACHE_FLASH_ATTR*/ x509_free(X509_CTX *x509_ctx)
 {
     X509_CTX *next;
     int i;
@@ -305,7 +307,7 @@ void x509_free(X509_CTX *x509_ctx)
 /**
  * Take a signature and decrypt it.
  */
-static bigint *sig_verify(BI_CTX *ctx, const uint8_t *sig, int sig_len,
+static bigint */*ICACHE_FLASH_ATTR*/ sig_verify(BI_CTX *ctx, const uint8_t *sig, int sig_len,
         bigint *modulus, bigint *pub_exp)
 {
     int i, size;
@@ -355,7 +357,7 @@ static bigint *sig_verify(BI_CTX *ctx, const uint8_t *sig, int sig_len,
  * - The certificate chain is valid.
  * - The signature of the certificate is valid.
  */
-int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert) 
+int /*ICACHE_FLASH_ATTR*/ x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert) 
 {
     int ret = X509_OK, i = 0;
     bigint *cert_sig;
@@ -376,9 +378,9 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
        to check the signature */
     if (asn1_compare_dn(cert->ca_cert_dn, cert->cert_dn) == 0)
     {
-#if CONFIG_SSL_DISPLAY_MODE
+//#if CONFIG_SSL_DISPLAY_MODE
     	printf("SSL: a self-signed certificate that is not in the CA store\n");
-#endif
+//#endif
         is_self_signed = 1;
         ctx = cert->rsa_ctx->bi_ctx;
         mod = cert->rsa_ctx->m;
@@ -408,9 +410,9 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
     {
        if (ca_cert_ctx != NULL) 
        {
-#if CONFIG_SSL_DISPLAY_MODE
+//#if CONFIG_SSL_DISPLAY_MODE
     	   printf("SSL: look for a trusted cert\n");
-#endif
+//#endif
             /* go thu the CA store */
             while (i < CONFIG_X509_MAX_CA_CERTS && ca_cert_ctx->cert[i])
             {
@@ -418,9 +420,9 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
                                             ca_cert_ctx->cert[i]->cert_dn) == 0)
                 {
                     /* use this CA certificate for signature verification */
-#if CONFIG_SSL_DISPLAY_MODE
+//#if CONFIG_SSL_DISPLAY_MODE
                 	printf("SSL: use the CA certificate for signature verification\n");
-#endif
+//#endif
                     match_ca_cert = 1;
                     ctx = ca_cert_ctx->cert[i]->rsa_ctx->bi_ctx;
                     mod = ca_cert_ctx->cert[i]->rsa_ctx->m;
@@ -469,9 +471,9 @@ int x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509_CTX *cert)
         if (bi_compare(cert_sig, cert->digest) != 0)
             ret = X509_VFY_ERROR_BAD_SIGNATURE;
 
-#if CONFIG_SSL_DISPLAY_MODE
+//#if CONFIG_SSL_DISPLAY_MODE
         printf("check the signature ok\n");
-#endif
+//#endif
 //        bi_free(ctx, cert_sig);//comment the line for check signature by LiuH at 20150.06.11
     }
     else
@@ -501,10 +503,12 @@ end_verify:
  * Used for diagnostics.
  */
 static const char *not_part_of_cert = "<Not Part Of Certificate>";
-void x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert_ctx) 
+void /*ICACHE_FLASH_ATTR*/ x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert_ctx) 
 {
     if (cert == NULL)
         return;
+
+    char bufTime[100];
 
     printf("=== CERTIFICATE ISSUED TO ===\n");
     printf("Common Name (CN):\t\t");
@@ -532,8 +536,14 @@ void x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert_ctx)
     printf("%s\n", cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] ?
         cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] : not_part_of_cert);
 
-    printf("Not Before:\t\t\t%s", ctime(&cert->not_before));
-    printf("Not After:\t\t\t%s", ctime(&cert->not_after));
+    struct tm* p_tm = localtime(&cert->not_before);
+    asctime_x(p_tm, bufTime, sizeof(bufTime));
+    printf("Not Before:\t\t\t%s", bufTime);
+
+    p_tm = localtime(&cert->not_after);
+    asctime_x(p_tm, bufTime, sizeof(bufTime));
+    printf("Not After:\t\t\t%s", bufTime);
+
     printf("RSA bitsize:\t\t\t%d\n", cert->rsa_ctx->num_octets*8);
     printf("Sig Type:\t\t\t");
     switch (cert->sig_type)
@@ -581,7 +591,7 @@ void x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert_ctx)
     TTY_FLUSH();
 }
 
-const char * x509_display_error(int error)
+const char * /*ICACHE_FLASH_ATTR*/ x509_display_error(int error)
 {
     switch (error)
     {

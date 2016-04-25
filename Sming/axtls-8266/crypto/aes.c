@@ -78,7 +78,7 @@
 /*
  * AES S-box
  */
-static const uint8_t aes_sbox[256] =
+static const uint8_t aes_sbox[256] /*ICACHE_RODATA_ATTR STORE_ATTR*/ =
 {
 	0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,
 	0x30,0x01,0x67,0x2B,0xFE,0xD7,0xAB,0x76,
@@ -117,7 +117,7 @@ static const uint8_t aes_sbox[256] =
 /*
  * AES is-box
  */
-static const uint8_t aes_isbox[256] = 
+static const uint8_t aes_isbox[256] /*ICACHE_RODATA_ATTR STORE_ATTR*/ =
 {
     0x52,0x09,0x6a,0xd5,0x30,0x36,0xa5,0x38,
     0xbf,0x40,0xa3,0x9e,0x81,0xf3,0xd7,0xfb,
@@ -153,7 +153,7 @@ static const uint8_t aes_isbox[256] =
     0xe1,0x69,0x14,0x63,0x55,0x21,0x0c,0x7d
 };
 
-static const unsigned char Rcon[30]=
+static const unsigned char Rcon[30] /*ICACHE_RODATA_ATTR STORE_ATTR*/ =
 {
 	0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,
 	0x1b,0x36,0x6c,0xd8,0xab,0x4d,0x9a,0x2f,
@@ -167,7 +167,7 @@ static void AES_decrypt(const AES_CTX *ctx, uint32_t *data);
 
 /* Perform doubling in Galois Field GF(2^8) using the irreducible polynomial
    x^8+x^4+x^3+x+1 */
-static unsigned char AES_xtime(uint32_t x)
+/*inline*/ static unsigned char IRAM_ATTR/*ICACHE_FLASH_ATTR*/ AES_xtime(uint32_t x)
 {
 	return (x&0x80) ? (x<<1)^0x1b : x<<1;
 }
@@ -175,13 +175,15 @@ static unsigned char AES_xtime(uint32_t x)
 /**
  * Set up AES with the key/iv and cipher size.
  */
-void AES_set_key(AES_CTX *ctx, const uint8_t *key, 
+void IRAM_ATTR/*ICACHE_FLASH_ATTR*/ AES_set_key(AES_CTX *ctx, const uint8_t *key,
         const uint8_t *iv, AES_MODE mode)
 {
     int i, ii;
     uint32_t *W, tmp, tmp2;
-    const unsigned char *ip;
+    const/*-*/ unsigned char *ip;
     int words;
+
+    //unsigned char Rcon_ram[32];
 
     switch (mode)
     {
@@ -243,6 +245,7 @@ void AES_set_key(AES_CTX *ctx, const uint8_t *key,
         W[i]=W[i-words]^tmp;
     }
 
+
     /* copy the iv across */
     memcpy(ctx->iv, iv, 16);
 }
@@ -250,7 +253,7 @@ void AES_set_key(AES_CTX *ctx, const uint8_t *key,
 /**
  * Change a key for decryption.
  */
-void AES_convert_key(AES_CTX *ctx)
+void IRAM_ATTR/*ICACHE_FLASH_ATTR*/ AES_convert_key(AES_CTX *ctx)
 {
     int i;
     uint32_t *k,w,t1,t2,t3,t4;
@@ -269,7 +272,7 @@ void AES_convert_key(AES_CTX *ctx)
 /**
  * Encrypt a byte sequence (with a block size 16) using the AES cipher.
  */
-void AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, uint8_t *out, int length)
+void IRAM_ATTR/*ICACHE_FLASH_ATTR*/ AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, uint8_t *out, int length)
 {
     int i;
     uint32_t tin[4], tout[4], iv[4];
@@ -308,7 +311,7 @@ void AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, uint8_t *out, int length)
 /**
  * Decrypt a byte sequence (with a block size 16) using the AES cipher.
  */
-void AES_cbc_decrypt(AES_CTX *ctx, const uint8_t *msg, uint8_t *out, int length)
+void IRAM_ATTR/*ICACHE_FLASH_ATTR*/ AES_cbc_decrypt(AES_CTX *ctx, const uint8_t *msg, uint8_t *out, int length)
 {
     int i;
     uint32_t tin[4], xor[4], tout[4], data[4], iv[4];
@@ -351,7 +354,7 @@ void AES_cbc_decrypt(AES_CTX *ctx, const uint8_t *msg, uint8_t *out, int length)
 /**
  * Encrypt a single block (16 bytes) of data
  */
-static void AES_encrypt(const AES_CTX *ctx, uint32_t *data)
+static void IRAM_ATTR/*ICACHE_FLASH_ATTR*/ AES_encrypt(const AES_CTX *ctx, uint32_t *data)
 {
     /* To make this code smaller, generate the sbox entries on the fly.
      * This will have a really heavy effect upon performance.
@@ -401,7 +404,7 @@ static void AES_encrypt(const AES_CTX *ctx, uint32_t *data)
 /**
  * Decrypt a single block (16 bytes) of data
  */
-static void AES_decrypt(const AES_CTX *ctx, uint32_t *data)
+static void IRAM_ATTR/*ICACHE_FLASH_ATTR*/ AES_decrypt(const AES_CTX *ctx, uint32_t *data)
 { 
     uint32_t tmp[4];
     uint32_t xt0,xt1,xt2,xt3,xt4,xt5,xt6;

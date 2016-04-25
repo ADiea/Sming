@@ -142,7 +142,7 @@ extern "C" {
 #define SSL_HAS_PEM                             3
 
 /* default session sizes */
-#define SSL_DEFAULT_SVR_SESS                    5
+#define SSL_DEFAULT_SVR_SESS                    1
 #define SSL_DEFAULT_CLNT_SESS                   1
 
 /* X.509/X.520 distinguished name types */
