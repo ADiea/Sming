@@ -29,14 +29,17 @@ TcpConnection::TcpConnection(tcp_pcb* connection, bool autoDestruct) : autoSelfD
 
 TcpConnection::~TcpConnection()
 {
-	autoSelfDestruct = false;
-	close();
-
 	if(sslFingerprint) {
 		delete[] sslFingerprint;
 	}
 	freeSslClientKeyCert();
 	debugf("~TCP connection");
+
+	ssl_ctx_free(sslContext);
+	sslContext=nullptr;
+
+	autoSelfDestruct = false;
+	close();
 }
 
 bool TcpConnection::connect(String server, int port, boolean useSsl /* = false */, uint32_t sslOptions /* = 0 */)
@@ -123,7 +126,7 @@ err_t TcpConnection::onPoll()
 		debugf("TCP connection closed by timeout: %d (from %d)", sleep, timeOut);
 
 		close();
-		return ERR_OK;
+		return ERR_TIMEOUT;
 	}
 
 	if (tcp != NULL && getAvailableWriteSize() > 0) //(tcp->state >= SYN_SENT && tcp->state <= ESTABLISHED))
@@ -152,11 +155,14 @@ void TcpConnection::onError(err_t err)
 {
 #ifdef ENABLE_SSL
 	if(ssl) {
-//		ssl_ctx_free(sslContext);
 		ssl_free(ssl);
-		sslContext=nullptr;
 		ssl=nullptr;
+
+		//ssl_ctx_free(sslContext);
+		//sslContext=nullptr;
+
 		sslConnected = false;
+
 	}
 #endif
 	debugf("TCP connection error: %d", err);
@@ -278,12 +284,14 @@ void TcpConnection::close()
 #ifdef ENABLE_SSL
 	if (ssl != nullptr) {
 		debugf("SSL: closing ...");
-//		ssl_ctx_free(sslContext);
+
 		ssl_free(ssl);
-		sslContext=nullptr;
 		ssl=nullptr;
+
+		//ssl_ctx_free(sslContext);
+		//sslContext=nullptr;
+
 		sslConnected = false;
-		debugf("done\n");
 	}
 #endif
 
@@ -373,8 +381,8 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 		tcp_abort(tcp);
 		return ERR_ABRT;
 	}
-	else
-		debugf("OnConnected");
+	//else
+	//	debugf("TCP: OnConnected");
 
 #ifndef ENABLE_SSL
 	if(con->useSsl) {
@@ -392,7 +400,7 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 		else {
 			uint32_t sslOptions = con->sslOptions;
 #ifdef SSL_DEBUG
-			sslOptions |= SSL_DISPLAY_STATES /*| SSL_DISPLAY_BYTES*/ | SSL_DISPLAY_CERTS | SSL_DISPLAY_RSA;
+			sslOptions |= SSL_DISPLAY_STATES /*| SSL_DISPLAY_BYTES | SSL_DISPLAY_CERTS | SSL_DISPLAY_RSA*/;
 			debugf("SSL: Show debug data ...");
 #endif
 			debugf("SSL: Starting connection...");
@@ -402,7 +410,11 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 #endif
 			debugf("SSL: handshake start");
 			con->debugSSLConnStartMillis = millis();
-			con->sslContext = ssl_ctx_new(SSL_CONNECT_IN_PARTS | sslOptions, 1);
+
+			if(con->sslContext == nullptr)
+			{
+				con->sslContext = ssl_ctx_new(SSL_CONNECT_IN_PARTS | sslOptions, 1);
+			}
 
 			if (con->clientKeyCert.keyLength && con->clientKeyCert.certificateLength)
 			{
@@ -604,6 +616,10 @@ void TcpConnection::staticOnError(void *arg, err_t err)
 {
 	TcpConnection* con = (TcpConnection*)arg;
 	if (con == NULL) return;
+
+#ifdef ENABLE_SSL
+	axl_free(con->tcp);
+#endif
 
 	con->tcp = NULL; // IMPORTANT. No available connection after error!
 	con->onError(err);

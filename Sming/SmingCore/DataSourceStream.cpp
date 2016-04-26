@@ -47,7 +47,7 @@ size_t MemoryDataStream::write(const uint8_t* data, size_t len)
 		if (required > capacity)
 		{
 			capacity = required < 256 ? required + 128 : required + 64;
-			debugf("realloc %d -> %d", size, capacity);
+			debugf("MStream realloc %d -> %d", size, capacity);
 			buf = (char*)realloc(buf, capacity);
 		}
 		buf[cur + len] = '\0';

@@ -53,7 +53,7 @@ void* ax_port_malloc(size_t size, const char* file, int line) {
         while(true){}
     }
     //if (size >= 1024)
-        DEBUG_TLS_MEM_PRINT("%s:%d malloc %d, left %d\r\n", file, line, size, system_get_free_heap_size());
+        DEBUG_TLS_MEM_PRINT("%s:%d malloc %d => %x left %d\r\n", file, line, size, (uint32_t)result, system_get_free_heap_size());
     return result;
 }
 
@@ -70,7 +70,7 @@ void* ax_port_realloc(void* ptr, size_t size, const char* file, int line) {
         while(true){}
     }
     //if (size >= 1024)
-        DEBUG_TLS_MEM_PRINT("%s:%d realloc %d, left %d\r\n", file, line, size, system_get_free_heap_size());
+        DEBUG_TLS_MEM_PRINT("%s:%d realloc %d=>%x, left %d\r\n", file, line, size, result, system_get_free_heap_size());
     return result;
 }
 
