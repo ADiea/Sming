@@ -988,7 +988,8 @@ static void *_umm_malloc( size_t size ) {
 
   if(size == 120)
   {
-	  while(1);
+	  char *a=0;
+	  *a = 3;
   }
 
   /*
