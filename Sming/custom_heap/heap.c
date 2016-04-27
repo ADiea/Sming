@@ -7,15 +7,16 @@
 #include "espinc/c_types_compatible.h"
 #include "umm_malloc/umm_malloc.h"
 
+
 #define IRAM_ATTR __attribute__((section(".iram.text")))
 
 #define HEAP_OP_SIZE 120
-
+/*
 extern void *umm_malloc( size_t size );
 extern void *umm_calloc( size_t num, size_t size );
 extern void *umm_realloc( void *ptr, size_t size );
 extern void umm_free( void *ptr );
-
+*/
 typedef struct _heapOp
 {
 	char op;
@@ -73,36 +74,100 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 }
 
 
-
-void* IRAM_ATTR pvPortMalloc(size_t size, const char* file, int line)
+/**
+ *
+ * pvPortMalloc
+ *
+ */
+void* IRAM_ATTR pvPortMalloc(size_t size
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+)
 {
     void* ret =  malloc(size);
+
+#ifdef MEMLEAK_DEBUG
+
+
+    if(gTotalHeapOp > 100)m_printf("malloc %d > %x %d", size, (uint32_t)ret, /*file,*/ line);
+#endif
+
     return ret;
 }
 
-void IRAM_ATTR vPortFree(void *ptr, const char* file, int line)
+
+/**
+ *
+ * vPortFree
+ *
+ */
+void IRAM_ATTR vPortFree(void *ptr
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+)
 {
 	free(ptr);
+#ifdef MEMLEAK_DEBUG
+	if(gTotalHeapOp > 100)m_printf("free %x %_s %d", (uint32_t)ptr, /*file,*/ line);
+#endif
 }
 
-void* IRAM_ATTR pvPortCalloc(size_t count, size_t size, const char* file, int line)
+
+/**
+ *
+ * pvPortCalloc
+ *
+ */
+void* IRAM_ATTR pvPortCalloc(size_t count, size_t size
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+)
 {
 	void* ret = calloc(count, size);
-    //recordHeapOp('c', size*count, (uint32_t)ret, 0);
+#ifdef MEMLEAK_DEBUG
+	if(gTotalHeapOp > 100)m_printf("calloc %d > %x %_s %d", size*count, (uint32_t)ret, /*file,*/ line);
+#endif
     return ret;
 }
 
-void* IRAM_ATTR pvPortRealloc(void *ptr, size_t size, const char* file, int line)
+
+/**
+ *
+ * pvPortRealloc
+ *
+ */
+void* IRAM_ATTR pvPortRealloc(void *ptr, size_t size
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+)
 {
 	void* ret = realloc(ptr, size);
-    //recordHeapOp('r', size, (uint32_t)ret, (uint32_t)ptr);
+#ifdef MEMLEAK_DEBUG
+	if(gTotalHeapOp > 100)m_printf("realloc %x %d > %x %_s %d", (uint32_t)ptr, size, (uint32_t)ret, /*file,*/ line);
+#endif
     return ret;
 }
 
-void* IRAM_ATTR pvPortZalloc(size_t size, const char* file, int line)
+
+/**
+ *
+ * pvPortZalloc
+ *
+ */
+void* IRAM_ATTR pvPortZalloc(size_t size
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+)
 {
 	void* ret = calloc(1, size);
-	//recordHeapOp('z', size, (uint32_t)ret, 0);
+#ifdef MEMLEAK_DEBUG
+	if(gTotalHeapOp > 100)m_printf("zalloc %d > %x %_s %d", size, (uint32_t)ret, /*file,*/ line);
+#endif
     return ret;
 }
 

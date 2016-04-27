@@ -986,12 +986,6 @@ static void *_umm_malloc( size_t size ) {
     umm_init();
   }
 
-  if(size == 120)
-  {
-	  char *a=0;
-	  *a = 3;
-  }
-
   /*
    * the very first thing we do is figure out if we're being asked to allocate
    * a size of 0 - and if we are we'll simply return a null pointer. if not

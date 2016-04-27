@@ -162,6 +162,7 @@ LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN) crypto pwm $(EXTRA_LI
 
 # compiler flags using during compilation of source files
 #-Wl,-wrap,system_restart_local 
+# -DMEMLEAK_DEBUG
 CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals \
 			  -finline-functions -fdata-sections -ffunction-sections -D__ets__ \
 			  -DICACHE_FLASH -DARDUINO=106 $(USER_CFLAGS) \

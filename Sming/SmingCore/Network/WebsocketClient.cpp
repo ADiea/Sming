@@ -11,6 +11,14 @@
 
 #include "WebsocketClient.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern uint32_t phy_get_rand();
+#ifdef __cplusplus
+}
+#endif
+
 #define DBG_WEBCLI 1
 
 WebsocketClient::WebsocketClient(bool autoDestruct /*= false*/) :
@@ -87,7 +95,7 @@ bool WebsocketClient::connect(String url)
 	memset(b64Key, 0, sizeof(b64Key));
 	Mode = ws_Connecting; // Server Connected / WS Upgrade request sent
 
-	randomSeed(/*analogRead(0)*/system_get_time());
+	randomSeed(phy_get_rand());
 
 	for (int i = 0; i < 16; ++i)
 	{

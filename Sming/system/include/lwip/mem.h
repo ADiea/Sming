@@ -38,11 +38,27 @@
 
 #include "esp_systemapi.h"
 
+
+
+
+#ifndef MEMLEAK_DEBUG
+
 #define os_malloc   pvPortMalloc
 #define os_free     vPortFree
 #define os_zalloc   pvPortZalloc
 #define os_calloc   pvPortCalloc
 #define os_realloc  pvPortRealloc
+
+
+#else
+	#define os_malloc(x) pvPortMalloc(x, __FILE__, __LINE__)
+	#define os_realloc(x,y) pvPortRealloc(x, y, __FILE__, __LINE__)
+	#define os_free(x) pvPortFree(x, __FILE__, __LINE__)
+	#define os_zalloc(x) pvPortZalloc(x, __FILE__, __LINE__)
+	#define os_calloc(x,y) pvPortCalloc(x, y, __FILE__, __LINE__)
+
+#endif /*MEMLEAK_DEBUG*/
+
 #define system_get_free_heap_size xPortGetFreeHeapSize
 
 

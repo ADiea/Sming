@@ -22,8 +22,7 @@
 #include "FakePgmSpace.h"
 #include "debug_progmem.h"
 
-void* malloc(size_t);
-void free(void*);
+
 
 #define __ESP8266_EX__ // System definition ESP8266 SOC
 
@@ -89,17 +88,34 @@ void system_pp_recycle_rx_pkt(void *eb);
 	extern void *pvPortMalloc( size_t xWantedSize );
 	extern void vPortFree( void *pv );
 	extern void *pvPortZalloc(size_t size);
+
+	extern void *pvPortCalloc(size_t size, size_t count);
+	extern void *pvPortRealloc(void* ptr, size_t size);
+
+	#define malloc pvPortMalloc
+	#define realloc pvPortRealloc
+	#define free vPortFree
+	#define zalloc pvPortZalloc
+	#define calloc pvPortCalloc
+
 #else
 	extern void *pvPortMalloc(size_t xWantedSize, const char *file, uint32 line);
 	extern void *pvPortZalloc(size_t xWantedSize, const char *file, uint32 line);
 	extern void vPortFree(void *ptr, const char *file, uint32 line);
+	extern void *pvPortCalloc(size_t size, size_t count, const char *file, uint32 line);
+	extern void *pvPortRealloc(void* ptr, size_t size, const char *file, uint32 line);
 
-	extern void pvPortFree(void *ptr);
-	extern void *vPortMalloc(size_t xWantedSize);
+	/*#define malloc(x) pvPortMalloc(x, __FILE__, __LINE__)
+	#define realloc(x,y) pvPortRealloc(x, y, __FILE__, __LINE__)
+	#define free(x) pvPortFree(x, __FILE__, __LINE__)
+	#define zalloc(x) pvPortZalloc(x, __FILE__, __LINE__)
+	#define calloc(x,y) pvPortCalloc(x, y, __FILE__, __LINE__)*/
+
 #endif /*MEMLEAK_DEBUG*/
 
-extern void *pvPortCalloc(unsigned int n, unsigned int count);
-extern void *pvPortRealloc(void * p, size_t size);
+#define pvPortFree vPortFree
+#define vPortMalloc pvPortMalloc
+
 extern size_t xPortGetFreeHeapSize(void);
 extern void prvHeapInit(void) ICACHE_FLASH_ATTR ;
 

@@ -19,21 +19,24 @@
 
 TcpConnection::TcpConnection(bool autoDestruct) : autoSelfDestruct(autoDestruct), sleep(0), canSend(true), timeOut(70)
 {
+	debugf("+TcpConnection NEW %d", autoDestruct);
 	initialize(tcp_new());
 }
 
 TcpConnection::TcpConnection(tcp_pcb* connection, bool autoDestruct) : autoSelfDestruct(autoDestruct), sleep(0), canSend(true), timeOut(70)
 {
+	debugf("+TcpConnection USE %x %d", (uint32_t)connection, autoDestruct);
 	initialize(connection);
 }
 
 TcpConnection::~TcpConnection()
 {
+	debugf("~TCP connection");
+
 	if(sslFingerprint) {
 		delete[] sslFingerprint;
 	}
 	freeSslClientKeyCert();
-	debugf("~TCP connection");
 
 	ssl_ctx_free(sslContext);
 	sslContext=nullptr;
@@ -508,7 +511,7 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 #ifdef ENABLE_SSL
 	if(con->ssl && p != NULL) {
 		WDT.alive(); /* SSL handshake needs time. In theory we have max 8 seconds before the hardware watchdog resets the device */
-		struct pbuf* pout;
+		struct pbuf* pout=NULL;
 
 		int read_bytes = axl_ssl_read(con->ssl, tcp, p, &pout);
 
@@ -519,6 +522,9 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 
 		if(read_bytes < SSL_OK) {
 			debugf("SSL: Got error: %d", read_bytes);
+
+			//if(pout != NULL) {pbuf_free(pout);}
+
 			if(read_bytes == SSL_CLOSE_NOTIFY) {
 				return ERR_OK;
 			}
@@ -529,6 +535,9 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 		}
 
 		if (read_bytes == 0) {
+
+			//if(pout != NULL) {pbuf_free(pout);}
+
 			if(!con->sslConnected && ssl_handshake_status(con->ssl) == SSL_OK) {
 				con->sslConnected = true;
 				debugf("SSL: Handshake done (%d ms).", millis() - con->debugSSLConnStartMillis);
@@ -538,6 +547,7 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 #endif
 				if(con->sslFingerprint && ssl_match_fingerprint(con->ssl, con->sslFingerprint) != SSL_OK) {
 					debugf("SSL: Certificate fingerprint does not match!");
+
 					con->close();
 					closeTcpConnection(tcp);
 
@@ -557,7 +567,7 @@ err_t TcpConnection::staticOnReceive(void *arg, tcp_pcb *tcp, pbuf *p, err_t err
 		// we got some decrypted bytes...
 		//debugf("SSL: Decrypted data len %d", read_bytes);
 
-		// put the decrypted data in a brand new pbuf
+		// decrypted data is in pout
 		p = pout;
 	}
 #endif
