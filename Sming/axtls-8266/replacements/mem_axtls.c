@@ -38,46 +38,64 @@ extern void *pvPortRealloc(void * p, size_t size);
 #define memset ets_memset
 #define system_get_free_heap_size xPortGetFreeHeapSize
 
-#ifdef DEBUG_TLS_MEM
+#ifdef MEMLEAK_DEBUG
 #define DEBUG_TLS_MEM_PRINT LOG_I
-#else
-#define DEBUG_TLS_MEM_PRINT(...)
 #endif
 
-void* ax_port_malloc(size_t size, const char* file, int line) {
+void* ax_port_malloc(size_t size
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+) {
     void* result = (void *)malloc(size);
 
     if (result == NULL) {
+#ifdef MEMLEAK_DEBUG
         DEBUG_TLS_MEM_PRINT("%s:%d malloc %d failed, left %d\r\n", file, line, size, system_get_free_heap_size());
-
+#endif
         while(true){}
     }
-    //if (size >= 1024)
-        DEBUG_TLS_MEM_PRINT("%s:%d malloc %d => %x left %d\r\n", file, line, size, (uint32_t)result, system_get_free_heap_size());
+#ifdef MEMLEAK_DEBUG
+    DEBUG_TLS_MEM_PRINT("%s:%d malloc %d => %x left %d\r\n", file, line, size, (uint32_t)result, system_get_free_heap_size());
+#endif
     return result;
 }
 
-void* ax_port_calloc(size_t size, size_t count, const char* file, int line) {
-    void* result = (void* )ax_port_malloc(size * count, file, line);
+void* ax_port_calloc(size_t size, size_t count
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+) {
+    void* result = (void* )ax_port_malloc(size * count
+#ifdef MEMLEAK_DEBUG
+    													, file, line
+#endif
+    );
     memset(result, 0, size * count);
     return result;
 }
 
-void* ax_port_realloc(void* ptr, size_t size, const char* file, int line) {
+void* ax_port_realloc(void* ptr, size_t size
+#ifdef MEMLEAK_DEBUG
+		, const char* file, int line
+#endif
+) {
     void* result = (void* )realloc(ptr, size);
     if (result == NULL) {
+#ifdef MEMLEAK_DEBUG
         DEBUG_TLS_MEM_PRINT("%s:%d realloc %d failed, left %d\r\n", file, line, size, system_get_free_heap_size());
+#endif
         while(true){}
     }
-    //if (size >= 1024)
-        DEBUG_TLS_MEM_PRINT("%s:%d realloc %d=>%x, left %d\r\n", file, line, size, result, system_get_free_heap_size());
+
+#ifdef MEMLEAK_DEBUG
+    DEBUG_TLS_MEM_PRINT("%s:%d realloc %d=>%x, left %d\r\n", file, line, size, result, system_get_free_heap_size());
+#endif
     return result;
 }
 
 void ax_port_free(void* ptr) {
     free(ptr);
-    //uint32_t *p = (uint32_t*) ptr;
-    //size_t size = p[-3];
-    //if (size >= 1024)
+
     //    DEBUG_TLS_MEM_PRINT("free %x, left %d\r\n", p[-3], system_get_free_heap_size());
 }

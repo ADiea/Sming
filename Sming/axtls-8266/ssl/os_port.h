@@ -182,21 +182,42 @@ EXP_FUNC int STDCALL getdomainname(char *buf, int buf_size);
 #endif  /* Not Win32 */
 
 /* some functions to mutate the way these work */
+#ifdef MEMLEAK_DEBUG
 #define malloc(A)       ax_port_malloc(A, __FILE__, __LINE__)
 #ifndef realloc
 #define realloc(A,B)    ax_port_realloc(A,B, __FILE__, __LINE__)
 #endif
 #define calloc(A,B)     ax_port_calloc(A,B, __FILE__, __LINE__)
+#else /*MEMLEAK_DEBUG*/
+#define malloc(A)       ax_port_malloc(A)
+#ifndef realloc
+#define realloc(A,B)    ax_port_realloc(A,B)
+#endif
+#define calloc(A,B)     ax_port_calloc(A,B)
+#endif /*MEMLEAK_DEBUG*/
+
 #define free(x)         ax_port_free(x)
 
-EXP_FUNC void * STDCALL ax_port_malloc(size_t s, const char*, int);
-EXP_FUNC void * STDCALL ax_port_realloc(void *y, size_t s, const char*, int);
-EXP_FUNC void * STDCALL ax_port_calloc(size_t n, size_t s, const char*, int);
+EXP_FUNC void * STDCALL ax_port_malloc(size_t s
+#ifdef MEMLEAK_DEBUG
+		, const char*, int
+#endif
+);
+
+EXP_FUNC void * STDCALL ax_port_realloc(void *y, size_t s
+#ifdef MEMLEAK_DEBUG
+		, const char*, int
+#endif
+);
+
+EXP_FUNC void * STDCALL ax_port_calloc(size_t n, size_t s
+#ifdef MEMLEAK_DEBUG
+		, const char*, int
+#endif
+);
 EXP_FUNC void * STDCALL ax_port_free(void*);
 EXP_FUNC int STDCALL ax_open(const char *pathname, int flags);
 
-//extern int ets_vprintf(const char *format, ...);
-//#define vprintf ets_vprintf
 
 // gettimeofday
 // mktime

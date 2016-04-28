@@ -18,7 +18,7 @@
 /*
  * Define the AXL_DEBUG_PRINT function to add debug functionality
  */
-#ifndef AXL_DEBUG
+#if !AXL_DEBUG
 	#define AXL_DEBUG_PRINT(...)
 #else
 	#define AXL_DEBUG_PRINT  debugf

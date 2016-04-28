@@ -67,9 +67,8 @@ int m_vprintf ( const char * format, va_list arg )
 	{
 		return 0;
 	}
-	cbc_printchar('!');
+
 	char buf[MPRINTF_BUF_SIZE], *p;
-	cbc_printchar(':');
 
 	int n = 0;
 	m_vsnprintf(buf, sizeof(buf), format, arg);
@@ -81,8 +80,6 @@ int m_vprintf ( const char * format, va_list arg )
 		n++;
 		p++;
 	}
-
-	cbc_printchar('#');cbc_printchar('?');
 
 	return n;
 }

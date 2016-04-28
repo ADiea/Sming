@@ -16,13 +16,17 @@ void cpp_core_initialize()
 
 void *operator new(size_t size)
 {
+#ifdef MEMLEAK_DEBUG
   debugf("new: malloc %d (%d)", size, system_get_free_heap_size());
+#endif
   return malloc(size);
 }
 
 void *operator new[](size_t size)
 {
+#ifdef MEMLEAK_DEBUG
   debugf("new[]: malloc %d (%d)", size, system_get_free_heap_size());
+#endif
   return malloc(size);
 }
 

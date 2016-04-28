@@ -109,8 +109,12 @@
 
 #include "umm_malloc_cfg.h"   /* user-dependent */
 
+#ifdef MEM_HEAPMAP
 extern uint16_t gTotalHeapOp; //total heap operations
 extern void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld);
+#else
+#define recordHeapOp
+#endif /*MEM_HEAPMAP*/
 
 #ifndef UMM_FIRST_FIT
 #  ifndef UMM_BEST_FIT
@@ -163,62 +167,43 @@ extern void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld
 #undef DBG_LOG_INFO
 #undef DBG_LOG_FORCE
 
-#define MAX_LOG_OP_LIMIT 40
-
 /* ------------------------------------------------------------------------- */
 
 #define DBG_MEM_OP( format, ... )
 
-/*
-uint32_t sizeBufLog = 0, printSz;
-#define SZ_LOG_BUF 2048
-char bufLog[SZ_LOG_BUF];
-char printed=0;
-
-#define DBG_MEM_OP( format, ... ) { \
-										if(sizeBufLog+30 < SZ_LOG_BUF) \
-											sizeBufLog += m_snprintf(bufLog+sizeBufLog, SZ_LOG_BUF - sizeBufLog,  format, ## __VA_ARGS__ ); \
-										 else if(gTotalHeapOp > 80 && !printed) \
-										 { \
-											 printed=1; \
-											 for(printSz=0; printSz<sizeBufLog; printSz++) \
-											 m_putc(bufLog[printSz]); \
-										 } \
-									}
-*/
 
 #if DBG_LOG_LEVEL >= 6
-#  define DBG_LOG_TRACE( format, ... ) { if(gTotalHeapOp < MAX_LOG_OP_LIMIT) LOG_II( format, ## __VA_ARGS__ ); }
+#  define DBG_LOG_TRACE( format, ... ) {  LOG_II( format, ## __VA_ARGS__ ); }
 #else
 #  define DBG_LOG_TRACE( format, ... )
 #endif
 
 #if DBG_LOG_LEVEL >= 5
-#  define DBG_LOG_DEBUG( format, ... ) { if(gTotalHeapOp < MAX_LOG_OP_LIMIT) LOG_II( format, ## __VA_ARGS__ ); }
+#  define DBG_LOG_DEBUG( format, ... ) {  LOG_II( format, ## __VA_ARGS__ ); }
 #else
 #  define DBG_LOG_DEBUG( format, ... )
 #endif
 
 #if DBG_LOG_LEVEL >= 4
-#  define DBG_LOG_CRITICAL( format, ... ) { if(gTotalHeapOp < MAX_LOG_OP_LIMIT) LOG_II( format, ## __VA_ARGS__ ); }
+#  define DBG_LOG_CRITICAL( format, ... ) {  LOG_II( format, ## __VA_ARGS__ ); }
 #else
 #  define DBG_LOG_CRITICAL( format, ... )
 #endif
 
 #if DBG_LOG_LEVEL >= 3
-#  define DBG_LOG_ERROR( format, ... ) { if(gTotalHeapOp < MAX_LOG_OP_LIMIT) LOG_II( format, ## __VA_ARGS__ ); }
+#  define DBG_LOG_ERROR( format, ... ) {  LOG_II( format, ## __VA_ARGS__ ); }
 #else
 #  define DBG_LOG_ERROR( format, ... )
 #endif
 
 #if DBG_LOG_LEVEL >= 2
-#  define DBG_LOG_WARNING( format, ... ) { if(gTotalHeapOp < MAX_LOG_OP_LIMIT) LOG_II( format, ## __VA_ARGS__ ); }
+#  define DBG_LOG_WARNING( format, ... ) {  LOG_II( format, ## __VA_ARGS__ ); }
 #else
 #  define DBG_LOG_WARNING( format, ... )
 #endif
 
 #if DBG_LOG_LEVEL >= 1
-#  define DBG_LOG_INFO( format, ... ) { if(gTotalHeapOp < MAX_LOG_OP_LIMIT) LOG_II( format, ## __VA_ARGS__ ); }
+#  define DBG_LOG_INFO( format, ... ) {  LOG_II( format, ## __VA_ARGS__ ); }
 #else
 #  define DBG_LOG_INFO( format, ... )
 #endif

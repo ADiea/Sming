@@ -10,13 +10,9 @@
 
 #define IRAM_ATTR __attribute__((section(".iram.text")))
 
+#ifdef MEM_HEAPMAP
 #define HEAP_OP_SIZE 120
-/*
-extern void *umm_malloc( size_t size );
-extern void *umm_calloc( size_t num, size_t size );
-extern void *umm_realloc( void *ptr, size_t size );
-extern void umm_free( void *ptr );
-*/
+
 typedef struct _heapOp
 {
 	char op;
@@ -72,6 +68,7 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 	gLastHeapOp[heapOpIndex].addrOld = addrOld;
 	gLastHeapOp[heapOpIndex].opCounter = gTotalHeapOp;
 }
+#endif /*MEM_HEAPMAP*/
 
 
 /**
