@@ -76,7 +76,6 @@ EXP_FUNC SSL * STDCALL /*ICACHE_FLASH_ATTR*/ ssl_client_new(SSL_CTX *ssl_ctx, in
  */
 int /*ICACHE_FLASH_ATTR*/ do_clnt_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len)
 {
-	printf("SSL > %s %d", __FUNCTION__, handshake_type);
     int ret;
 
     /* To get here the state must be valid */
@@ -330,7 +329,6 @@ static int /*ICACHE_FLASH_ATTR*/ process_server_hello_done(SSL *ssl)
  */
 static int /*ICACHE_FLASH_ATTR*/ send_client_key_xchg(SSL *ssl)
 {
-	printf("SSL > %s", __FUNCTION__);
 
     uint8_t *buf = ssl->bm_data;
     uint8_t premaster_secret[SSL_SECRET_SIZE];

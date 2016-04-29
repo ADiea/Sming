@@ -2096,7 +2096,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * DNS_DEBUG: Enable debugging for DNS.
  */
 #ifndef DNS_DEBUG
-#define DNS_DEBUG                       (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
+#define DNS_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**

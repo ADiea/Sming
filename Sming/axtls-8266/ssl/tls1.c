@@ -2002,25 +2002,6 @@ void /*ICACHE_FLASH_ATTR*/ DISPLAY_STATE(SSL *ssl, int is_send, uint8_t state, i
     if (!IS_SET_SSL_FLAG(SSL_DISPLAY_STATES))
         return;
 
-    if(not_ok)
-    {
-    	printf("Error - invalid State:\t");
-    }
-    else
-    {
-    	printf("State:\t");
-    }
-
-    if(is_send)
-    {
-    	printf("sending ");
-    }
-    else
-    {
-    	printf("receiving ");
-    }
-
-
     switch (state)
     {
         case HS_HELLO_REQUEST:
@@ -2069,7 +2050,21 @@ void /*ICACHE_FLASH_ATTR*/ DISPLAY_STATE(SSL *ssl, int is_send, uint8_t state, i
             break;
     }
 
-    printf("%s\n", str);
+    if(not_ok)
+    {
+    	printf("Error - invalid State:\t");
+    }
+    else
+    {
+        if(is_send)
+        {
+        	printf("SSL state: sending %s", str);
+        }
+        else
+        {
+        	printf("SSL state: receiving %s", str);
+        }
+    }
     TTY_FLUSH();
 }
 

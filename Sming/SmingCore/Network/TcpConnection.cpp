@@ -384,8 +384,6 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 		tcp_abort(tcp);
 		return ERR_ABRT;
 	}
-	//else
-	//	debugf("TCP: OnConnected");
 
 #ifndef ENABLE_SSL
 	if(con->useSsl) {
@@ -402,13 +400,11 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 		}
 		else {
 			uint32_t sslOptions = con->sslOptions;
-#ifdef SSL_DEBUG
+#if SSL_DEBUG
 			sslOptions |= SSL_DISPLAY_STATES /*| SSL_DISPLAY_BYTES | SSL_DISPLAY_CERTS | SSL_DISPLAY_RSA*/;
 			debugf("SSL: Show debug data ...");
 #endif
-			debugf("SSL: Starting connection...");
 #ifndef SSL_SLOW_CONNECT
-			debugf("SSL: Switching to 160 MHz");
 			System.setCpuFrequency(eCF_160MHz); // For shorter waiting time, more power consumption.
 #endif
 			debugf("SSL: handshake start");
@@ -444,12 +440,11 @@ err_t TcpConnection::staticOnConnected(void *arg, tcp_pcb *tcp, err_t err)
 			}
 
 			if(ssl_handshake_status(con->ssl)!=SSL_OK) {
-				debugf("SSL: handshake is in progress...");
+				//debugf("SSL: handshake is in progress...");
 				return SSL_OK;
 			}
 
 #ifndef SSL_SLOW_CONNECT
-			debugf("SSL: Switching back 80 MHz");
 			System.setCpuFrequency(eCF_80MHz);
 #endif
 		}

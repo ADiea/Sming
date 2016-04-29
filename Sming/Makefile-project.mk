@@ -180,7 +180,7 @@ CXXFLAGS	= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++11 -felide-constructors
 EXTRA_INCDIR += $(SMING_HOME)/axtls-8266 $(SMING_HOME)/axtls-8266/ssl $(SMING_HOME)/axtls-8266/crypto 
 AXTLS_FLAGS = -DLWIP_RAW=1 -DENABLE_SSL=1
 ifeq ($(SSL_DEBUG),1) # 
-	AXTLS_FLAGS += -DSSL_DEBUG=1
+	AXTLS_FLAGS += -DSSL_DEBUG=0 -DAXL_DEBUG=0
 endif
 
 

@@ -150,8 +150,6 @@ int /*ICACHE_FLASH_ATTR*/ RSA_decrypt(const RSA_CTX *ctx, const uint8_t *in_data
     uint8_t *block = (uint8_t *)malloc(byte_size);
     int pad_count = 0;
 
-    printf("SSL > %s", __FUNCTION__);
-
     if (out_len < byte_size)        /* check output has enough size */
        goto error;
 
@@ -202,10 +200,6 @@ int /*ICACHE_FLASH_ATTR*/ RSA_decrypt(const RSA_CTX *ctx, const uint8_t *in_data
 
 error:
 	free(block);
-	if(size == -1)
-		printf("SSL %s error", __FUNCTION__);
-
-	printf("SSL %s >", __FUNCTION__);
 	return size;
 }
 
