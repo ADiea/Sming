@@ -47,7 +47,9 @@ size_t MemoryDataStream::write(const uint8_t* data, size_t len)
 		if (required > capacity)
 		{
 			capacity = required < 256 ? required + 128 : required + 64;
+#ifdef MEMLEAK_DEBUG
 			debugf("MStream realloc %d -> %d", size, capacity);
+#endif
 			buf = (char*)realloc(buf, capacity);
 		}
 		buf[cur + len] = '\0';

@@ -4,6 +4,10 @@
 #include <stdarg.h>
 #include "FakePgmSpace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DEBUG_BUILD 1
 
 #define ERR 0	
@@ -18,18 +22,19 @@
 #define TOKEN_PASTE(x,y,z) x##y##z
 #define TOKEN_PASTE2(x,y, z) TOKEN_PASTE(x,y,z)
 
+#define GET_FUNC __FUNCTION__
 
 #define LOG_E(fmt, ...) \
 	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
 	__attribute__((aligned(4))) \
-	__attribute__((section(".irom.text"))) = fmt"\n\0"; \
-	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), ##__VA_ARGS__);})
+	__attribute__((section(".irom.text"))) = "\nL%4d: " fmt; \
+	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), __LINE__, ##__VA_ARGS__);})
 
 //log inline with no \n
 #define LOG_EI(fmt, ...) \
 	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
 	__attribute__((aligned(4))) \
-	__attribute__((section(".irom.text"))) = fmt"\0"; \
+	__attribute__((section(".irom.text"))) = fmt; \
 	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), ##__VA_ARGS__);})
 		
 
@@ -70,5 +75,9 @@
 	#define LOG_D
 	#define LOG_DI
 #endif /*DEBUG_BUILD*/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*#ifndef DEBUG_PROGMEM_H*/

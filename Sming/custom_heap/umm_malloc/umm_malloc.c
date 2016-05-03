@@ -108,6 +108,7 @@
 #include "umm_malloc.h"
 
 #include "umm_malloc_cfg.h"   /* user-dependent */
+void (*outOfMemoryCb)(size_t) = NULL;
 
 #ifdef MEM_HEAPMAP
 extern uint16_t gTotalHeapOp; //total heap operations
@@ -1080,6 +1081,9 @@ static void *_umm_malloc( size_t size ) {
 
     /* Release the critical section... */
     UMM_CRITICAL_EXIT();
+
+    if(outOfMemoryCb)
+    	outOfMemoryCb(size);
 
     return( (void *)NULL );
   }

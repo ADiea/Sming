@@ -62,6 +62,8 @@ public:
 	virtual unsigned short transfer16(unsigned short val) = 0;
 	virtual void transfer(uint8 * buffer, size_t size) = 0;
 
+	virtual void setDelay(uint8_t dly){}
+
 	SPISettings SPIDefaultSettings;
 
 };

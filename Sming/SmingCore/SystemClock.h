@@ -64,6 +64,9 @@ public:
      */
 	bool setTimeZone(double localTimezoneOffset);
 
+
+	void setLastKnownTime(uint32_t time);
+
     /** @} */
 
 private:

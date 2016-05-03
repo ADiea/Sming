@@ -15,7 +15,10 @@ DateTime SystemClockClass::now(TimeZone timeType /* = eTZ_Local */)
 	}
 }
 
-
+void SystemClockClass::setLastKnownTime(uint32_t time)
+{
+	RTC.setRtcSeconds(time);
+}
 
 
 void SystemClockClass::setTime(time_t time, TimeZone timeType /* = eTZ_Local */)

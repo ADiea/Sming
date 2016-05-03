@@ -173,7 +173,7 @@ void TcpConnection::onError(err_t err)
 
 void TcpConnection::onReadyToSendData(TcpConnectionEvent sourceEvent)
 {
-	if (sourceEvent != eTCE_Poll) debugf("onReadyToSendData: %d", sourceEvent);
+	//if (sourceEvent != eTCE_Poll) debugf("onReadyToSendData: %d", sourceEvent);
 }
 
 int TcpConnection::writeString(const String data, uint8_t apiflags /* = TCP_WRITE_FLAG_COPY*/)

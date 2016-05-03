@@ -67,9 +67,9 @@ extern "C"
 		})
 	#define printf_P(f_P, ...) \
 		({ \
-			int __result=0;char __localF[256]; \
-			__result = m_printf(strncpy_P(__localF, sizeof(__localF), (f_P)), ##__VA_ARGS__); \
-			__result; \
+			char __localF[256]; \
+			memset(__localF, 0, sizeof(__localF)); \
+			m_printf(strncpy_P(__localF, sizeof(__localF), (f_P)), ##__VA_ARGS__); \
 		})
 #ifdef __cplusplus
 }
