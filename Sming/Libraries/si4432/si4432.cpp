@@ -199,9 +199,9 @@ eRadioError Si4432::sendPacket(uint8_t length,
 	}
 
 	//timeout occured.
-	debugf("TX timeout");
 #if DEBUG_SI4432
-	readAll();
+	debugf("TX timeout");
+	//readAll();
 #endif
 	switchMode(Ready);
 
@@ -231,9 +231,10 @@ bool Si4432::waitForPacket(uint64_t waitMs) {
 	}
 	//timeout occured.
 
-	debugf("RX timeout");
+
 #if DEBUG_SI4432
-	readAll();
+	debugf("RX timeout");
+	//readAll();
 #endif
 	switchMode(Ready);
 	clearRxFIFO();

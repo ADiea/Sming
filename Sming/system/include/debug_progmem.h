@@ -22,13 +22,14 @@ extern "C" {
 #define TOKEN_PASTE(x,y,z) x##y##z
 #define TOKEN_PASTE2(x,y, z) TOKEN_PASTE(x,y,z)
 
-#define GET_FUNC __FUNCTION__
+#define GET_FILENAME(x) #x
+#define GET_FNAME2(x) GET_FILENAME(x)
 
 #define LOG_E(fmt, ...) \
 	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
 	__attribute__((aligned(4))) \
-	__attribute__((section(".irom.text"))) = "\nL%4d: " fmt; \
-	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), __LINE__, ##__VA_ARGS__);})
+	__attribute__((section(".irom.text"))) = fmt " \t[" GET_FNAME2(CUST_FILE_BASE) ":%d]\n"; \
+	printf_P(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), ##__VA_ARGS__, __LINE__);})
 
 //log inline with no \n
 #define LOG_EI(fmt, ...) \

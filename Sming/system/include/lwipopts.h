@@ -2068,7 +2068,7 @@ DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
  * DHCP_DEBUG: Enable debugging in dhcp.c.
  */
 #ifndef DHCP_DEBUG
-#define DHCP_DEBUG                      (LWIP_DBG_OFF)
+#define DHCP_DEBUG                      (LWIP_DBG_LEVEL_ALL | LWIP_DBG_ON)
 #endif
 
 /**
