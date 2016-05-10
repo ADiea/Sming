@@ -80,12 +80,12 @@ int axl_ssl_read(SSL *ssl, struct tcp_pcb *tcp, struct pbuf *pin, struct pbuf **
 	AxlTcpData* data = NULL;
 
 	if (ssl == NULL) {
-		AXL_DEBUG_PRINT("axl_ssl_read: SSL is null\n");
+		AXL_DEBUG_PRINT("SSL is null");
 		return ERR_AXL_INVALID_SSL;
 	}
 
 	if(pin == NULL) {
-		AXL_DEBUG_PRINT("axl_ssl_read: PBUF is null\n");
+		AXL_DEBUG_PRINT("PBUF is null");
 		return ERR_AXL_INVALID_PBUF;
 	}
 
@@ -96,13 +96,13 @@ int axl_ssl_read(SSL *ssl, struct tcp_pcb *tcp, struct pbuf *pin, struct pbuf **
 
 	clientfd = ax_fd_getfd(&axlFdArray, tcp);
 	if(clientfd == -1) {
-		AXL_DEBUG_PRINT("axl_ssl_read: ClientFD not found\n");
+		AXL_DEBUG_PRINT("ClientFD not found");
 		return ERR_AXL_INVALID_CLIENTFD;
 	}
 
 	data = ax_fd_get(&axlFdArray, clientfd);
 	if(data == NULL) {
-		AXL_DEBUG_PRINT("axl_ssl_read: ClientFD data not found\n");
+		AXL_DEBUG_PRINT("ClientFD data not found");
 		return ERR_AXL_INVALID_CLIENTFD_DATA;
 	}
 
@@ -112,7 +112,7 @@ int axl_ssl_read(SSL *ssl, struct tcp_pcb *tcp, struct pbuf *pin, struct pbuf **
 	do {
 		WATCHDOG_RESET();
 		read_bytes = ssl_read(ssl, &read_buffer);
-		AXL_DEBUG_PRINT("axl_ssl_read: Read bytes: %d\n", read_bytes);
+		AXL_DEBUG_PRINT("Read bytes: %d", read_bytes);
 		if(read_bytes < SSL_OK) {
 			/* An error has occurred. Give it back for further processing */
 			if(total_bytes == 0) {
@@ -122,7 +122,7 @@ int axl_ssl_read(SSL *ssl, struct tcp_pcb *tcp, struct pbuf *pin, struct pbuf **
 			else {
 				// We already have read some data -> deliver it back
 				// and silence the error for now..
-				AXL_DEBUG_PRINT("axl_ssl_read: Silently ignoring SSL error %d\n", read_bytes);
+				AXL_DEBUG_PRINT("Silently ignoring SSL error %d", read_bytes);
 			}
 
 			break;
@@ -132,12 +132,12 @@ int axl_ssl_read(SSL *ssl, struct tcp_pcb *tcp, struct pbuf *pin, struct pbuf **
 				total_read_buffer = (uint8_t *)malloc(read_bytes);
 			}
 			else {
-				AXL_DEBUG_PRINT("axl_ssl_read: Got more than one SSL packet inside one TCP packet\n");
+				AXL_DEBUG_PRINT("Got more than one SSL packet inside one TCP packet");
 				total_read_buffer = (uint8_t *)realloc(total_read_buffer, total_bytes + read_bytes);
 			}
 
 			if(total_read_buffer == NULL) {
-				AXL_DEBUG_PRINT("axl_ssl_read: Unable to allocate additional %d bytes", read_bytes);
+				AXL_DEBUG_PRINT("Unable to allocate additional %d bytes", read_bytes);
 				while(1) {}
 			}
 
@@ -149,7 +149,7 @@ int axl_ssl_read(SSL *ssl, struct tcp_pcb *tcp, struct pbuf *pin, struct pbuf **
 	if(total_bytes > 0) {
 		// put the decrypted data in a brand new pbuf
 		*pout = pbuf_alloc(PBUF_TRANSPORT, total_bytes, PBUF_RAM);
-		AXL_DEBUG_PRINT("axl_ssl_read: malloc %d+54 %x", total_bytes, (uint32_t)pout);
+		AXL_DEBUG_PRINT("malloc %d+54 %x", total_bytes, (uint32_t)pout);
 		memcpy((*pout)->payload, total_read_buffer, total_bytes);
 		free(total_read_buffer);
 	}
@@ -171,12 +171,12 @@ int ax_port_write(int clientfd, uint8_t *buf, uint16_t bytes_needed) {
 
 	data = ax_fd_get(&axlFdArray, clientfd);
 	if(data == NULL) {
-		AXL_DEBUG_PRINT("ax_port_write: Invalid ClientFD.\n");
+		AXL_DEBUG_PRINT("Invalid ClientFD.");
 		return ERR_AXL_INVALID_CLIENTFD;
 	}
 
 	if (data == NULL || data->tcp == NULL || buf == NULL || bytes_needed == 0) {
-		AXL_DEBUG_PRINT("ax_port_write: Return Zero.\n");
+		AXL_DEBUG_PRINT("Return Zero.");
 		return 0;
 	}
 
@@ -184,7 +184,7 @@ int ax_port_write(int clientfd, uint8_t *buf, uint16_t bytes_needed) {
 		tcp_len = tcp_sndbuf(data->tcp);
 		if(tcp_len == 0) {
 			err = tcp_output(data->tcp);
-			AXL_DEBUG_PRINT("ax_port_write: The send buffer is full! We have problem.\n");
+			AXL_DEBUG_PRINT("The send buffer is full! We have problem.");
 			return 0;
 		}
 
@@ -199,19 +199,19 @@ int ax_port_write(int clientfd, uint8_t *buf, uint16_t bytes_needed) {
 	do {
 		err = tcp_write(data->tcp, buf, tcp_len, TCP_WRITE_FLAG_COPY);
 		if(err < SSL_OK) {
-			AXL_DEBUG_PRINT("ax_port_write: Got error: %d\n", err);
+			AXL_DEBUG_PRINT("Got error: %d", err);
 		}
 
 		if (err == ERR_MEM) {
-			AXL_DEBUG_PRINT("ax_port_write: Not enough memory to write data with length: %d (%d)\n", tcp_len, bytes_needed);
+			AXL_DEBUG_PRINT("Not enough memory to write data with length: %d (%d)", tcp_len, bytes_needed);
 			tcp_len /= 2;
 		}
 	} while (err == ERR_MEM && tcp_len > 1);
-	AXL_DEBUG_PRINT("ax_port_write: send_raw_packet length %d(%d)\n", tcp_len, bytes_needed);
+	AXL_DEBUG_PRINT("send_raw_packet length %d(%d)", tcp_len, bytes_needed);
 	if (err == ERR_OK) {
 		err = tcp_output(data->tcp);
 		if(err != ERR_OK) {
-			AXL_DEBUG_PRINT("ax_port_write: tcp_output got err: %d\n", err);
+			AXL_DEBUG_PRINT("tcp_output got err: %d", err);
 		}
 	}
 
@@ -233,7 +233,7 @@ int ax_port_read(int clientfd, uint8_t *buf, int bytes_needed) {
 	}
 
 	if(data->tcp_pbuf == NULL || data->tcp_pbuf->tot_len == 0) {
-		AXL_DEBUG_PRINT("ax_port_read: Nothing to read?! May be the connection needs resetting?\n");
+		AXL_DEBUG_PRINT("ax_port_read: Nothing to read?! May be the connection needs resetting?");
 		return 0;
 	}
 
@@ -249,7 +249,7 @@ int ax_port_read(int clientfd, uint8_t *buf, int bytes_needed) {
 	}
 
 	if(bytes_needed < recv_len) {
-		AXL_DEBUG_PRINT("ax_port_read: Bytes needed: %d, Bytes read: %d\n", bytes_needed, recv_len);
+		AXL_DEBUG_PRINT("ax_port_read: Bytes needed: %d, Bytes read: %d", bytes_needed, recv_len);
 	}
 
 	free(pread_buf);
@@ -290,7 +290,7 @@ int ax_fd_append(AxlTcpDataArray *vector, struct tcp_pcb *tcp) {
 
 AxlTcpData* ax_fd_get(AxlTcpDataArray *vector, int index) {
 	if (index >= vector->size || index < 0) {
-		AXL_DEBUG_PRINT("ax_fd_get: Index %d out of bounds for vector of size %d\n", index, vector->size);
+		AXL_DEBUG_PRINT("ax_fd_get: Index %d out of bounds for vector of size %d", index, vector->size);
 		return NULL;
 	}
 	return &(vector->data[index]);

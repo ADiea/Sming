@@ -99,7 +99,7 @@ int /*ICACHE_FLASH_ATTR*/ pkcs8_decode(SSL_CTX *ssl_ctx, SSLObjLoader *ssl_obj, 
     if (asn1_next_obj(buf, &offset, ASN1_SEQUENCE) < 0)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: Invalid p8 ASN.1 file\n");
+        printf("Error: Invalid p8 ASN.1 file");
 #endif
         goto error;
     }
@@ -252,7 +252,7 @@ int /*ICACHE_FLASH_ATTR*/ pkcs12_decode(SSL_CTX *ssl_ctx, SSLObjLoader *ssl_obj,
     if (asn1_next_obj(buf, &offset, ASN1_SEQUENCE) < 0)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: Invalid p12 ASN.1 file\n");
+        printf("Error: Invalid p12 ASN.1 file");
 #endif
         goto error;
     }
@@ -448,7 +448,7 @@ static int /*ICACHE_FLASH_ATTR*/ get_pbe_params(uint8_t *buf, int *offset,
                     memcmp(&buf[*offset], pbeSH1RC4, sizeof(pbeSH1RC4)))
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: pkcs8/pkcs12 must use \"PBE-SHA1-RC4-128\"\n");
+        printf("Error: pkcs8/pkcs12 must use \"PBE-SHA1-RC4-128\"");
 #endif
         goto error;
     }

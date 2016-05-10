@@ -123,7 +123,7 @@ void /*ICACHE_FLASH_ATTR*/ bi_terminate(BI_CTX *ctx)
     if (ctx->active_count != 0)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("bi_terminate: there were %d un-freed bigints\n",
+        printf("bi_terminate: there were %d un-freed bigints",
                        ctx->active_count);
 #endif
         abort();
@@ -180,7 +180,7 @@ void /*ICACHE_FLASH_ATTR*/ bi_permanent(bigint *bi)
     if (bi->refs != 1)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("bi_permanent: refs was not 1\n");
+        printf("bi_permanent: refs was not 1");
 #endif
         abort();
     }
@@ -198,7 +198,7 @@ void /*ICACHE_FLASH_ATTR*/ bi_depermanent(bigint *bi)
     if (bi->refs != PERMANENT)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("bi_depermanent: bigint was not permanent\n");
+        printf("bi_depermanent: bigint was not permanent");
 #endif
         abort();
     }
@@ -234,7 +234,7 @@ void /*ICACHE_FLASH_ATTR*/ bi_free(BI_CTX *ctx, bigint *bi)
     {
 #ifdef CONFIG_SSL_FULL_MODE
         printf("bi_free: active_count went negative "
-                "- double-freed bigint?\n");
+                "- double-freed bigint?");
 #endif
         abort();
     }
@@ -677,11 +677,11 @@ void bi_print(const char *label, bigint *x)
 
     if (x == NULL)
     {
-        printf("%s: (null)\n", label);
+        printf("%s: (null)", label);
         return;
     }
 
-    printf("%s: (size %d)\n", label, x->size);
+    printf("%s: (size %d)", label, x->size);
     for (i = x->size-1; i >= 0; i--)
     {
         for (j = COMP_NUM_NIBBLES-1; j >= 0; j--)
@@ -692,7 +692,7 @@ void bi_print(const char *label, bigint *x)
         }
     }  
 
-    printf("\n");
+    printf("");
 }
 #endif
 
@@ -1098,7 +1098,7 @@ static bigint * /*ICACHE_FLASH_ATTR*/ alloc(BI_CTX *ctx, int size)
         if (biR->refs != 0)
         {
 #ifdef CONFIG_SSL_FULL_MODE
-            printf("alloc: refs was not 0\n");
+            printf("alloc: refs was not 0");
 #endif
             abort();    /* create a stack trace from a core dump */
         }
@@ -1174,14 +1174,14 @@ static void /*ICACHE_FLASH_ATTR*/ check(const bigint *bi)
 {
     if (bi->refs <= 0)
     {
-        printf("check: zero or negative refs in bigint\n");
+        printf("check: zero or negative refs in bigint");
         abort();
     }
 
     if (bi->next != NULL)
     {
         printf("check: attempt to use a bigint from "
-                "the free list\n");
+                "the free list");
         abort();
     }
 }

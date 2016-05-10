@@ -85,7 +85,7 @@ int /*ICACHE_FLASH_ATTR*/ get_file(const char *filename, uint8_t **buf)
     if (stream == NULL)
     {
 #ifdef CONFIG_SSL_FULL_MODE         
-        printf("file '%s' does not exist\n", filename); TTY_FLUSH();
+        printf("file '%s' does not exist", filename); TTY_FLUSH();
 #endif
         return -1;
     }
@@ -128,7 +128,7 @@ EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ RNG_initialize()
                        PROV_RSA_FULL, 
                        CRYPT_NEWKEYSET))
         {
-        	printf("CryptoLib: Error: Feature not supported %x\n", GetLastError());
+        	printf("CryptoLib: Error: Feature not supported %x", GetLastError());
             exit(1);
         }
     }
@@ -385,7 +385,7 @@ EXP_FUNC int STDCALL /*ICACHE_FLASH_ATTR*/ base64_decode(const char *in, int len
 error:
 #ifdef CONFIG_SSL_FULL_MODE
     if (ret < 0)
-        printf("Error: Invalid base64\n"); TTY_FLUSH();
+        printf("Error: Invalid base64"); TTY_FLUSH();
 #endif
     //TTY_FLUSH();
     return ret;

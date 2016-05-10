@@ -301,7 +301,7 @@ espconn_connect(struct espconn *espconn)
     	ipaddr.addr <<= 8;
     	wifi_get_ip_info(AP_NETIF,&ipinfo);
     	ipinfo.ip.addr <<= 8;
-    	espconn_printf("softap_addr = %x, remote_addr = %x\n", ipinfo.ip.addr, ipaddr.addr);
+    	espconn_printf("softap_addr = %x, remote_addr = %x", ipinfo.ip.addr, ipaddr.addr);
 
     	if (ipaddr.addr != ipinfo.ip.addr){
     		connect_status = wifi_station_get_connect_status();

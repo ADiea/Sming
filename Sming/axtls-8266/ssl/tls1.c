@@ -336,7 +336,7 @@ int /*ICACHE_FLASH_ATTR*/ add_cert(SSL_CTX *ssl_ctx, const uint8_t *buf, int len
     {
 #ifdef CONFIG_SSL_FULL_MODE
         printf("Error: maximum number of certs added (%d) - change of "
-                "compile-time configuration required\n",
+                "compile-time configuration required",
                 CONFIG_SSL_MAX_CERTS);
 #endif
         goto error;
@@ -394,7 +394,7 @@ int /*ICACHE_FLASH_ATTR*/ add_cert_auth(SSL_CTX *ssl_ctx, const uint8_t *buf, in
         {
 #ifdef CONFIG_SSL_FULL_MODE
             printf("Error: maximum number of CA certs added (%d) - change of "
-                    "compile-time configuration required\n", 
+                    "compile-time configuration required",
                     CONFIG_X509_MAX_CA_CERTS);
 #endif
             ret = X509_MAX_CERTS;
@@ -889,7 +889,7 @@ void /*ICACHE_FLASH_ATTR*/ finished_digest(SSL *ssl, const char *label, uint8_t 
     }
 
 #if 0
-    printf("label: %s\n", label);
+    printf("label: %s", label);
     print_blob("master secret", ssl->dc->master_secret, 48);
     print_blob("mac_buf", mac_buf, q-mac_buf);
     print_blob("finished digest", digest, SSL_FINISHED_HASH_SIZE);
@@ -1281,7 +1281,7 @@ int /*ICACHE_FLASH_ATTR*/ basic_read(SSL *ssl, uint8_t **in_data)
             add_packet(ssl, &buf[2], 3);
             ret = process_sslv23_client_hello(ssl); 
 #else
-            printf("Error: no SSLv23 handshaking allowed\n"); TTY_FLUSH();
+            printf("Error: no SSLv23 handshaking allowed"); TTY_FLUSH();
             ret = SSL_ERROR_NOT_SUPPORTED;
 #endif
             goto error; /* not an error - just get out of here */
@@ -1293,7 +1293,7 @@ int /*ICACHE_FLASH_ATTR*/ basic_read(SSL *ssl, uint8_t **in_data)
         if (ssl->need_bytes > ssl->max_plain_length+RT_EXTRA-BM_RECORD_OFFSET)
         {
             ret = SSL_ERROR_INVALID_PROT_MSG;              
-            printf("SSL: ssl->need_bytes=%d > %d\r\n", ssl->need_bytes, ssl->max_plain_length+RT_EXTRA-BM_RECORD_OFFSET);
+            printf("SSL: ssl->need_bytes=%d > %d\r", ssl->need_bytes, ssl->max_plain_length+RT_EXTRA-BM_RECORD_OFFSET);
             goto error;
         }
 
@@ -1421,7 +1421,7 @@ int increase_bm_data_size(SSL *ssl)
     ssl->bm_data = 0;
     ssl->bm_all_data = malloc(RT_MAX_PLAIN_LENGTH + RT_EXTRA);
     if (!ssl->bm_all_data) {
-        printf("failed to grow plain buffer\r\n");
+        printf("failed to grow plain buffer\r");
         ssl->hs_status == SSL_ERROR_DEAD;
         return SSL_ERROR_CONN_LOST;
     }
@@ -1977,11 +1977,10 @@ EXP_FUNC int STDCALL ssl_match_fingerprint(const SSL *ssl, const uint8_t* fp)
         for (int i = 0; i < SHA1_SIZE; ++i) {
             printf("%02X ", ssl->x509_ctx->fingerprint[i]);
         }
-        printf("\r\ntest FP: ");
+        printf("test FP: ");
         for (int i = 0; i < SHA1_SIZE; ++i) {
             printf("%02X ", fp[i]);
         }
-        printf("\r\n");
     }
     return res;
 }
@@ -2110,14 +2109,14 @@ EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ ssl_display_error(int error_code)
     /* X509 error? */
     if (error_code < SSL_X509_OFFSET)
     {
-        printf("%s\n", x509_display_error(error_code - SSL_X509_OFFSET));
+        printf("%s", x509_display_error(error_code - SSL_X509_OFFSET));
         return;
     }
 
     /* SSL alert error code */
     if (error_code > SSL_ERROR_CONN_LOST)
     {
-        printf("SSL error %d\n", -error_code);
+        printf("SSL error %d", -error_code);
         return;
     }
 
@@ -2184,7 +2183,6 @@ EXP_FUNC void STDCALL /*ICACHE_FLASH_ATTR*/ ssl_display_error(int error_code)
             break;
     }
 
-    printf("\n");
     TTY_FLUSH();
 }
 
@@ -2245,7 +2243,6 @@ void /*ICACHE_FLASH_ATTR*/ DISPLAY_ALERT(SSL *ssl, int alert)
             break;
     }
 
-    printf("\n");
     TTY_FLUSH();
 }
 
@@ -2273,7 +2270,7 @@ EXP_FUNC void STDCALL ssl_display_error(int error_code) {}
 EXP_FUNC SSL * STDCALL /*ICACHE_FLASH_ATTR*/ ssl_client_new(SSL_CTX *ssl_ctx, int client_fd, const
         uint8_t *session_id, uint8_t sess_id_size)
 {
-    printf("Error: Feature not supported\n");
+    printf("Error: Feature not supported");
     return NULL;
 }
 #endif
@@ -2281,20 +2278,20 @@ EXP_FUNC SSL * STDCALL /*ICACHE_FLASH_ATTR*/ ssl_client_new(SSL_CTX *ssl_ctx, in
 #if !defined(CONFIG_SSL_CERT_VERIFICATION)
 EXP_FUNC int STDCALL /*ICACHE_FLASH_ATTR*/ ssl_verify_cert(const SSL *ssl)
 {
-    printf("Error: Feature not supported\n");
+    printf("Error: Feature not supported");
     return -1;
 }
 
 
 EXP_FUNC const char * STDCALL /*ICACHE_FLASH_ATTR*/ ssl_get_cert_dn(const SSL *ssl, int component)
 {
-    printf("Error: Feature not supported\n");
+    printf("Error: Feature not supported");
     return NULL;
 }
 
 EXP_FUNC const char * STDCALL /*ICACHE_FLASH_ATTR*/ ssl_get_cert_subject_alt_dnsname(const SSL *ssl, int index)
 {
-    printf("Error: Feature not supported\n");
+    printf("Error: Feature not supported");
     return NULL;
 }
 

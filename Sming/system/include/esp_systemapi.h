@@ -40,7 +40,7 @@
 #define debugf LOG_E
 
 #define assert(condition) if (!(condition)) SYSTEM_ERROR("ASSERT: %s %d", __FUNCTION__, __LINE__)
-#define SYSTEM_ERROR(fmt, ...) m_printf("ERROR: " fmt "\r\n", ##__VA_ARGS__)
+#define SYSTEM_ERROR(fmt, ...) m_printf("ERROR: " fmt "\n", ##__VA_ARGS__)
 
 extern void ets_timer_arm_new(ETSTimer *ptimer, uint32_t milliseconds, bool repeat_flag, int isMstimer);
 extern void ets_timer_disarm(ETSTimer *a);

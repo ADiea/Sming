@@ -37,7 +37,6 @@ void recordHeapOp(char op, uint32_t size, uint32_t addr, uint32_t addrOld)
 	   heapOpIndex >= gHeapOpFlushAfter - 1)
 	{
 		//Need to flush
-		m_printf("\n");
 		for(i=0; i <= heapOpIndex; i++)
 		{
 			if(gLastHeapOp[i].op == 'f')

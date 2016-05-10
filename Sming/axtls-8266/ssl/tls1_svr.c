@@ -58,7 +58,7 @@ EXP_FUNC SSL * /*ICACHE_FLASH_ATTR*/ STDCALL ssl_server_new(SSL_CTX *ssl_ctx, in
 
 #ifdef CONFIG_SSL_FULL_MODE
     if (ssl_ctx->chain_length == 0)
-        printf("Warning - no server certificate defined\n"); TTY_FLUSH();
+        printf("Warning - no server certificate defined"); TTY_FLUSH();
 #endif
 
     return ssl;

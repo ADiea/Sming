@@ -25,7 +25,7 @@ extern uint64_t system_mktime(uint32_t year, uint32_t mon, uint32_t day, uint32_
 static int errno_var = 0;
 
 int* __errno(void) {
-    // DEBUGV("__errno is called last error: %d (not current)\n", errno_var);
+    // DEBUGV("__errno is called last error: %d (not current)", errno_var);
     return &errno_var;
 }
 

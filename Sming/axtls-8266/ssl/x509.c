@@ -248,7 +248,7 @@ end_cert:
     if (ret)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: Invalid X509 ASN.1 file (%s)\n",
+        printf("Error: Invalid X509 ASN.1 file (%s)",
                         x509_display_error(ret));
 #endif
         x509_free(x509_ctx);
@@ -379,7 +379,7 @@ int /*ICACHE_FLASH_ATTR*/ x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509
     if (asn1_compare_dn(cert->ca_cert_dn, cert->cert_dn) == 0)
     {
 //#if CONFIG_SSL_DISPLAY_MODE
-    	printf("SSL: a self-signed certificate that is not in the CA store\n");
+    	printf("SSL: a self-signed certificate that is not in the CA store");
 //#endif
         is_self_signed = 1;
         ctx = cert->rsa_ctx->bi_ctx;
@@ -411,7 +411,7 @@ int /*ICACHE_FLASH_ATTR*/ x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509
        if (ca_cert_ctx != NULL) 
        {
 //#if CONFIG_SSL_DISPLAY_MODE
-    	   printf("SSL: look for a trusted cert\n");
+    	   printf("SSL: look for a trusted cert");
 //#endif
             /* go thu the CA store */
             while (i < CONFIG_X509_MAX_CA_CERTS && ca_cert_ctx->cert[i])
@@ -421,7 +421,7 @@ int /*ICACHE_FLASH_ATTR*/ x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509
                 {
                     /* use this CA certificate for signature verification */
 //#if CONFIG_SSL_DISPLAY_MODE
-                	printf("SSL: use the CA certificate for signature verification\n");
+                	printf("SSL: use the CA certificate for signature verification");
 //#endif
                     match_ca_cert = 1;
                     ctx = ca_cert_ctx->cert[i]->rsa_ctx->bi_ctx;
@@ -472,7 +472,7 @@ int /*ICACHE_FLASH_ATTR*/ x509_verify(const CA_CERT_CTX *ca_cert_ctx, const X509
             ret = X509_VFY_ERROR_BAD_SIGNATURE;
 
 //#if CONFIG_SSL_DISPLAY_MODE
-        printf("check the signature ok\n");
+        printf("check the signature ok");
 //#endif
 //        bi_free(ctx, cert_sig);//comment the line for check signature by LiuH at 20150.06.11
     }
@@ -510,30 +510,30 @@ void /*ICACHE_FLASH_ATTR*/ x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert
 
     char bufTime[100];
 
-    printf("=== CERTIFICATE ISSUED TO ===\n");
+    printf("=== CERTIFICATE ISSUED TO ===");
     printf("Common Name (CN):\t\t");
-    printf("%s\n", cert->cert_dn[X509_COMMON_NAME] ?
+    printf("%s", cert->cert_dn[X509_COMMON_NAME] ?
                     cert->cert_dn[X509_COMMON_NAME] : not_part_of_cert);
 
     printf("Organization (O):\t\t");
-    printf("%s\n", cert->cert_dn[X509_ORGANIZATION] ?
+    printf("%s", cert->cert_dn[X509_ORGANIZATION] ?
         cert->cert_dn[X509_ORGANIZATION] : not_part_of_cert);
 
     printf("Organizational Unit (OU):\t");
-    printf("%s\n", cert->cert_dn[X509_ORGANIZATIONAL_UNIT] ?
+    printf("%s", cert->cert_dn[X509_ORGANIZATIONAL_UNIT] ?
         cert->cert_dn[X509_ORGANIZATIONAL_UNIT] : not_part_of_cert);
 
-    printf("=== CERTIFICATE ISSUED BY ===\n");
+    printf("=== CERTIFICATE ISSUED BY ===");
     printf("Common Name (CN):\t\t");
-    printf("%s\n", cert->ca_cert_dn[X509_COMMON_NAME] ?
+    printf("%s", cert->ca_cert_dn[X509_COMMON_NAME] ?
                     cert->ca_cert_dn[X509_COMMON_NAME] : not_part_of_cert);
 
     printf("Organization (O):\t\t");
-    printf("%s\n", cert->ca_cert_dn[X509_ORGANIZATION] ?
+    printf("%s", cert->ca_cert_dn[X509_ORGANIZATION] ?
         cert->ca_cert_dn[X509_ORGANIZATION] : not_part_of_cert);
 
     printf("Organizational Unit (OU):\t");
-    printf("%s\n", cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] ?
+    printf("%s", cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] ?
         cert->ca_cert_dn[X509_ORGANIZATIONAL_UNIT] : not_part_of_cert);
 
     struct tm* p_tm = localtime(&cert->not_before);
@@ -544,36 +544,36 @@ void /*ICACHE_FLASH_ATTR*/ x509_print(const X509_CTX *cert, CA_CERT_CTX *ca_cert
     asctime_x(p_tm, bufTime, sizeof(bufTime));
     printf("Not After:\t\t\t%s", bufTime);
 
-    printf("RSA bitsize:\t\t\t%d\n", cert->rsa_ctx->num_octets*8);
+    printf("RSA bitsize:\t\t\t%d", cert->rsa_ctx->num_octets*8);
     printf("Sig Type:\t\t\t");
     switch (cert->sig_type)
     {
         case SIG_TYPE_MD2:
-            printf("MD2\n");
+            printf("MD2");
             break;
         case SIG_TYPE_MD5:
-            printf("MD5\n");
+            printf("MD5");
             break;
         case SIG_TYPE_SHA1:
-            printf("SHA1\n");
+            printf("SHA1");
             break;
         case SIG_TYPE_SHA256:
-            printf("SHA256\n");
+            printf("SHA256");
             break;
         case SIG_TYPE_SHA384:
-            printf("SHA384\n");
+            printf("SHA384");
             break;
         case SIG_TYPE_SHA512:
-            printf("SHA512\n");
+            printf("SHA512");
             break;
         default:
-            printf("Unrecognized: %d\n", cert->sig_type);
+            printf("Unrecognized: %d", cert->sig_type);
             break;
     }
 
     if (ca_cert_ctx)
     {
-        printf("Verify:\t\t\t\t%s\n",
+        printf("Verify:\t\t\t\t%s",
                 x509_display_error(x509_verify(ca_cert_ctx, cert)));
     }
 

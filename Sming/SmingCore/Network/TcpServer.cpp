@@ -56,7 +56,7 @@ TcpConnection* TcpServer::createClient(tcp_pcb *clientTcp)
 {
 	if (clientTcp == NULL)
 	{
-		debugf("TCP Server createClient NULL\r\n");
+		debugf("TCP Server createClient NULL");
 	}
 	else
 	{
@@ -102,7 +102,7 @@ err_t TcpServer::onAccept(tcp_pcb *clientTcp, err_t err)
 	// Anti DDoS :-)
 	if (system_get_free_heap_size() < 6500)
 	{
-		debugf("\r\nCONNECTION DROPPED (heap %d)\r\n", system_get_free_heap_size());
+		debugf("\nCONNECTION DROPPED (heap %d)\n", system_get_free_heap_size());
 		return ERR_MEM;
 	}
 
@@ -128,7 +128,7 @@ err_t TcpServer::onAccept(tcp_pcb *clientTcp, err_t err)
 void TcpServer::onClient(TcpClient *client)
 {
 	activeClients++;
-	debugf("TcpServer onClient: %s\r\n", client->getRemoteIp().toString().c_str());
+	debugf("TcpServer onClient: %s", client->getRemoteIp().toString().c_str());
 	if (clientConnectDelegate)
 	{
 		clientConnectDelegate(client);
@@ -138,7 +138,7 @@ void TcpServer::onClient(TcpClient *client)
 void TcpServer::onClientComplete(TcpClient& client, bool succesfull)
 {
 	activeClients--;
-	debugf("TcpSever onComplete: %s\r\n", client.getRemoteIp().toString().c_str());
+	debugf("TcpSever onComplete: %s", client.getRemoteIp().toString().c_str());
 	if (clientCompleteDelegate)
 	{
 		clientCompleteDelegate(client,succesfull);
@@ -147,7 +147,7 @@ void TcpServer::onClientComplete(TcpClient& client, bool succesfull)
 
 bool TcpServer::onClientReceive (TcpClient& client, char *data, int size)
 {
-	debugf("TcpSever onReceive: %s, %d bytes\r\n", client.getRemoteIp().toString().c_str(), size);
+	debugf("TcpSever onReceive: %s, %d bytes", client.getRemoteIp().toString().c_str(), size);
 	debugf("Data: %s", data);
 	if (clientReceiveDelegate)
 	{

@@ -92,8 +92,8 @@ void SystemClass::applyFirmwareUpdate(uint32_t readFlashOffset, uint32_t targetF
 
 	if (outputDebug)
 	{
-		ets_uart_printf("Firmware upgrade started\n");
-		ets_uart_printf("start write: 0x%X -> 0x%X %d\n", readFlashOffset, targetFlashOffset, firmwareSize);
+		ets_uart_printf("Firmware upgrade started");
+		ets_uart_printf("start write: 0x%X -> 0x%X %d", readFlashOffset, targetFlashOffset, firmwareSize);
 	}
 	internalApplyFirmwareUpdate(readFlashOffset, targetFlashOffset, firmwareSize, outputDebug);
 }
@@ -110,7 +110,7 @@ void IRAM_ATTR SystemClass::internalApplyFirmwareUpdate(uint32_t readFlashOffset
 	while (size > 0)
 	{
 		int sect = to / unit;
-		if (outputDebug) ets_uart_printf("write: 0x%X -> 0x%X (sect: %d), %d\n", from, to, sect, size);
+		if (outputDebug) ets_uart_printf("write: 0x%X -> 0x%X (sect: %d), %d", from, to, sect, size);
 		spi_flash_erase_sector(sect);
 		//ets_uart_printf("ers.");
 		spi_flash_read(from, (uint32*)buf, unit);
@@ -122,7 +122,7 @@ void IRAM_ATTR SystemClass::internalApplyFirmwareUpdate(uint32_t readFlashOffset
 		size -= unit;
 	}
 
-	if (outputDebug) ets_uart_printf("Firmware upgrade finished\n");
+	if (outputDebug) ets_uart_printf("Firmware upgrade finished");
 
 	((void (*)(void))0x40000080)(); // Hardcore reset vector
 

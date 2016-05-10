@@ -82,7 +82,7 @@ EXP_FUNC int STDCALL /*ICACHE_FLASH_ATTR*/ ssl_obj_load(SSL_CTX *ssl_ctx, int ob
 #ifdef CONFIG_SSL_HAS_PEM
         ret = ssl_obj_PEM_load(ssl_ctx, obj_type, ssl_obj, password);
 #else
-        printf("Error: Feature not supported\n");
+        printf("Error: Feature not supported");
         ret = SSL_ERROR_NOT_SUPPORTED;
 #endif
     }
@@ -93,7 +93,7 @@ error:
     ssl_obj_free(ssl_obj);
     return ret;
 #else
-    printf("Error: Feature not supported\n");
+    printf("Error: Feature not supported");
     return SSL_ERROR_NOT_SUPPORTED;
 #endif /* CONFIG_SSL_SKELETON_MODE */
 }
@@ -151,7 +151,7 @@ static int /*ICACHE_FLASH_ATTR*/ do_obj(SSL_CTX *ssl_ctx, int obj_type,
             break;
 #endif
         default:
-            printf("Error: Feature not supported\n");
+            printf("Error: Feature not supported");
             ret = SSL_ERROR_NOT_SUPPORTED;
             break;
     }
@@ -224,7 +224,7 @@ static int /*ICACHE_FLASH_ATTR*/ pem_decrypt(const char *where, const char *end,
     if (password == NULL || strlen(password) == 0)
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: Need a password for this PEM file\n"); TTY_FLUSH();
+        printf("Error: Need a password for this PEM file"); TTY_FLUSH();
 #endif
         goto error;
     }
@@ -247,7 +247,7 @@ static int /*ICACHE_FLASH_ATTR*/ pem_decrypt(const char *where, const char *end,
     else 
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: Unsupported password cipher\n"); TTY_FLUSH();
+        printf("Error: Unsupported password cipher"); TTY_FLUSH();
 #endif
         goto error;
     }
@@ -509,7 +509,7 @@ error:
 #ifdef CONFIG_SSL_FULL_MODE
     if (ret)
     {
-        printf("Error: Certificate or key not loaded\n"); TTY_FLUSH();
+        printf("Error: Certificate or key not loaded"); TTY_FLUSH();
     }
 #endif
 

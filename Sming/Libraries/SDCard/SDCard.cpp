@@ -74,7 +74,7 @@ void SDCard_begin(uint8 PIN_CARD_SS)
 	FRESULT mountRes = f_mount(pFatFs, "", 0);
 	if(FR_OK != mountRes)
 	{
-		debugf( "f_mount: FAIL %d\n", mountRes);
+		debugf( "f_mount: FAIL %d", mountRes);
 	}
 
 	/* open dummy file to force card init */
@@ -180,7 +180,7 @@ int select (void)	/* 1:OK, 0:Timeout */
 	SDCardSPI->transfer(&d, 1);	/* Dummy clock (force DO enabled) */
 	if (wait_ready()) return 1;	/* Wait for card ready */
 
-	debugf( "SDCard select() failed\n");
+	debugf( "SDCard select() failed");
 	deselect();
 	return 0;			/* Failed */
 }
@@ -420,12 +420,12 @@ DSTATUS disk_initialize (
 	if(ty == 0)
 	{
 		Stat = STA_NOINIT;
-		debugf("SDCard: FAIL\n", ty);
+		debugf("SDCard: FAIL", ty);
 	}
 	else
 	{
 		Stat = 0;
-		debugf("SDCard: OK TYPE %d\n", ty);
+		debugf("SDCard: OK TYPE %d", ty);
 	}
 
 	deselect();

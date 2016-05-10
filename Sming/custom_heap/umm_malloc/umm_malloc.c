@@ -299,7 +299,7 @@ static int integrity_check(void) {
     /* Check that next free block number is valid */
     if (cur >= UMM_NUMBLOCKS) {
       printf("heap integrity broken: too large next free num: %d "
-          "(in block %d, addr 0x%lx)\n", cur, prev,
+          "(in block %d, addr 0x%lx)", cur, prev,
           (unsigned long)&UMM_NBLOCK(prev));
       ok = 0;
       goto clean;
@@ -312,7 +312,7 @@ static int integrity_check(void) {
     /* Check if prev free block number matches */
     if (UMM_PFREE(cur) != prev) {
       printf("heap integrity broken: free links don't match: "
-          "%d -> %d, but %d -> %d\n",
+          "%d -> %d, but %d -> %d",
           prev, cur, cur, UMM_PFREE(cur));
       ok = 0;
       goto clean;
@@ -331,7 +331,7 @@ static int integrity_check(void) {
     /* Check that next block number is valid */
     if (cur >= UMM_NUMBLOCKS) {
       printf("heap integrity broken: too large next block num: %d "
-          "(in block %d, addr 0x%lx)\n", cur, prev,
+          "(in block %d, addr 0x%lx)", cur, prev,
           (unsigned long)&UMM_NBLOCK(prev));
       ok = 0;
       goto clean;
@@ -345,7 +345,7 @@ static int integrity_check(void) {
     if ((UMM_NBLOCK(cur) & UMM_FREELIST_MASK)
         != (UMM_PBLOCK(cur) & UMM_FREELIST_MASK))
     {
-      printf("heap integrity broken: mask wrong at addr 0x%lx: n=0x%x, p=0x%x\n",
+      printf("heap integrity broken: mask wrong at addr 0x%lx: n=0x%x, p=0x%x",
           (unsigned long)&UMM_NBLOCK(cur),
           (UMM_NBLOCK(cur) & UMM_FREELIST_MASK),
           (UMM_PBLOCK(cur) & UMM_FREELIST_MASK)
@@ -360,7 +360,7 @@ static int integrity_check(void) {
     /* Check if prev block number matches */
     if (UMM_PBLOCK(cur) != prev) {
       printf("heap integrity broken: block links don't match: "
-          "%d -> %d, but %d -> %d\n",
+          "%d -> %d, but %d -> %d",
           prev, cur, cur, UMM_PBLOCK(cur));
       ok = 0;
       goto clean;
@@ -440,7 +440,6 @@ static int check_poison( const unsigned char *ptr, size_t poison_size,
         "Expected poison address: 0x%lx, actual data:",
         where, (unsigned long)ptr);
     dump_mem(ptr, poison_size);
-    printf("\n");
   }
 
   return ok;
@@ -454,7 +453,7 @@ static int check_poison_block( umm_block *pblock ) {
   int ok = 1;
 
   if (pblock->header.used.next & UMM_FREELIST_MASK) {
-    printf("check_poison_block is called for free block 0x%lx\n",
+    printf("check_poison_block is called for free block 0x%lx",
         (unsigned long)pblock);
   } else {
     /* the block is used; let's check poison */
@@ -606,9 +605,9 @@ void ICACHE_FLASH_ATTR *umm_info( void *ptr, int force ) {
    */
   memset( &ummHeapInfo, 0, sizeof( ummHeapInfo ) );
 
-  DBG_LOG_FORCE( force, "\n\nDumping the umm_heap...\n" );
+  DBG_LOG_FORCE( force, "\n\nDumping the umm_heap..." );
 
-  DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5d|NF %5d|PF %5d|\n",
+  DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5d|NF %5d|PF %5d|",
       (unsigned long)(&UMM_BLOCK(blockNo)),
       blockNo,
       UMM_NBLOCK(blockNo) & UMM_BLOCKNO_MASK,
@@ -641,7 +640,7 @@ void ICACHE_FLASH_ATTR *umm_info( void *ptr, int force ) {
         ummHeapInfo.maxFreeContiguousBlocks = curBlocks;
       }
 
-      DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5u|NF %5d|PF %5d|\n",
+      DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5u|NF %5d|PF %5d|",
           (unsigned long)(&UMM_BLOCK(blockNo)),
           blockNo,
           UMM_NBLOCK(blockNo) & UMM_BLOCKNO_MASK,
@@ -663,7 +662,7 @@ void ICACHE_FLASH_ATTR *umm_info( void *ptr, int force ) {
       ++ummHeapInfo.usedEntries;
       ummHeapInfo.usedBlocks += curBlocks;
 
-      DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5u|\n",
+      DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5u|",
           (unsigned long)(&UMM_BLOCK(blockNo)),
           blockNo,
           UMM_NBLOCK(blockNo) & UMM_BLOCKNO_MASK,
@@ -689,7 +688,7 @@ void ICACHE_FLASH_ATTR *umm_info( void *ptr, int force ) {
     }
   }
 
-  DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5d|NF %5d|PF %5d|\n",
+  DBG_LOG_FORCE( force, "|0x%08lx|B %5d|NB %5d|PB %5d|Z %5d|NF %5d|PF %5d|",
       (unsigned long)(&UMM_BLOCK(blockNo)),
       blockNo,
       UMM_NBLOCK(blockNo) & UMM_BLOCKNO_MASK,
@@ -698,12 +697,12 @@ void ICACHE_FLASH_ATTR *umm_info( void *ptr, int force ) {
       UMM_NFREE(blockNo),
       UMM_PFREE(blockNo) );
 
-  DBG_LOG_FORCE( force, "Total Entries %5d    Used Entries %5d    Free Entries %5d\n",
+  DBG_LOG_FORCE( force, "Total Entries %5d    Used Entries %5d    Free Entries %5d",
       ummHeapInfo.totalEntries,
       ummHeapInfo.usedEntries,
       ummHeapInfo.freeEntries );
 
-  DBG_LOG_FORCE( force, "Total Blocks  %5d    Used Blocks  %5d    Free Blocks  %5d\n",
+  DBG_LOG_FORCE( force, "Total Blocks  %5d    Used Blocks  %5d    Free Blocks  %5d",
       ummHeapInfo.totalBlocks,
       ummHeapInfo.usedBlocks,
       ummHeapInfo.freeBlocks  );
@@ -786,7 +785,7 @@ static void umm_assimilate_up( unsigned short int c ) {
      * the free list
      */
 
-   // DBG_LOG_DEBUG( "Assimilate up to next block, which is FREE\n" );
+   // DBG_LOG_DEBUG( "Assimilate up to next block, which is FREE" );
 
     /* Disconnect the next block from the FREE list */
 
@@ -875,7 +874,7 @@ static void _umm_free( void *ptr ) {
   /* If we're being asked to free a NULL pointer, well that's just silly! */
 
   if( (void *)0 == ptr ) {
-    DBG_LOG_DEBUG( "MEM: free NULL -> nop\n" );
+    DBG_LOG_DEBUG( "MEM: free NULL -> nop" );
 
     return;
   }
@@ -907,8 +906,8 @@ static void _umm_free( void *ptr ) {
 
   if( UMM_NBLOCK(UMM_PBLOCK(c)) & UMM_FREELIST_MASK ) {
 
-	DBG_MEM_OP( " down\n");
-    DBG_LOG_DEBUG( "- Assim down next block\n" );
+	DBG_MEM_OP( " down");
+    DBG_LOG_DEBUG( "- Assim down next block" );
 
     c = umm_assimilate_down(c, UMM_FREELIST_MASK);
   } else {
@@ -917,8 +916,8 @@ static void _umm_free( void *ptr ) {
      * of the free list
      */
 
-	  DBG_MEM_OP( " up\n");
-    DBG_LOG_DEBUG( "- Add head free list\n" );
+	  DBG_MEM_OP( " up");
+    DBG_LOG_DEBUG( "- Add head free list" );
 
     UMM_PFREE(UMM_NFREE(0)) = c;
     UMM_NFREE(c)            = UMM_NFREE(0);
@@ -980,7 +979,7 @@ static void *_umm_malloc( size_t size ) {
    */
 
   if( 0 == size ) {
-    DBG_LOG_DEBUG( "MEM: Alo sz 0\n" );
+    DBG_LOG_DEBUG( "MEM: Alo sz 0" );
 
     return( (void *)NULL );
   }
@@ -1039,17 +1038,17 @@ static void *_umm_malloc( size_t size ) {
 
     if( blockSize == blocks ) {
       /* It's an exact fit and we don't neet to split off a block. */
-      DBG_MEM_OP( "!X %d %d %x\n", cf, blocks, (uint32_t)&UMM_DATA(cf));
-      DBG_LOG_DEBUG( "- XACT %d(+%d)=> %x\n", cf, blocks, (uint32_t)&UMM_DATA(cf));
+      DBG_MEM_OP( "!X %d %d %x", cf, blocks, (uint32_t)&UMM_DATA(cf));
+      DBG_LOG_DEBUG( "- XACT %d(+%d)=> %x", cf, blocks, (uint32_t)&UMM_DATA(cf));
 
       /* Disconnect this block from the FREE list */
 
       umm_disconnect_from_free_list( cf );
 
     } else {
-    	DBG_MEM_OP( "!E %d %d %x\n", cf, blocks, (uint32_t)&UMM_DATA(cf));
+    	DBG_MEM_OP( "!E %d %d %x", cf, blocks, (uint32_t)&UMM_DATA(cf));
       /* It's not an exact fit and we need to split off a block. */
-    	DBG_LOG_DEBUG( "- xist %d(+%d)=> %x \n", cf, blocks, (uint32_t)&UMM_DATA(cf));
+    	DBG_LOG_DEBUG( "- xist %d(+%d)=> %x ", cf, blocks, (uint32_t)&UMM_DATA(cf));
 
       /*
        * split current free block `cf` into two blocks. The first one will be
@@ -1076,8 +1075,8 @@ static void *_umm_malloc( size_t size ) {
     }
   } else {
     /* Out of memory */
-	DBG_MEM_OP( "NO %d\n", blocks);
-    DBG_LOG_DEBUG(  "- NO alloc sz %d\n", blocks );
+	DBG_MEM_OP( "NO %d", blocks);
+    DBG_LOG_DEBUG(  "- NO alloc sz %d", blocks );
 
     /* Release the critical section... */
     UMM_CRITICAL_EXIT();
@@ -1119,7 +1118,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
    */
 
   if( ((void *)NULL == ptr) ) {
-    DBG_LOG_DEBUG( "MEM: realloc NULL => malloc\n" );
+    DBG_LOG_DEBUG( "MEM: realloc NULL => malloc" );
     return( _umm_malloc(size) );
   }
 
@@ -1130,7 +1129,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
    */
 
   if( 0 == size ) {
-    DBG_LOG_DEBUG( "MEM: realloc sz 0, => free\n" );
+    DBG_LOG_DEBUG( "MEM: realloc sz 0, => free" );
     _umm_free( ptr );
     return( (void *)NULL );
   }
@@ -1170,7 +1169,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
   if( blockSize == blocks ) {
     /* This space intentionally left blank - return the original pointer! */
 
-    DBG_LOG_DEBUG( "MEM[%d]: realloc same sz %d =>nop\n", gTotalHeapOp, blocks );
+    DBG_LOG_DEBUG( "MEM[%d]: realloc same sz %d =>nop", gTotalHeapOp, blocks );
 
     /* Release the critical section... */
     UMM_CRITICAL_EXIT();
@@ -1200,7 +1199,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
 
     /* Check if the resulting block would be big enough... */
 
-    DBG_LOG_DEBUG( "MEM[%d]: realloc() assim down sz %d - fits!\n", gTotalHeapOp, c-UMM_PBLOCK(c) );
+    DBG_LOG_DEBUG( "MEM[%d]: realloc() assim down sz %d - fits!", gTotalHeapOp, c-UMM_PBLOCK(c) );
 
     /* Disconnect the previous block from the FREE list */
 
@@ -1232,7 +1231,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
   if( blockSize == blocks ) {
     /* This space intentionally left blank - return the original pointer! */
 
-    DBG_LOG_DEBUG( "MEM[%d]: realloc the same size block - %d, do nothing\n", gTotalHeapOp, blocks );
+    DBG_LOG_DEBUG( "MEM[%d]: realloc the same size block - %d, do nothing", gTotalHeapOp, blocks );
 
   } else if (blockSize > blocks ) {
     /*
@@ -1240,7 +1239,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
      * at the end of this one and put it up on the free list...
      */
 
-    DBG_LOG_DEBUG( "MEM[%d]: realloc %d -> %d, shrink + free\n", gTotalHeapOp, blockSize, blocks );
+    DBG_LOG_DEBUG( "MEM[%d]: realloc %d -> %d, shrink + free", gTotalHeapOp, blockSize, blocks );
 
     umm_make_new_block( c, blocks, 0, 0 );
     _umm_free( (void *)&UMM_DATA(c+blocks) );
@@ -1249,7 +1248,7 @@ static void *_umm_realloc( void *ptr, size_t size ) {
 
     void *oldptr = ptr;
 
-    DBG_LOG_DEBUG( "MEM[%d]: realloc %d -> %d, new, copy, free\n", gTotalHeapOp, blockSize, blocks );
+    DBG_LOG_DEBUG( "MEM[%d]: realloc %d -> %d, new, copy, free", gTotalHeapOp, blockSize, blocks );
 
     /*
      * Now _umm_malloc() a new/ one, copy the old data to the new block, and

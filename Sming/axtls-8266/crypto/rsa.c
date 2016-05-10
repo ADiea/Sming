@@ -227,7 +227,7 @@ void RSA_print(const RSA_CTX *rsa_ctx)
         return;
 
     printf("-----------------   RSA DEBUG   ----------------\n");
-    printf("Size:\t%d\n", rsa_ctx->num_octets);
+    printf("Size:\t%d", rsa_ctx->num_octets);
     bi_print("Modulus", rsa_ctx->m);
     bi_print("Public Key", rsa_ctx->e);
     bi_print("Private Key", rsa_ctx->d);

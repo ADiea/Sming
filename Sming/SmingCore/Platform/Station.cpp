@@ -394,17 +394,17 @@ void StationClass::internalSmartConfig(sc_status status, void *pdata) {
 
 	switch (status) {
 		case SC_STATUS_WAIT:
-			debugf("SC_STATUS_WAIT\n");
+			debugf("SC_STATUS_WAIT");
 			break;
 		case SC_STATUS_FIND_CHANNEL:
-			debugf("SC_STATUS_FIND_CHANNEL\n");
+			debugf("SC_STATUS_FIND_CHANNEL");
 			break;
 		case SC_STATUS_GETTING_SSID_PSWD:
-			debugf("SC_STATUS_GETTING_SSID_PSWD\n");
+			debugf("SC_STATUS_GETTING_SSID_PSWD");
 			break;
 		case SC_STATUS_LINK:
 			{
-				debugf("SC_STATUS_LINK\n");
+				debugf("SC_STATUS_LINK");
 				station_config *sta_conf = (station_config *)pdata;
 				char *ssid = (char*)sta_conf->ssid;
 				char *password = (char*)sta_conf->password;
@@ -412,7 +412,7 @@ void StationClass::internalSmartConfig(sc_status status, void *pdata) {
 			}
 			break;
 		case SC_STATUS_LINK_OVER:
-			debugf("SC_STATUS_LINK_OVER\n");
+			debugf("SC_STATUS_LINK_OVER");
 			smartConfigStop();
 			break;
 	}

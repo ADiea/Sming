@@ -51,12 +51,12 @@ void* ax_port_malloc(size_t size
 
     if (result == NULL) {
 #ifdef MEMLEAK_DEBUG
-        DEBUG_TLS_MEM_PRINT("%s:%d malloc %d failed, left %d\r\n", file, line, size, system_get_free_heap_size());
+        DEBUG_TLS_MEM_PRINT("%s:%d malloc %d failed, left %d\r", file, line, size, system_get_free_heap_size());
 #endif
         while(true){}
     }
 #ifdef MEMLEAK_DEBUG
-    DEBUG_TLS_MEM_PRINT("%s:%d malloc %d => %x left %d\r\n", file, line, size, (uint32_t)result, system_get_free_heap_size());
+    DEBUG_TLS_MEM_PRINT("%s:%d malloc %d => %x left %d\r", file, line, size, (uint32_t)result, system_get_free_heap_size());
 #endif
     return result;
 }
@@ -83,13 +83,13 @@ void* ax_port_realloc(void* ptr, size_t size
     void* result = (void* )realloc(ptr, size);
     if (result == NULL) {
 #ifdef MEMLEAK_DEBUG
-        DEBUG_TLS_MEM_PRINT("%s:%d realloc %d failed, left %d\r\n", file, line, size, system_get_free_heap_size());
+        DEBUG_TLS_MEM_PRINT("%s:%d realloc %d failed, left %d\r", file, line, size, system_get_free_heap_size());
 #endif
         while(true){}
     }
 
 #ifdef MEMLEAK_DEBUG
-    DEBUG_TLS_MEM_PRINT("%s:%d realloc %d=>%x, left %d\r\n", file, line, size, result, system_get_free_heap_size());
+    DEBUG_TLS_MEM_PRINT("%s:%d realloc %d=>%x, left %d\r", file, line, size, result, system_get_free_heap_size());
 #endif
     return result;
 }
@@ -97,5 +97,5 @@ void* ax_port_realloc(void* ptr, size_t size
 void ax_port_free(void* ptr) {
     free(ptr);
 
-    //    DEBUG_TLS_MEM_PRINT("free %x, left %d\r\n", p[-3], system_get_free_heap_size());
+    //    DEBUG_TLS_MEM_PRINT("free %x, left %d\r", p[-3], system_get_free_heap_size());
 }

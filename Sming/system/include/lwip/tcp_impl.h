@@ -338,11 +338,11 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
 #endif
 #if TCP_DEBUG_PCB_LISTS
 #define TCP_REG(pcbs, npcb) do {\
-                            LWIP_DEBUGF(TCP_DEBUG, ("TCP_REG %p local port %d\n", (npcb), (npcb)->local_port)); \
+                            LWIP_DEBUGF(TCP_DEBUG, ("TCP_REG %p local port %d", (npcb), (npcb)->local_port)); \
                             for(tcp_tmp_pcb = *(pcbs); \
           tcp_tmp_pcb != NULL; \
         tcp_tmp_pcb = tcp_tmp_pcb->next) { \
-                                LWIP_ASSERT("TCP_REG: already registered\n", tcp_tmp_pcb != (npcb)); \
+                                LWIP_ASSERT("TCP_REG: already registered", tcp_tmp_pcb != (npcb)); \
                             } \
                             LWIP_ASSERT("TCP_REG: pcb->state != CLOSED", ((pcbs) == &tcp_bound_pcbs) || ((npcb)->state != CLOSED)); \
                             (npcb)->next = *(pcbs); \
@@ -353,7 +353,7 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
                             } while(0)
 #define TCP_RMV(pcbs, npcb) do { \
                             LWIP_ASSERT("TCP_RMV: pcbs != NULL", *(pcbs) != NULL); \
-                            LWIP_DEBUGF(TCP_DEBUG, ("TCP_RMV: removing %p from %p\n", (npcb), *(pcbs))); \
+                            LWIP_DEBUGF(TCP_DEBUG, ("TCP_RMV: removing %p from %p", (npcb), *(pcbs))); \
                             if(*(pcbs) == (npcb)) { \
                                *(pcbs) = (*pcbs)->next; \
                             } else for(tcp_tmp_pcb = *(pcbs); tcp_tmp_pcb != NULL; tcp_tmp_pcb = tcp_tmp_pcb->next) { \
@@ -364,7 +364,7 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
                             } \
                             (npcb)->next = NULL; \
                             LWIP_ASSERT("TCP_RMV: tcp_pcbs sane", tcp_pcbs_sane()); \
-                            LWIP_DEBUGF(TCP_DEBUG, ("TCP_RMV: removed %p from %p\n", (npcb), *(pcbs))); \
+                            LWIP_DEBUGF(TCP_DEBUG, ("TCP_RMV: removed %p from %p", (npcb), *(pcbs))); \
                             } while(0)
 
 #else /* LWIP_DEBUG */

@@ -179,7 +179,7 @@ int /*ICACHE_FLASH_ATTR*/ asn1_get_private_key(const uint8_t *buf, int len, RSA_
     if (buf[0] != ASN1_SEQUENCE) /* basic sanity check */
     {
 #ifdef CONFIG_SSL_FULL_MODE
-        printf("Error: This is not a valid ASN.1 file\n");
+        printf("Error: This is not a valid ASN.1 file");
 #endif
         return X509_INVALID_PRIV_KEY;
     }
@@ -636,7 +636,7 @@ int /*ICACHE_FLASH_ATTR*/ asn1_signature_type(const uint8_t *cert,
             for (i = 0; i < len; i++)
                 printf("%02x ", cert[*offset + i]);
 
-            printf("\n");
+            m_printf("\n");
 #endif
             goto end_check_sig;     /* unrecognised cert type */
         }
