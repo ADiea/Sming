@@ -12,10 +12,7 @@
 #include "lwip/mem.h"
 #include "osapi.h"
 
-#ifndef USE_OPEN_DHCPS
 #define USE_OPEN_DHCPS
-#endif
-
 #ifdef USE_OPEN_DHCPS
 
 #include "lwip/app/dhcpserver.h"
@@ -44,19 +41,20 @@ static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
 //static const uint8_t magic_cookie[4] = {99, 130, 83, 99};
 //static u8_t old_xid[4] = {0};
 static const uint32 magic_cookie ICACHE_RODATA_ATTR = 0x63538263;
-static struct udp_pcb *pcb_dhcps = NULL;
+static struct udp_pcb *pcb_dhcps LWIP_DATA_IRAM_ATTR; // = NULL;
 static struct ip_addr broadcast_dhcps;
 static struct ip_addr server_address;
 static struct ip_addr client_address; //added
 static struct ip_addr client_address_plus;
 
+//static
 struct dhcps_lease dhcps_lease;
-static uint32_t dhcps_lease_flag = true;
-static list_node *plist = NULL;
+uint32 dhcps_lease_flag LWIP_DATA_IRAM_ATTR; // = FALSE;
+static list_node *plist LWIP_DATA_IRAM_ATTR; // = NULL;
 static uint8 offer = 0xFF;
-static uint32 renew = false;
+static uint32 renew LWIP_DATA_IRAM_ATTR; // = false;
 #define DHCPS_LEASE_TIME_DEF	(120)
-uint32 dhcps_lease_time = DHCPS_LEASE_TIME_DEF;  //minute -> init in dhcps_start()
+uint32 dhcps_lease_time LWIP_DATA_IRAM_ATTR; // = DHCPS_LEASE_TIME_DEF;  //minute -> init in dhcps_start()
 /******************************************************************************
  * FunctionName : node_insert_to_list
  * Description  : insert the node to the list
@@ -174,10 +172,10 @@ static uint8_t* ICACHE_FLASH_ATTR add_offer_options(uint8_t *optptr)
 
         *optptr++ = DHCP_OPTION_LEASE_TIME;
         *optptr++ = 4;  
-        *optptr++ = ((dhcps_lease_time * 60) >> 24) & 0xFF;
-        *optptr++ = ((dhcps_lease_time * 60) >> 16) & 0xFF;
-        *optptr++ = ((dhcps_lease_time * 60) >> 8) & 0xFF;
-        *optptr++ = ((dhcps_lease_time * 60) >> 0) & 0xFF;
+        *optptr++ = ((dhcps_lease_time * 60) >> 24);// & 0xFF;
+        *optptr++ = ((dhcps_lease_time * 60) >> 16);// & 0xFF;
+        *optptr++ = ((dhcps_lease_time * 60) >> 8);// & 0xFF;
+        *optptr++ = ((dhcps_lease_time * 60) >> 0);// & 0xFF;
 
         *optptr++ = DHCP_OPTION_SERVER_ID;
         *optptr++ = 4;  
@@ -674,9 +672,7 @@ static sint16_t ICACHE_FLASH_ATTR parse_msg(struct dhcps_msg *m, u16_t len)
 						for (pback_node = plist; pback_node != NULL;pback_node = pback_node->pnext) {
 							pdhcps_pool = pback_node->pnode;
 							if (os_memcmp(pdhcps_pool->mac, m->chaddr, sizeof(pdhcps_pool->mac)) == 0){
-#if DHCPS_DEBUG
-								LOG_I("the same device request ip");
-#endif
+//									LOG_I("the same device request ip");
 								if (os_memcmp(&pdhcps_pool->ip.addr, m->ciaddr, sizeof(pdhcps_pool->ip.addr)) == 0) {
 								    renew = true;
 								}
@@ -686,10 +682,8 @@ static sint16_t ICACHE_FLASH_ATTR parse_msg(struct dhcps_msg *m, u16_t len)
 								goto POOL_CHECK;
 							} else if (pdhcps_pool->ip.addr == client_address_plus.addr){
 //									client_address.addr = client_address_plus.addr;
-#if DHCPS_DEBUG
-								LOG_I("the ip addr has been request");
-#endif
-								/*								addr_tmp.addr = htonl(client_address_plus.addr);
+//									LOG_I("the ip addr has been request");
+/*								addr_tmp.addr = htonl(client_address_plus.addr);
 								addr_tmp.addr++;
 								client_address_plus.addr = htonl(addr_tmp.addr);
 								client_address.addr = client_address_plus.addr; */
@@ -747,7 +741,7 @@ static sint16_t ICACHE_FLASH_ATTR parse_msg(struct dhcps_msg *m, u16_t len)
 						        pdhcps_pool = NULL;
 						    }
 //							client_address_plus.addr = dhcps_lease.start_ip.addr;
-							return DHCPS_STATE_NAK;
+							return 4;
 						}
 
 						sint16_t ret = parse_options(&m->options[4], len);;
