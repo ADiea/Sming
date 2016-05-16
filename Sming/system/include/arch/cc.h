@@ -88,6 +88,7 @@ typedef unsigned long   mem_ptr_t;
 
 #ifdef LWIP_DEBUG
 #include "debug_progmem.h"
+
 #define LWIP_PLATFORM_DIAG(x) LOG_I x
 #define LWIP_PLATFORM_ASSERT(x) m_printf("ASSERT: %s %s %d", (x), __FUNCTION__, __LINE__)
 

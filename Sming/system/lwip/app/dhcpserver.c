@@ -369,7 +369,7 @@ static void ICACHE_FLASH_ATTR send_offer(struct dhcps_msg *m)
 	    }
 #if DHCPS_DEBUG
 	    err_t SendOffer_err_t = udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT );
-	    LOG_I("dhcps: send_offer>>udp_sendto result %x", SendOffer_err_t);
+	    LOG_I("dhcps: send_offer>>udp_sendto 0x%x result 0x%x", broadcast_dhcps.addr, SendOffer_err_t);
 #else
 	    udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT );
 #endif
@@ -922,7 +922,9 @@ void ICACHE_FLASH_ATTR dhcps_start(struct ip_info *info)
 {
 	struct netif * apnetif = (struct netif *)eagle_lwip_getif(0x01);
     
-	if(apnetif->dhcps_pcb != NULL) {
+	if(apnetif->dhcps_pcb != NULL)
+	{
+		LOG_I("Remove old UDP PCB");
         udp_remove(apnetif->dhcps_pcb);
     }
     if(dhcps_lease_time == 0) dhcps_lease_time = DHCPS_LEASE_TIME_DEF;
