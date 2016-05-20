@@ -131,8 +131,8 @@ bool AccessPointClass::setIP(IPAddress address, IPAddress dhcpStartIP, IPAddress
 	wifi_set_ip_info(SOFTAP_IF, &ipinfo);
 
 	struct dhcps_lease dhcp;
-	IP4_ADDR(&dhcp.start_ip, 192, 168, 1, 2);
-	IP4_ADDR(&dhcp.end_ip, 192, 168, 1, 6);
+	dhcp.start_ip = dhcpStartIP;
+	dhcp.end_ip = dhcpEndIP;
 
 	wifi_softap_set_dhcps_lease(&dhcp);
 

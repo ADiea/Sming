@@ -84,7 +84,7 @@ extern uint32 dhcps_lease_time;
 #define DHCP_OPTION_END         255
 
 //#define USE_CLASS_B_NET 1
-#define DHCPS_DEBUG          2
+#define DHCPS_DEBUG          1
 #define MAX_STATION_NUM      8
 
 #define DHCPS_STATE_OFFER 1
