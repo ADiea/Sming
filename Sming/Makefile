@@ -124,13 +124,15 @@ USER_LIBDIR = compiler/lib
 LIBS		= microc microgcc hal phy pp net80211 wpa $(LIBMAIN)
 
 # compiler flags using during compilation of source files. Add '-pg' for debugging
+
 # -DMEMLEAK_DEBUG -DMEM_HEAPMAP
 CFLAGS		= -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections \
-			  -D__ets__ -DICACHE_FLASH -DARDUINO=106 -DUSE_ESPCONN -DLWIP_OPEN_SRC -DUSE_OPEN_DHCPS -DPBUF_RSV_FOR_WLAN -DEBUF_LWIP -DESP8266  -Wl,-wrap,system_restart_local \
+			  -D__ets__ -DICACHE_FLASH -DARDUINO=106 -DCOM_SPEED_SERIAL=$(COM_SPEED_SERIAL) -DUSE_ESPCONN -DLWIP_OPEN_SRC -DUSE_OPEN_DHCPS -DPBUF_RSV_FOR_WLAN -DEBUF_LWIP -DESP8266  -Wl,-wrap,system_restart_local \
 			  -DCUST_FILE_BASE=$$(subst /,_,$(subst .,_,$$*))
 			  
 # awk 'END{ var_=FILENAME; n = split(var,a,"/"); print a[n] n var_;}' $$*
 #	$(subst /,_,$(subst .,_,$$*))		  
+
 ifeq ($(ENABLE_GDB), 1)
 	CFLAGS += -Og -ggdb -DGDBSTUB_FREERTOS=0 -DENABLE_GDB=1
 	MODULES		 += gdbstub

@@ -37,6 +37,8 @@ size_t MemoryDataStream::write(const uint8_t* data, size_t len)
 	if (buf == NULL)
 	{
 		buf = (char*)malloc(len + 1);
+		if (buf == NULL)
+			return 0;
 		buf[len] = '\0';
 		memcpy(buf, data, len);
 	}
@@ -47,10 +49,19 @@ size_t MemoryDataStream::write(const uint8_t* data, size_t len)
 		if (required > capacity)
 		{
 			capacity = required < 256 ? required + 128 : required + 64;
+
 #ifdef MEMLEAK_DEBUG
 			debugf("MStream realloc %d -> %d", size, capacity);
 #endif
-			buf = (char*)realloc(buf, capacity);
+			char * new_buf;
+			//realloc can fail, store the result in temporary pointer
+			new_buf = (char*)realloc(buf, capacity);
+
+			if (new_buf == NULL)
+			{
+				return 0;
+			}
+			buf = new_buf;
 		}
 		buf[cur + len] = '\0';
 		memcpy(buf + cur, data, len);
