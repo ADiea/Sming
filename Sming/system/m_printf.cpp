@@ -218,7 +218,7 @@ int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args)
 
 		case 'f':
 
-			s = dtostrf(va_arg(args, double), width, precision, tempNum);
+			s = dtostrf_p(va_arg(args, double), width, precision, tempNum, pad);
 			while (*s && (maxLen - (uint32_t)(str - buf) > OVERFLOW_GUARD))
 				*str++ = *s++;
 			continue;
@@ -234,7 +234,7 @@ int m_vsnprintf(char *buf, size_t maxLen, const char *fmt, va_list args)
 		}
 
 		if (flags & SIGN)
-			s = ltoa_w(va_arg(args, int), tempNum, base, width);
+			s = ltoa_wp(va_arg(args, int), tempNum, base, width, pad);
 		else
 			s = ultoa_wp(va_arg(args, unsigned int), tempNum, base, width, pad);
 

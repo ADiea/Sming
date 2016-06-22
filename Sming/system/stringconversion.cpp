@@ -12,6 +12,11 @@ char* ltoa(long val, char* buffer, int base)
 
 char* ltoa_w(long val, char* buffer, int base, int width)
 {
+	return ltoa_wp(val, buffer, base, width, ' ');
+}
+
+char* ltoa_wp(long val, char* buffer, int base, int width, char pad)
+{
 	int i = 38, p = 0;
 	char buf[40] = {0};
 	bool ngt = val < 0;
@@ -29,7 +34,7 @@ char* ltoa_w(long val, char* buffer, int base, int width)
 		width -= strlen(&buf[i+1]);
 		if(width > 0)
 		{
-			memset(buffer, ' ', width);
+			memset(buffer, pad, width);
 		}
 		else width = 0;
 	}
@@ -72,9 +77,13 @@ char* ultoa_wp(unsigned long val, char* buffer, unsigned int base, int width, ch
 	return buffer;
 }
 
+char *dtostrf(double floatVar, int minStringWidthIncDecimalPoint, int numDigitsAfterDecimal, char *outputBuffer)
+{
+	return dtostrf_p(floatVar, minStringWidthIncDecimalPoint, numDigitsAfterDecimal, outputBuffer, ' ');
+}
 // Author zitron: http://forum.arduino.cc/index.php?topic=37391#msg276209
 // modified by ADiea: remove dependencies strcat, floor, round; reorganize+speedup code
-char *dtostrf(double floatVar, int minStringWidthIncDecimalPoint, int numDigitsAfterDecimal, char *outputBuffer)
+extern char *dtostrf_p(double floatVar, int minStringWidthIncDecimalPoint, int numDigitsAfterDecimal, char *outputBuffer, char pad)
 {
 	char temp[40], num[40];
 	unsigned long mult = 1, int_part;
@@ -176,7 +185,7 @@ char *dtostrf(double floatVar, int minStringWidthIncDecimalPoint, int numDigitsA
 		i = minStringWidthIncDecimalPoint - strlen(num) + 1;
 		while (--i > 0)
 		{
-			*buf++ = ' ';
+			*buf++ = pad;
 		}
 
 		//Write output buffer

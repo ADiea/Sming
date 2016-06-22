@@ -460,7 +460,7 @@ int ArduCAM::wrSensorRegs8_8(const struct sensor_reg reglist[])
 		err = wrSensorReg8_8(reg_addr, reg_val);
    	next++;
 #if defined(ESP8266)
-	  yield();
+	  //yield();
 #endif
 	} 
 	
@@ -484,7 +484,7 @@ int ArduCAM::wrSensorRegs8_16(const struct sensor_reg reglist[])
 	   	//return err;
 	  next++;
 #if defined(ESP8266)
-	  yield();
+	 // yield();
 #endif
 	}  
 	
@@ -509,7 +509,7 @@ int ArduCAM::wrSensorRegs16_8(const struct sensor_reg reglist[])
 	   	//return err;
 	  next++;
 #if defined(ESP8266)
-	  yield();
+	  //yield();
 #endif
 	} 
 	
@@ -534,7 +534,7 @@ int ArduCAM::wrSensorRegs16_16(const struct sensor_reg reglist[])
 	  reg_addr = pgm_read_word(&next->reg);
 		reg_val = pgm_read_word(&next->val);
 #if defined(ESP8266)
-	  yield();
+	  //yield();
 #endif
 	}
 	
