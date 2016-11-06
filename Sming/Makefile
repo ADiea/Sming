@@ -265,6 +265,17 @@ gdbstub/Makefile:
 	$(Q) git submodule update
 endif
 
+rboot/Makefile: 
+	$(Q) echo "No rBoot submodule found. Using git to fetch it..."
+	$(Q) git submodule update --init rboot/
+
+spiffy: spiffy/spiffy
+
+spiffy/spiffy:
+	$(vecho) "Making spiffy utility"
+	$(Q) $(MAKE) --no-print-directory -C spiffy V=$(V)
+	$(vecho) "Done"
+
 $(APP_AR): $(OBJ)
 	$(vecho) "AR $@"
 	$(Q) $(AR) cru $@ $^
@@ -273,10 +284,16 @@ $(APP_AR): $(OBJ)
 	$(Q) cp -r $(APP_AR) $(USER_LIBDIR)/$(LIBSMING).a  
 	$(vecho) "Done"
 
+
 compile-ssl: 
 #	$(Q) $(MAKE) --no-print-directory -C axtls-8266 -e V=$(V) BIN_DIR="$(SMING_HOME)/$(USER_LIBDIR)" ESP_HOME="$(ESP_HOME)"
 
-checkdirs: compile-ssl $(BUILD_DIR) $(FW_BASE)
+ifeq ($(ENABLE_GDB), 1)	
+checkdirs: compile-ssl gdbstub/Makefile $(BUILD_DIR) $(FW_BASE) rboot/Makefile
+else
+checkdirs: compile-ssl $(BUILD_DIR) $(FW_BASE) rboot/Makefile
+endif
+
 
 $(BUILD_DIR):
 	$(Q) mkdir -p $@
