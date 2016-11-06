@@ -209,7 +209,7 @@ endef
 
 .PHONY: all checkdirs clean spiffy test samples recurse-samples $(SAMPLES_DIRS)
 
-all: checkdirs $(APP_AR)
+all: checkdirs $(APP_AR) spiffy
 
 ifeq ($(ENABLE_GDB), 1)	
 gdbstub/Makefile: 
@@ -217,6 +217,11 @@ gdbstub/Makefile:
 	$(Q) git submodule init
 	$(Q) git submodule update
 endif
+
+
+rboot/Makefile: 
+	$(Q) echo "No rBoot submodule found. Using git to fetch it..."
+	$(Q) git submodule update --init rboot/
 
 spiffy: spiffy/spiffy
 
@@ -233,9 +238,9 @@ $(APP_AR): $(OBJ)
 	$(vecho) "Done"
 
 ifeq ($(ENABLE_GDB), 1)	
-checkdirs: gdbstub/Makefile $(BUILD_DIR) $(FW_BASE)
+checkdirs: gdbstub/Makefile $(BUILD_DIR) $(FW_BASE) rboot/Makefile
 else
-checkdirs: $(BUILD_DIR) $(FW_BASE)
+checkdirs: $(BUILD_DIR) $(FW_BASE) rboot/Makefile
 endif
 
 $(BUILD_DIR):
