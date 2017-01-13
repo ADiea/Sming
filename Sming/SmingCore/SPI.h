@@ -59,7 +59,7 @@ public:
 	 * setup the SPI after SPI.begin()
 	 *
 	 */
-	virtual void beginTransaction(SPISettings mySettings);
+	virtual void beginTransaction(SPISettings& mySettings);
 
 	/** @brief endTransaction()
 	 *

@@ -9,11 +9,17 @@ Descr: Low-level SDCard functions
 #define _SD_CARD_
 
 #include <SmingCore.h>
-#include "SPISoft.h"
+#include "SPIBase.h"
 
-void SDCard_begin(uint8 PIN_CARD_SS);
+#define SDCARD_DEBUG_VERBOSE 0
 
-//extern SPISoft *SDCardSPI;
+//Provide either the chip select pin for simple setups
+//or a custom delegate that controls the chip select from application code
+void SDCard_begin(uint8 PIN_CARD_SS, SPIDelegateCS customCSDelegate = nullptr);
+
+/** @brief SDChipSelect: Offers flexibility to control
+ *                       chip select/release from user code.
+ */
 
 extern SPIBase	*SDCardSPI;
 

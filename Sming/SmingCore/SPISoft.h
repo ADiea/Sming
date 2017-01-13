@@ -16,38 +16,33 @@ class SPISoft: public SPIBase {
 
 public:
 
-	SPISoft(uint16_t miso, uint16_t mosi, uint16_t sck, uint16_t ss, uint8_t delay) {
+	SPISoft(uint16_t miso, uint16_t mosi, uint16_t sck, uint8_t delay) {
 		mMISO = miso;
 		mMOSI = mosi;
 		mCLK = sck;
-		mSS = ss;
 		m_delay = delay;
 	}
 
 	virtual ~SPISoft() {};
 
-	/*
-	 *  begin(): Initializes the SPI bus by setting SCK, MOSI, and SS to outputs, pulling SCK and MOSI low, and SS high.
+	/**brief begin(): Initializes the SPI bus by setting SCK, MOSI to outputs,
+	 *  pulling SCK and MOSI low, and SS high.
 	 */
 	virtual void begin();	//setup pins
 
-	/*
-	 * end(): Disables the SPI bus (leaving pin modes unchanged).
+	/*brief end(): Disables the SPI bus (leaving pin modes unchanged).
 	 */
 	virtual void end() {};
 
-	/*
-	 * beginTransaction(): Initializes the SPI bus using the defined SPISettings.
+	/*brief beginTransaction(): Initializes the SPI bus using the defined SPISettings.
 	 */
-	virtual void beginTransaction(SPISettings mySettings) {digitalWrite(mSS, LOW);};
+	virtual void beginTransaction(SPISettings& mySettings);
 
-	/*
-	 * endTransaction(): Stop using the SPI bus. Normally this is called after de-asserting the chip select, to allow other libraries to use the SPI bus.
+	/*brief endTransaction(): Stop using the SPI bus. Normally this is called after de-asserting the chip select, to allow other libraries to use the SPI bus.
 	 */
-	virtual void endTransaction() {digitalWrite(mSS, HIGH);};
+	virtual void endTransaction(){}
 
-	/*
-	 * transfer(), transfer16()
+	/*brief transfer(), transfer16()
 	 *
 	 * SPI transfer is based on a simultaneous send and receive: the received data is returned in receivedVal (or receivedVal16). In case of buffer transfers the received data is stored in the buffer in-place (the old data is replaced with the data received).
 	 *
@@ -59,17 +54,8 @@ public:
 	unsigned char transfer(unsigned char val) {transfer(&val, 1); return val;};
 	unsigned short transfer16(unsigned short val) {transfer((uint8 *)&val, 2); return val;};
 
-
-	/**
-	\brief Set microsecond delay for the SCK signal. Impacts SPI speed
-	*/
-	inline void setDelay(uint8_t dly) {m_delay = dly;}
-
-	inline void setMOSI(uint8_t val){digitalWrite(mMOSI, val);}
-
 private:
-	uint16_t mMISO, mMOSI, mCLK, mSS;
-	SPISettings mSPISettings;
+	uint16_t mMISO, mMOSI, mCLK;
 	uint8_t m_delay;
 };
 

@@ -28,6 +28,8 @@ Original location: https://github.com/theGanymedes/si4432/
 
 #define MAX_TRANSMIT_TIMEOUT 200
 
+#define SPI_SCK_FREQ 200000
+
 #define BAUD_RATE_REGS 12
 struct baudRateCfg
 {
@@ -46,8 +48,11 @@ baudRateCfg BaudRates[e_Baud_numBauds] =
 const uint16_t IFFilterTable[][2] = { { 322, 0x26 }, { 3355, 0x88 }, { 3618, 0x89 }, { 4202, 0x8A }, { 4684, 0x8B }, {
 		5188, 0x8C }, { 5770, 0x8D }, { 6207, 0x8E } };
 
-Si4432::Si4432(SPISoft *pSpi, uint8_t InterruptPin) :
-		_spi(pSpi), _sdnPin(0), _intPin(InterruptPin), _freqCarrier(433000000), _freqChannel(0), _kbps(eBaud_38k4), _packageSign(
+Si4432::Si4432(SPIBase *pSpi, uint8_t InterruptPin/* = 0*/,
+				SPIDelegateCS csDelegate/* = nullptr*/, uint8_t csPin/* = 0xFF*/) :
+		_spi(pSpi), _sdnPin(0), _intPin(InterruptPin),
+		_csPin(csPin), _ChipSelect(csDelegate),
+		_freqCarrier(433000000), _freqChannel(0), _kbps(eBaud_38k4), _packageSign(
 				0xDEAD) { // default is 450 mhz
 }
 
@@ -96,15 +101,27 @@ void Si4432::init() {
 	if (_intPin != 0)
 		pinMode(_intPin, INPUT);
 
+	//Verify that at least csPin OR _ChipSelect delegate are set
+	if(_ChipSelect == nullptr && _csPin == 0xFF)
+	{
+		debugf("SI4432: Fatal no CS option");
+		return;
+	}
+
+	//If csPin is directly used for chip select, set it as output, deassert
+	if(_ChipSelect == nullptr)
+	{
+		pinMode(_csPin, OUTPUT);
+		digitalWrite(_csPin, HIGH);
+	}
+
 	_spi->begin();
-	_spi->setDelay(200);
 
 #if DEBUG_SI4432
-	debugf("SPI is initialized now.");
+	debugf("SI4432 SPI inited.");
 #endif
 
 	hardReset();
-
 }
 
 void Si4432::boot() {
@@ -407,18 +424,42 @@ void Si4432::BurstWrite(Registers startReg, const byte value[], uint8_t length) 
 				value[0], value[length-1], length);
 #endif
 
-//	_spi->enable();
-	_spi->beginTransaction(_spi->SPIDefaultSettings);
+
+	//Use _csPin if select/deselect delegate is not available
+	if(_ChipSelect == nullptr)
+	{
+		digitalWrite(_csPin, LOW);	/* Set CS# low */
+	}
+	else
+	{
+		if(!_ChipSelect(eSPISelect))
+		{
+			debugf("SI4432 busy(sel)");
+			return;
+		}
+	}
+
+	SDCardSPI->beginTransaction(SPISettings(SPI_SCK_FREQ,MSBFIRST, SPI_MODE0));
+
 	delayMicroseconds(1);
-//	_spi->send(&regVal, 1);
 	_spi->transfer(&regVal, 1);
 
-//	_spi->send(value, length);
 	//debugf("SPI xfer w %x", value);
 	_spi->transfer((uint8 *)value, length);
 
-//	_spi->disable();
-	_spi->endTransaction();
+	//Use _csPin if select/deselect delegate is not available
+	if(_ChipSelect == nullptr)
+	{
+		digitalWrite(_csPin, HIGH);
+	}
+	else
+	{
+		if(!_ChipSelect(eSPIRelease))
+		{
+			debugf("SI4432 busy(rel)");
+			return;
+		}
+	}
 }
 
 void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
@@ -426,22 +467,42 @@ void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
 	byte regVal = (byte) startReg & 0x7F; // reset MSB
 	byte temp = 0xff;
 
-//	_spi->enable();
-	_spi->beginTransaction(_spi->SPIDefaultSettings);
+	//Use _csPin if select/deselect delegate is not available
+	if(_ChipSelect == nullptr)
+	{
+		digitalWrite(_csPin, LOW);	/* Set CS# low */
+	}
+	else
+	{
+		if(!_ChipSelect(eSPISelect))
+		{
+			debugf("SI4432 busy(sel)");
+			return;
+		}
+	}
+
+	SDCardSPI->beginTransaction(SPISettings(SPI_SCK_FREQ, MSBFIRST, SPI_MODE0));
 	delayMicroseconds(1);
-//	_spi->send(&regVal, 1);
 	_spi->transfer(&regVal, 1);
 
-	//_spi->setMOSI(HIGH); /* Send 0xFF */
-	//_spi->transfer((uint8 *)&temp, 1);
-//	_spi->recv(value, length);
 	memset(value, 0xFF, length);
 	//debugf("SPI xfer r read %x", value);
 	_spi->transfer((uint8 *)value, length);
 
+	//Use _csPin if select/deselect delegate is not available
+	if(_ChipSelect == nullptr)
+	{
+		digitalWrite(_csPin, HIGH);
+	}
+	else
+	{
+		if(!_ChipSelect(eSPIRelease))
+		{
+			debugf("SI4432 busy(rel)");
+			return;
+		}
+	}
 
-	//	_spi->disable();
-	_spi->endTransaction();
 #if DEBUG_VERBOSE_SI4432
 	if(length > 1)
 		debugf("Read %x  | %x..%x (%d bytes)", startReg,

@@ -62,11 +62,11 @@ bool isInputPin(uint16_t pin)
 {
 	bool result = false;
 
-	if(pin != 16)
+	if(pin < 16)
 	{
 		result =((GPIO_REG_READ(GPIO_ENABLE_ADDRESS)>>pin) & 1);
 	}
-	else
+	else if(pin == 16)
 	{
 		result = (READ_PERI_REG(RTC_GPIO_ENABLE) & 1);
 	}
@@ -86,9 +86,9 @@ void digitalWrite(uint16_t pin, uint8_t val)
 	}
 	else
 	{
-		if (pin != 16)
+		if (pin < 16)
 			GPIO_REG_WRITE((((val != LOW) ? GPIO_OUT_W1TS_ADDRESS : GPIO_OUT_W1TC_ADDRESS)), (1<<pin));
-		else
+		else if(pin == 16)
 			WRITE_PERI_REG(RTC_GPIO_OUT, (READ_PERI_REG(RTC_GPIO_OUT) & (uint32)0xfffffffe) | (uint32)(val & 1));
 
 		//GPIO_OUTPUT_SET(pin, (val ? 0xFF : 00));
@@ -97,9 +97,9 @@ void digitalWrite(uint16_t pin, uint8_t val)
 
 uint8_t digitalRead(uint16_t pin)
 {
-	if (pin != 16)
+	if (pin < 16)
 		return ((GPIO_REG_READ(GPIO_IN_ADDRESS)>>pin) & 1);
-	else
+	else if(pin == 16)
 		return (uint8)(READ_PERI_REG(RTC_GPIO_IN_DATA) & 1);
 
 	//return  GPIO_INPUT_GET(pin);

@@ -19,6 +19,16 @@
 
 #include "SPISettings.h"
 
+enum eSPIChipSelect
+{
+	eSPIRelease,
+	eSPISelect
+};
+
+/** @brief SPIDelegateCS: A delegate that tries to select or release the chip select,
+ * 			returning true for success, false for failure.
+*/
+typedef Delegate<bool(eSPIChipSelect)> SPIDelegateCS;
 
 /* @defgroup SPI base implementation
  * Base class/interface for SPI implementations
@@ -44,7 +54,7 @@ public:
 
 	/** @brief beginTransaction(): Initializes the SPI bus using the defined SPISettings.
 	 */
-	virtual void beginTransaction(SPISettings mySettings) = 0;
+	virtual void beginTransaction(SPISettings& mySettings) = 0;
 
 	/** @brief endTransaction(): Stop using the SPI bus. Normally this is called after de-asserting the chip select, to allow other libraries to use the SPI bus.
 	 */
@@ -62,10 +72,7 @@ public:
 	virtual unsigned short transfer16(unsigned short val) = 0;
 	virtual void transfer(uint8 * buffer, size_t size) = 0;
 
-	virtual void setDelay(uint8_t dly){}
-
 	SPISettings SPIDefaultSettings;
-
 };
 
 #endif /* SMINGCORE_SPIBASE_H_ */

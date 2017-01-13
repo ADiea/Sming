@@ -100,13 +100,13 @@ void init()
 
 	Serial.systemDebugOutput(true); //Allow debug output to serial
 
-	Serial.print("\nRadio si4432 example - !!! see code for HW setup !!! \n\n");
+	Serial.print("\nRadio si4432 example - !!! see code for SPI setup !!! \n\n");
 
-	pRadioSPI = new SPISoft(PIN_RADIO_DO, PIN_RADIO_DI, PIN_RADIO_CK, PIN_RADIO_SS);
+	pRadioSPI = new SPISoft(PIN_RADIO_DO, PIN_RADIO_DI, PIN_RADIO_CK);
 
 	if(pRadioSPI)
 	{
-		radio = new Si4432(pRadioSPI);
+		radio = new Si4432(pRadioSPI, 0, nullptr, PIN_RADIO_SS);
 	}
 
 	if(radio)

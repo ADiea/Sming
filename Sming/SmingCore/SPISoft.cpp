@@ -7,10 +7,6 @@ Descr: Implement software SPI. To improve speed, GPIO16 is not supported(see Dig
 */
 #include "SPISoft.h"
 
-#define SPEED 0 /* You gain ~0.7 kBps (more for larger data chunks)*/
-#define SIZE 1 /* You gain ~ 400B from the total 32K of cache RAM */
-#define SPEED_VS_SIZE SIZE /* Your choice here, I choose SIZE */
-
 #define GP_IN(pin)	((GPIO_REG_READ(GPIO_IN_ADDRESS)>>(pin)) & 1)
 #define GP_OUT(pin, val) GPIO_REG_WRITE(((((val) != LOW) ? \
 							GPIO_OUT_W1TS_ADDRESS : \
@@ -19,6 +15,8 @@ Descr: Implement software SPI. To improve speed, GPIO16 is not supported(see Dig
 					fastDelay(m_delay); \
 					GP_OUT(mCLK, LOW); \
 					fastDelay(m_delay);
+
+#define SCK_SPEED_REFERENCE 40000000
 
 static inline void IRAM_ATTR fastDelay(unsigned d)
 {
@@ -45,9 +43,15 @@ void SPISoft::begin()
 	digitalWrite(mMISO, HIGH);
 
 	pinMode(mMOSI, OUTPUT);
+}
 
-	pinMode(mSS, OUTPUT);
-	digitalWrite(mSS, HIGH);
+void SPISoft::beginTransaction(SPISettings& mySettings)
+{
+	//Get the desired bus frequency of the peripheral and
+	// convert it to soft delay cycles
+	if(mySettings.getSpeed() > 0)
+		m_delay = SCK_SPEED_REFERENCE / mySettings.getSpeed();
+
 }
 
 void SPISoft::transfer(uint8_t* buffer, uint32_t size)

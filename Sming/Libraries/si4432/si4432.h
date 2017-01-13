@@ -29,7 +29,7 @@ Original location: https://github.com/theGanymedes/si4432/
 #define si4432_H_
 #include "Arduino.h"
 
-#include <SPISoft.h>
+#include <SPIBase.h>
 
 #define DEBUG_SI4432 0
 #define DEBUG_VERBOSE_SI4432 0
@@ -52,7 +52,7 @@ enum eRadioError
 	err_ErrOther,
 };
 
-/* Now, according to the this design, you must
+/* According to this design, you must
  * 1- Create an instance
  * 2- Call init()
  *
@@ -62,7 +62,10 @@ enum eRadioError
 
 class Si4432 {
 public:
-	Si4432(SPISoft *pSpi, uint8_t InterruptPin = 0); // when a InterruptPin is given, interrupts are checked with this pin - rather than SPI polling
+	//Note 1: Provide either the chip select pin for simple setups
+	//or a custom delegate that controls the chip select from application code
+	//Note 2:  when a InterruptPin is given, interrupts are checked with this pin - rather than SPI polling
+	Si4432(SPIBase *pSpi, uint8_t InterruptPin = 0, SPIDelegateCS csDelegate = nullptr, uint8_t csPin = 0xFF);
 
 	void setFrequency(unsigned long baseFrequency); // sets the freq. call before boot
 	void setChannel(byte channel); // sets the channel. call before switching to tx or rx mode
@@ -97,8 +100,9 @@ protected:
 		RXMode = 0x04, TXMode = 0x08, Ready = 0x01, TuneMode = 0x02
 	};
 
-	SPISoft *_spi;
-	uint8_t _sdnPin, _intPin;
+	SPIBase *_spi;
+	uint8_t _sdnPin, _intPin, _csPin;
+	SPIDelegateCS _ChipSelect = nullptr;
 
 	uint64_t _freqCarrier;
 	uint8_t _freqChannel;
