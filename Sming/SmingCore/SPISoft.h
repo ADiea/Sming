@@ -16,7 +16,8 @@ class SPISoft: public SPIBase {
 
 public:
 
-	SPISoft(uint16_t miso, uint16_t mosi, uint16_t sck, uint8_t delay) {
+	SPISoft(uint16_t miso, uint16_t mosi, uint16_t sck, uint8_t delay = 0)
+	{
 		mMISO = miso;
 		mMOSI = mosi;
 		mCLK = sck;

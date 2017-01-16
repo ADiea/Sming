@@ -33,7 +33,7 @@ bool NexSlider::setValue(uint32_t number)
     char buf[10] = {0};
     String cmd;
     
-    utoa(number, buf, 10);
+    snprintf(buf, 10, "%d", number);
     cmd += getObjName();
     cmd += ".val=";
     cmd += buf;

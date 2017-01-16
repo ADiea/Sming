@@ -18,6 +18,8 @@
 #include "NexConfig.h"
 #include "NexTouch.h"
 
+#define snprintf m_snprintf
+
 /**
  * @addtogroup CoreAPI 
  * @{ 

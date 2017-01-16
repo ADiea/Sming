@@ -18,6 +18,7 @@
 #define SMINGCORE_SPIBASE_H_
 
 #include "SPISettings.h"
+#include <Delegate.h>
 
 enum eSPIChipSelect
 {
