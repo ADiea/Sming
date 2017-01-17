@@ -116,6 +116,14 @@ public:
      */
 	void applyFirmwareUpdate(uint32_t readFlashOffset, uint32_t targetFlashOffset, int firmwareSize);
 
+    /** @brief  Return CPU cycle count
+     */
+	uint32_t getCycleCount();
+
+	/** @brief  Return CPU frequency in Mhz
+	 */
+	uint32_t getCpuFreqMHz();
+
 private:
 	static void staticReadyHandler();
 	void readyHandler();

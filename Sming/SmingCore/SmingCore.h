@@ -20,6 +20,7 @@
 #include "ESP8266EX.h"
 #include "FileSystem.h"
 #include "HardwareSerial.h"
+#include "SoftwareSerial.h"
 #include "Interrupts.h"
 #include "DriverPWM.h"
 #include "HardwarePWM.h"
