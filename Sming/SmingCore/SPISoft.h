@@ -37,7 +37,7 @@ public:
 
 	/*brief beginTransaction(): Initializes the SPI bus using the defined SPISettings.
 	 */
-	virtual void beginTransaction(SPISettings& mySettings);
+	virtual void beginTransaction(const SPISettings& mySettings);
 
 	/*brief endTransaction(): Stop using the SPI bus. Normally this is called after de-asserting the chip select, to allow other libraries to use the SPI bus.
 	 */

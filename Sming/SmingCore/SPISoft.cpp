@@ -45,7 +45,7 @@ void SPISoft::begin()
 	pinMode(mMOSI, OUTPUT);
 }
 
-void SPISoft::beginTransaction(SPISettings& mySettings)
+void SPISoft::beginTransaction(const SPISettings& mySettings)
 {
 	//Get the desired bus frequency of the peripheral and
 	// convert it to soft delay cycles

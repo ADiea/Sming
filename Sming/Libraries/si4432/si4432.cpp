@@ -102,14 +102,14 @@ void Si4432::init() {
 		pinMode(_intPin, INPUT);
 
 	//Verify that at least csPin OR _ChipSelect delegate are set
-	if(_ChipSelect == nullptr && _csPin == 0xFF)
+	if(_ChipSelect && _csPin == 0xFF)
 	{
 		debugf("SI4432: Fatal no CS option");
 		return;
 	}
 
 	//If csPin is directly used for chip select, set it as output, deassert
-	if(_ChipSelect == nullptr)
+	if(_ChipSelect)
 	{
 		pinMode(_csPin, OUTPUT);
 		digitalWrite(_csPin, HIGH);
@@ -426,7 +426,7 @@ void Si4432::BurstWrite(Registers startReg, const byte value[], uint8_t length) 
 
 
 	//Use _csPin if select/deselect delegate is not available
-	if(_ChipSelect == nullptr)
+	if(_ChipSelect)
 	{
 		digitalWrite(_csPin, LOW);	/* Set CS# low */
 	}
@@ -448,7 +448,7 @@ void Si4432::BurstWrite(Registers startReg, const byte value[], uint8_t length) 
 	_spi->transfer((uint8 *)value, length);
 
 	//Use _csPin if select/deselect delegate is not available
-	if(_ChipSelect == nullptr)
+	if(_ChipSelect)
 	{
 		digitalWrite(_csPin, HIGH);
 	}
@@ -468,7 +468,7 @@ void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
 	byte temp = 0xff;
 
 	//Use _csPin if select/deselect delegate is not available
-	if(_ChipSelect == nullptr)
+	if(_ChipSelect)
 	{
 		digitalWrite(_csPin, LOW);	/* Set CS# low */
 	}
@@ -490,7 +490,7 @@ void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
 	_spi->transfer((uint8 *)value, length);
 
 	//Use _csPin if select/deselect delegate is not available
-	if(_ChipSelect == nullptr)
+	if(_ChipSelect)
 	{
 		digitalWrite(_csPin, HIGH);
 	}

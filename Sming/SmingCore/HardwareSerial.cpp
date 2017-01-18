@@ -290,7 +290,4 @@ void HardwareSerial::delegateTask (os_event_t *inputEvent)
 	}
 }
 
-
-
-
 HardwareSerial Serial(UART_ID_0);

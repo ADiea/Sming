@@ -56,7 +56,7 @@ void SDCard_begin(uint8 PIN_CARD_SS, SPIDelegateCS customCSDelegate/* = nullptr*
 	SDChipSelect = customCSDelegate;
 
 	//Use SPI_CS pin if SDChipSelect delegate is not available
-	if(SDChipSelect == nullptr)
+	if(SDChipSelect)
 	{
 		pinMode(SPI_CS, OUTPUT);
 		digitalWrite(SPI_CS, HIGH);
@@ -177,7 +177,7 @@ void deselect (void)
 	BYTE d = 0xFF;
 
 	//Use SPI_CS pin if SDChipSelect delegate is not available
-	if(SDChipSelect == nullptr)
+	if(SDChipSelect)
 	{
 		digitalWrite(SPI_CS, HIGH);
 	}
@@ -205,7 +205,7 @@ int select (void)	/* 1:OK, 0:Timeout */
 	BYTE d = 0xFF;
 
 	//Use SPI_CS pin if SDChipSelect delegate is not available
-	if(SDChipSelect == nullptr)
+	if(SDChipSelect)
 	{
 		digitalWrite(SPI_CS, LOW);	/* Set CS# low */
 	}

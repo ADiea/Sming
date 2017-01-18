@@ -62,7 +62,7 @@ public:
 
 	inline uint8 getDataMode() {return _dataMode;}
 
-	inline int getSpeed() {return _speed;}
+	const inline int getSpeed() {return _speed;}
 
 	// overload operator to check wheter the settings are equal
 	bool operator==(const SPISettings &other) const;

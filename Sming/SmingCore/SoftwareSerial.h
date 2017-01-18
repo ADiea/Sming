@@ -69,7 +69,7 @@ public:
    
    size_t readBytes(char* buffer, size_t maxLen);
    
-   size_t print(char* out);
+   size_t print(const char* out);
 
 private:
    bool isValidGPIOpin(int pin);
@@ -92,5 +92,6 @@ private:
 // If only one tx or rx wanted then use this as parameter for the unused pin
 #define SW_SERIAL_UNUSED_PIN -1
 
+extern SoftwareSerial softUart;
 
 #endif

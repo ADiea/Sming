@@ -71,7 +71,7 @@ void SPIClass::end()
  * setup the SPI after SPI.begin()
  *
  */
-void SPIClass::beginTransaction(SPISettings& mySettings) {
+void SPIClass::beginTransaction(const SPISettings& mySettings) {
 
 #ifdef SPI_DEBUG
 	debugf("SPIhw::beginTransaction(SPISettings mySettings)");

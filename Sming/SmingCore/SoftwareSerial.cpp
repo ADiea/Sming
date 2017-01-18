@@ -35,17 +35,17 @@ extern "C" {
 // and callbacks corresponding to each possible GPIO pins have to be defined
 SoftwareSerial *ObjList[MAX_PIN+1];
 
-void ICACHE_RAM_ATTR sws_isr_0() { ObjList[0]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_1() { ObjList[1]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_2() { ObjList[2]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_3() { ObjList[3]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_4() { ObjList[4]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_5() { ObjList[5]->rxRead(); };
+void IRAM_ATTR sws_isr_0() { ObjList[0]->rxRead(); };
+void IRAM_ATTR sws_isr_1() { ObjList[1]->rxRead(); };
+void IRAM_ATTR sws_isr_2() { ObjList[2]->rxRead(); };
+void IRAM_ATTR sws_isr_3() { ObjList[3]->rxRead(); };
+void IRAM_ATTR sws_isr_4() { ObjList[4]->rxRead(); };
+void IRAM_ATTR sws_isr_5() { ObjList[5]->rxRead(); };
 // Pin 6 to 11 can not be used
-void ICACHE_RAM_ATTR sws_isr_12() { ObjList[12]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_13() { ObjList[13]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_14() { ObjList[14]->rxRead(); };
-void ICACHE_RAM_ATTR sws_isr_15() { ObjList[15]->rxRead(); };
+void IRAM_ATTR sws_isr_12() { ObjList[12]->rxRead(); };
+void IRAM_ATTR sws_isr_13() { ObjList[13]->rxRead(); };
+void IRAM_ATTR sws_isr_14() { ObjList[14]->rxRead(); };
+void IRAM_ATTR sws_isr_15() { ObjList[15]->rxRead(); };
 
 static void (*ISRList[MAX_PIN+1])() = {
       sws_isr_0,
@@ -154,7 +154,7 @@ int SoftwareSerial::available() {
 }
 
 
-size_t SoftwareSerial::print(char* out)
+size_t SoftwareSerial::print(const char* out)
 {
 	size_t ret = 0, i=0;
 	while(out && *out)
@@ -164,7 +164,7 @@ size_t SoftwareSerial::print(char* out)
 	return ret;
 }
 
-size_t readBytes(char* buffer, size_t maxLen)
+size_t SoftwareSerial::readBytes(char* buffer, size_t maxLen)
 {
 	uint32_t start = System.getCycleCount();
 	size_t received = 0;
@@ -233,7 +233,7 @@ int SoftwareSerial::peek() {
    return m_buffer[m_outPos];
 }
 
-void ICACHE_RAM_ATTR SoftwareSerial::rxRead() {
+void IRAM_ATTR SoftwareSerial::rxRead() {
    // Advance the starting point for the samples but compensate for the
    // initial delay which occurs before the interrupt is delivered
    unsigned long wait = m_bitTime + m_bitTime/3 - 500;
@@ -260,3 +260,5 @@ void ICACHE_RAM_ATTR SoftwareSerial::rxRead() {
    // it gets set even when interrupts are disabled
    GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, 1 << m_rxPin);
 }
+
+SoftwareSerial softUart(0, 1, false, 32);
