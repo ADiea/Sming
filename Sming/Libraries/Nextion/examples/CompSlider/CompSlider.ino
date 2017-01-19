@@ -31,7 +31,7 @@ void h0PopCallback(void *ptr)
     uint32_t number = 0;
     char temp[10] = {0};
     
-    dbSerialPrintln("h0PopCallback");
+    dbSerialPrint("h0PopCallback");
 
     h0.getValue(&number);
     utoa(number, temp, 10);
@@ -43,7 +43,7 @@ void setup(void)
 {
     nexInit();
     h0.attachPop(h0PopCallback);
-    dbSerialPrintln("setup done");
+    dbSerialPrint("setup done");
 }
 
 void loop(void)

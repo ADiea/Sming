@@ -30,7 +30,7 @@
  * 
  * @return true if success, false for failure. 
  */
-bool nexInit(void);
+bool nexInit(SoftwareSerial *serial);
 
 /**
  * Listen touch event and calling callbacks attached before.

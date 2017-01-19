@@ -89,9 +89,9 @@ $(document).ready(function(){initNavTree('_comp_button_8ino_source.html','');});
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    uint16_t len;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    uint16_t number;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <a class="code" href="class_nex_button.html">NexButton</a> *btn = (<a class="code" href="class_nex_button.html">NexButton</a> *)ptr;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    dbSerialPrintln(<span class="stringliteral">&quot;b0PopCallback&quot;</span>);</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    dbSerialPrint(<span class="stringliteral">&quot;b0PopCallback&quot;</span>);</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    dbSerialPrint(<span class="stringliteral">&quot;ptr=&quot;</span>);</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    dbSerialPrintln((uint32_t)ptr); </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    dbSerialPrint((uint32_t)ptr); </div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    memset(buffer, 0, <span class="keyword">sizeof</span>(buffer));</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    btn-&gt;<a class="code" href="class_nex_button.html#a5ba1f74aa94b41b98172e42583ee13d6">getText</a>(buffer, <span class="keyword">sizeof</span>(buffer));</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    </div>
@@ -108,7 +108,7 @@ $(document).ready(function(){initNavTree('_comp_button_8ino_source.html','');});
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;{    </div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <a class="code" href="group___core_a_p_i.html#gab09ddba6b72334d30ae091a7b038d790">nexInit</a>();</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    b0.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(b0PopCallback, &amp;b0);</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    dbSerialPrintln(<span class="stringliteral">&quot;setup done&quot;</span>); </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    dbSerialPrint(<span class="stringliteral">&quot;setup done&quot;</span>); </div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;}</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="keywordtype">void</span> loop(<span class="keywordtype">void</span>)</div>

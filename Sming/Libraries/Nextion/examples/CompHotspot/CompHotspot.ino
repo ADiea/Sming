@@ -28,30 +28,30 @@ NexTouch *nex_listen_list[] =
 
 void hot0PushCallback(void *ptr)
 {
-    dbSerialPrintln("hot0PushCallback");
+    dbSerialPrint("hot0PushCallback");
     dbSerialPrint("ptr=");
-    dbSerialPrintln((uint32_t)ptr);
+    dbSerialPrint((uint32_t)ptr);
 }
 
 void hot1PushCallback(void *ptr)
 {
-    dbSerialPrintln("hot1PushCallback");    
+    dbSerialPrint("hot1PushCallback");    
     dbSerialPrint("ptr=");
-    dbSerialPrintln((uint32_t)ptr);
+    dbSerialPrint((uint32_t)ptr);
 }
 
 void hot0PopCallback(void *ptr)
 {
-    dbSerialPrintln("hot0PopCallback");
+    dbSerialPrint("hot0PopCallback");
     dbSerialPrint("ptr=");
-    dbSerialPrintln((uint32_t)ptr);
+    dbSerialPrint((uint32_t)ptr);
 }
 
 void hot1PopCallback(void *ptr)
 {
-    dbSerialPrintln("hot1PopCallback");
+    dbSerialPrint("hot1PopCallback");
     dbSerialPrint("ptr=");
-    dbSerialPrintln((uint32_t)ptr);
+    dbSerialPrint((uint32_t)ptr);
 }
 
 void setup(void)
@@ -61,7 +61,7 @@ void setup(void)
     hot0.attachPop(hot0PopCallback, &hot0);
     hot1.attachPush(hot1PushCallback, &hot1);
     hot1.attachPop(hot1PopCallback, &hot1);
-    dbSerialPrintln("setup done");
+    dbSerialPrint("setup done");
 }
 
 void loop(void)

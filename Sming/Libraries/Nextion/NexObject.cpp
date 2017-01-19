@@ -38,21 +38,7 @@ const char* NexObject::getObjName(void)
 
 void NexObject::printObjInfo(void)
 {
-    dbSerialPrint("[");
-    dbSerialPrint((uint32_t)this);
-    dbSerialPrint(":");
-    dbSerialPrint(__pid);
-    dbSerialPrint(",");
-    dbSerialPrint(__cid);
-    dbSerialPrint(",");
-    if (__name)
-    {
-        dbSerialPrint(__name);
-    }
-    else
-    {
-        dbSerialPrint("(null)");
-    }
-    dbSerialPrintln("]");
+    dbSerialPrint("[0x%x:%d,%d,%s]", (uint32_t)this, __pid,
+    				__cid, __name ? __name : "(null)");
 }
 

@@ -85,7 +85,7 @@ $(document).ready(function(){initNavTree('_comp_picture_8ino_source.html','');})
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keywordtype">void</span> p0PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;{</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    uint32_t number = 0;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    dbSerialPrintln(<span class="stringliteral">&quot;p0PopCallback&quot;</span>);</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    dbSerialPrint(<span class="stringliteral">&quot;p0PopCallback&quot;</span>);</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    p0.<a class="code" href="class_nex_picture.html#a11bd68ef9fe1d03d9e0d02ef1c7527e9">getPic</a>(&amp;number);</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
@@ -106,7 +106,7 @@ $(document).ready(function(){initNavTree('_comp_picture_8ino_source.html','');})
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;{</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <a class="code" href="group___core_a_p_i.html#gab09ddba6b72334d30ae091a7b038d790">nexInit</a>();</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    p0.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(p0PopCallback);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    dbSerialPrintln(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    dbSerialPrint(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;}</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keywordtype">void</span> loop(<span class="keywordtype">void</span>)</div>

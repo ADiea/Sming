@@ -93,7 +93,7 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> t0PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;t0PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;t0PopCallback&quot;</span>);</div>
 <div class="line">    t0.<a name="a3"></a><a class="code" href="class_nex_text.html#a19589b32c981436a1bbcfe407bc766e3">setText</a>(<span class="stringliteral">&quot;50&quot;</span>);</div>
 <div class="line">}</div>
 <div class="line"></div>
@@ -102,7 +102,7 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line">    uint16_t len;</div>
 <div class="line">    uint16_t number;</div>
 <div class="line">    </div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;b0PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;b0PopCallback&quot;</span>);</div>
 <div class="line"></div>
 <div class="line">    memset(buffer, 0, <span class="keyword">sizeof</span>(buffer));</div>
 <div class="line">    t0.<a name="a4"></a><a class="code" href="class_nex_text.html#a9cf417b2f25df2872492c55bdc9f5b30">getText</a>(buffer, <span class="keyword">sizeof</span>(buffer));</div>
@@ -121,7 +121,7 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line">    uint16_t len;</div>
 <div class="line">    uint16_t number;</div>
 <div class="line">    </div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;b1PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;b1PopCallback&quot;</span>);</div>
 <div class="line"></div>
 <div class="line">    memset(buffer, 0, <span class="keyword">sizeof</span>(buffer));</div>
 <div class="line">    t0.<a class="code" href="class_nex_text.html#a9cf417b2f25df2872492c55bdc9f5b30">getText</a>(buffer, <span class="keyword">sizeof</span>(buffer));</div>
@@ -141,7 +141,7 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line">    t0.<a name="a6"></a><a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(t0PopCallback);</div>
 <div class="line">    b0.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(b0PopCallback);</div>
 <div class="line">    b1.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(b1PopCallback);</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> loop(<span class="keywordtype">void</span>)</div>

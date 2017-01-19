@@ -439,7 +439,7 @@ void Si4432::BurstWrite(Registers startReg, const byte value[], uint8_t length) 
 		}
 	}
 
-	SDCardSPI->beginTransaction(SPISettings(SPI_SCK_FREQ, MSBFIRST, SPI_MODE0));
+	_spi->beginTransaction(SPISettings(SPI_SCK_FREQ, MSBFIRST, SPI_MODE0));
 
 	delayMicroseconds(1);
 	_spi->transfer(&regVal, 1);
@@ -481,7 +481,7 @@ void Si4432::BurstRead(Registers startReg, byte value[], uint8_t length) {
 		}
 	}
 
-	SDCardSPI->beginTransaction(SPISettings(SPI_SCK_FREQ, MSBFIRST, SPI_MODE0));
+	_spi->beginTransaction(SPISettings(SPI_SCK_FREQ, MSBFIRST, SPI_MODE0));
 	delayMicroseconds(1);
 	_spi->transfer(&regVal, 1);
 

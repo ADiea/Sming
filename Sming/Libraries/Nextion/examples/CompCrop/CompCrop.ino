@@ -27,7 +27,7 @@ NexTouch *nex_listen_list[] =
 void q0PopCallback(void *ptr)
 {
     uint32_t number = 0;
-    dbSerialPrintln("q0PopCallback");
+    dbSerialPrint("q0PopCallback");
 
     q0.getPic(&number);
 
@@ -42,7 +42,7 @@ void setup(void)
 {
     nexInit();
     q0.attachPop(q0PopCallback);
-    dbSerialPrintln("setup done");
+    dbSerialPrint("setup done");
 }
 
 void loop(void)

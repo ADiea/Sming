@@ -14,6 +14,8 @@
  */
 #include "NexHardware.h"
 
+SoftwareSerial *nexSerial = nullptr;
+
 #define NEX_RET_CMD_FINISHED            (0x01)
 #define NEX_RET_EVENT_LAUNCHED          (0x88)
 #define NEX_RET_EVENT_UPGRADED          (0x89)
@@ -52,8 +54,8 @@ bool recvRetNumber(uint32_t *number, uint32_t timeout)
         goto __return;
     }
     
-    nexSerial.setTimeout(timeout);
-    if (sizeof(temp) != nexSerial.readBytes((char *)temp, sizeof(temp)))
+    nexSerial->setTimeout(timeout);
+    if (sizeof(temp) != nexSerial->readBytes((char *)temp, sizeof(temp)))
     {
         goto __return;
     }
@@ -72,12 +74,11 @@ __return:
 
     if (ret) 
     {
-        dbSerialPrint("recvRetNumber :");
-        dbSerialPrintln(*number);
+        dbSerialPrint("recvRetNumber :%d", *number);
     }
     else
     {
-        dbSerialPrintln("recvRetNumber err");
+        dbSerialPrint("recvRetNumber err");
     }
     
     return ret;
@@ -111,9 +112,9 @@ uint16_t recvRetString(char *buffer, uint16_t len, uint32_t timeout)
     start = millis();
     while (millis() - start <= timeout)
     {
-        while (nexSerial.available())
+        while (nexSerial->available())
         {
-            c = nexSerial.read();
+            c = nexSerial->read();
             if (str_start_flag)
             {
                 if (0xFF == c)
@@ -147,11 +148,7 @@ uint16_t recvRetString(char *buffer, uint16_t len, uint32_t timeout)
     
 __return:
 
-    dbSerialPrint("recvRetString[");
-    dbSerialPrint(temp.length());
-    dbSerialPrint(",");
-    dbSerialPrint(temp);
-    dbSerialPrintln("]");
+    dbSerialPrint("recvRetString[%d,%s]", temp.length(), temp);
 
     return ret;
 }
@@ -163,15 +160,15 @@ __return:
  */
 void sendCommand(const char* cmd)
 {
-    while (nexSerial.available())
+    while (nexSerial->available())
     {
-        nexSerial.read();
+        nexSerial->read();
     }
     
-    nexSerial.print(cmd);
-    nexSerial.write(0xFF);
-    nexSerial.write(0xFF);
-    nexSerial.write(0xFF);
+    nexSerial->print(cmd);
+    nexSerial->write(0xFF);
+    nexSerial->write(0xFF);
+    nexSerial->write(0xFF);
 }
 
 
@@ -189,8 +186,8 @@ bool recvRetCommandFinished(uint32_t timeout)
     bool ret = false;
     uint8_t temp[4] = {0};
     
-    nexSerial.setTimeout(timeout);
-    if (sizeof(temp) != nexSerial.readBytes((char *)temp, sizeof(temp)))
+    nexSerial->setTimeout(timeout);
+    if (sizeof(temp) != nexSerial->readBytes((char *)temp, sizeof(temp)))
     {
         ret = false;
     }
@@ -206,24 +203,28 @@ bool recvRetCommandFinished(uint32_t timeout)
 
     if (ret) 
     {
-        dbSerialPrintln("recvRetCommandFinished ok");
+        dbSerialPrint("recvRetCommandFinished ok");
     }
     else
     {
-        dbSerialPrintln("recvRetCommandFinished err");
+        dbSerialPrint("recvRetCommandFinished err");
     }
     
     return ret;
 }
 
 
-bool nexInit(void)
+bool nexInit(SoftwareSerial *serial)
 {
     bool ret1 = false;
     bool ret2 = false;
+
+    if(!serial)
+    	return false;
     
-    dbSerialBegin(9600);
-    nexSerial.begin(9600);
+    nexSerial = serial;
+
+    nexSerial->begin(9600);
     sendCommand("");
     sendCommand("bkcmd=1");
     ret1 = recvRetCommandFinished();
@@ -239,19 +240,19 @@ void nexLoop(NexTouch *nex_listen_list[])
     uint16_t i;
     uint8_t c;  
     
-    while (nexSerial.available() > 0)
+    while (nexSerial->available() > 0)
     {   
         delay(10);
-        c = nexSerial.read();
+        c = nexSerial->read();
         
         if (NEX_RET_EVENT_TOUCH_HEAD == c)
         {
-            if (nexSerial.available() >= 6)
+            if (nexSerial->available() >= 6)
             {
                 __buffer[0] = c;  
                 for (i = 1; i < 7; i++)
                 {
-                    __buffer[i] = nexSerial.read();
+                    __buffer[i] = nexSerial->read();
                 }
                 __buffer[i] = 0x00;
                 

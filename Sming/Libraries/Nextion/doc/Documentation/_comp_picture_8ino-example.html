@@ -84,7 +84,7 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line"><span class="keywordtype">void</span> p0PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
 <div class="line">    uint32_t number = 0;</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;p0PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;p0PopCallback&quot;</span>);</div>
 <div class="line"></div>
 <div class="line">    p0.<a name="a2"></a><a class="code" href="class_nex_picture.html#a11bd68ef9fe1d03d9e0d02ef1c7527e9">getPic</a>(&amp;number);</div>
 <div class="line"></div>
@@ -105,7 +105,7 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line">{</div>
 <div class="line">    <a name="a4"></a><a class="code" href="group___core_a_p_i.html#gab09ddba6b72334d30ae091a7b038d790">nexInit</a>();</div>
 <div class="line">    p0.<a name="a5"></a><a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(p0PopCallback);</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> loop(<span class="keywordtype">void</span>)</div>

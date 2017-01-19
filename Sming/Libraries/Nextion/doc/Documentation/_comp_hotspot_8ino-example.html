@@ -85,30 +85,30 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> hot0PushCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;hot0PushCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;hot0PushCallback&quot;</span>);</div>
 <div class="line">    dbSerialPrint(<span class="stringliteral">&quot;ptr=&quot;</span>);</div>
-<div class="line">    dbSerialPrintln((uint32_t)ptr);</div>
+<div class="line">    dbSerialPrint((uint32_t)ptr);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> hot1PushCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;hot1PushCallback&quot;</span>);    </div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;hot1PushCallback&quot;</span>);    </div>
 <div class="line">    dbSerialPrint(<span class="stringliteral">&quot;ptr=&quot;</span>);</div>
-<div class="line">    dbSerialPrintln((uint32_t)ptr);</div>
+<div class="line">    dbSerialPrint((uint32_t)ptr);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> hot0PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;hot0PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;hot0PopCallback&quot;</span>);</div>
 <div class="line">    dbSerialPrint(<span class="stringliteral">&quot;ptr=&quot;</span>);</div>
-<div class="line">    dbSerialPrintln((uint32_t)ptr);</div>
+<div class="line">    dbSerialPrint((uint32_t)ptr);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> hot1PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;hot1PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;hot1PopCallback&quot;</span>);</div>
 <div class="line">    dbSerialPrint(<span class="stringliteral">&quot;ptr=&quot;</span>);</div>
-<div class="line">    dbSerialPrintln((uint32_t)ptr);</div>
+<div class="line">    dbSerialPrint((uint32_t)ptr);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> setup(<span class="keywordtype">void</span>)</div>
@@ -118,7 +118,7 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line">    hot0.<a name="a4"></a><a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(hot0PopCallback, &amp;hot0);</div>
 <div class="line">    hot1.<a class="code" href="class_nex_touch.html#a685a753aae5eb9fb9866a7807a310132">attachPush</a>(hot1PushCallback, &amp;hot1);</div>
 <div class="line">    hot1.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(hot1PopCallback, &amp;hot1);</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;setup done&quot;</span>);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> loop(<span class="keywordtype">void</span>)</div>

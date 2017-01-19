@@ -35,7 +35,7 @@ static uint8_t ch3_data = LEVEL_LOW;
 void setup(void)
 {
     nexInit();
-    dbSerialPrintln("setup done");
+    dbSerialPrint("setup done");
 }
 
 void loop(void)

@@ -89,39 +89,39 @@ This program is free software; you can redistribute it and/or modify it under th
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> page0PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;page0PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;page0PopCallback&quot;</span>);</div>
 <div class="line">    page1.<a name="a2"></a><a class="code" href="class_nex_page.html#a5714e41d4528b991eda4bbe578005418">show</a>();</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> page1PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;page1PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;page1PopCallback&quot;</span>);</div>
 <div class="line">    page2.<a class="code" href="class_nex_page.html#a5714e41d4528b991eda4bbe578005418">show</a>();</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> page2PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;page2PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;page2PopCallback&quot;</span>);</div>
 <div class="line">    page3.<a class="code" href="class_nex_page.html#a5714e41d4528b991eda4bbe578005418">show</a>();</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> page3PopCallback(<span class="keywordtype">void</span> *ptr)</div>
 <div class="line">{</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;page3PopCallback&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;page3PopCallback&quot;</span>);</div>
 <div class="line">    page0.<a class="code" href="class_nex_page.html#a5714e41d4528b991eda4bbe578005418">show</a>();</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> setup(<span class="keywordtype">void</span>)</div>
 <div class="line">{   </div>
 <div class="line">    <a name="a3"></a><a class="code" href="group___core_a_p_i.html#gab09ddba6b72334d30ae091a7b038d790">nexInit</a>();</div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;setup begin&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;setup begin&quot;</span>);</div>
 <div class="line">    </div>
 <div class="line">    page0.<a name="a4"></a><a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(page0PopCallback);</div>
 <div class="line">    page1.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(page1PopCallback);</div>
 <div class="line">    page2.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(page2PopCallback);</div>
 <div class="line">    page3.<a class="code" href="class_nex_touch.html#a4da1c4fcdfadb7eabfb9ccaba9ecad11">attachPop</a>(page3PopCallback);</div>
 <div class="line">    </div>
-<div class="line">    dbSerialPrintln(<span class="stringliteral">&quot;setup end&quot;</span>);</div>
+<div class="line">    dbSerialPrint(<span class="stringliteral">&quot;setup end&quot;</span>);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> loop(<span class="keywordtype">void</span>)</div>
