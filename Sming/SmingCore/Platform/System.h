@@ -118,7 +118,12 @@ public:
 
     /** @brief  Return CPU cycle count
      */
-	uint32_t getCycleCount();
+	inline uint32_t IRAM_ATTR getCycleCount(void)
+	{
+		  uint32_t ccount;
+		  __asm__ __volatile__("rsr %0,ccount":"=a" (ccount));
+		  return ccount;
+	}
 
 	/** @brief  Return CPU frequency in Mhz
 	 */

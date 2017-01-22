@@ -131,13 +131,6 @@ void IRAM_ATTR SystemClass::internalApplyFirmwareUpdate(uint32_t readFlashOffset
 		; // Reboot anyway!
 }
 
-inline uint32_t IRAM_ATTR SystemClass::getCycleCount(void)
-{
-	  uint32_t ccount;
-	  __asm__ __volatile__("rsr %0,ccount":"=a" (ccount));
-	  return ccount;
-}
-
 uint32_t SystemClass::getCpuFreqMHz()
 {
 	return ets_get_cpu_frequency();
