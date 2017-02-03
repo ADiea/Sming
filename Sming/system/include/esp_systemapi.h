@@ -39,6 +39,7 @@
 #define debugf(fmt, ...)
 #else
 #define debugf LOG_E
+#define debugf_RAM m_printf
 #endif
 #define assert(condition) if (!(condition)) SYSTEM_ERROR("ASSERT: %s %d", __FUNCTION__, __LINE__)
 #define SYSTEM_ERROR(fmt, ...) m_printf("ERROR: " fmt "\r\n", ##__VA_ARGS__)

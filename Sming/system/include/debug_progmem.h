@@ -18,13 +18,20 @@ extern "C" {
 #endif
 
 //This enables or disables logging
-//Define in Makefile, default is 1
+//Can be overridden in Makefile
 #ifndef DEBUG_BUILD
-#define DEBUG_BUILD 1
+	#ifdef SMING_RELEASE
+		#define DEBUG_BUILD 0
+	#else
+		#define DEBUG_BUILD 1
+	#endif
 #endif
 
 //This enables or disables file and number printing for each log line
+//Can be overridden in Makefile
+#ifndef PRINT_FILENAME_AND_LINE
 #define PRINT_FILENAME_AND_LINE 0
+#endif
 
 #define ERR 0	
 #define WARN 1
@@ -45,6 +52,15 @@ extern "C" {
 #define GET_FILENAME(x) #x
 #define GET_FNAME2(x) GET_FILENAME(x)
 
+#define CAT2(x,y) x##y
+#define CONCAT(x,y) CAT2(x,y)
+#define QUOT(x) #x
+#define QUOTE(x) QUOT(x)
+#define SET_SECT()
+//
+/*__attribute__((section(".irom.text." GET_FNAME2(__LINE__))))*/
+/*__attribute__((section(".irom.text")))*/
+
 //A static const char[] is defined having a unique name (log_ prefix, filename and line number)
 //This will be stored in the irom section(on flash) feeing up the RAM
 //Next special version of printf from FakePgmSpace is called to fetch and print the message
@@ -52,13 +68,13 @@ extern "C" {
 #define LOG_E(fmt, ...) \
 	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
 	__attribute__((aligned(4))) \
-	/*__attribute__((section(".irom.text." GET_FNAME2(__LINE__))))*/ = "[" GET_FNAME2(CUST_FILE_BASE) ":%d] " fmt; \
+	__attribute__((section(QUOTE(.irom.text)))) = "[" GET_FNAME2(CUST_FILE_BASE) ":%d] " fmt; \
 	printf_P_stack(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), __LINE__, ##__VA_ARGS__);})
 #else
 #define LOG_E(fmt, ...) \
 	({static const char TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__)[] \
 	__attribute__((aligned(4))) \
-	/*__attribute__((section(".irom.text." GET_FNAME2(__LINE__))))*/ = fmt; \
+	__attribute__((section(".irom.text"))) = fmt; \
 	printf_P_stack(TOKEN_PASTE2(log_,CUST_FILE_BASE,__LINE__), ##__VA_ARGS__);})
 #endif
 
