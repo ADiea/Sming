@@ -62,9 +62,11 @@ public:
 
     /** @brief  Set WiFi AP IP addres
      *  @param  address New IP address for WiFi AP
+	 *  @param  dhcpStartIP DHCP start IP
+	 *  @param  dhcpEndIP DHCP end IP
      *  @retval bool True on success
      */
-	bool setIP(IPAddress address);
+	bool setIP(IPAddress address, IPAddress dhcpStartIP, IPAddress dhcpEndIP);
 
     /** @brief  Get WiFi AP MAC address
      *  @retval String WiFi AP MAC address

@@ -10,6 +10,9 @@
 
 AccessPointClass WifiAccessPoint;
 
+extern "C" {
+	extern bool wifi_softap_set_dhcps_lease(struct dhcps_lease *please);
+}
 AccessPointClass::AccessPointClass()
 {
 	System.onReady(this);
@@ -121,14 +124,8 @@ IPAddress AccessPointClass::getNetworkGateway()
 	return info.gw;
 }
 
-bool AccessPointClass::setIP(IPAddress address)
+bool AccessPointClass::setIP(IPAddress address, IPAddress dhcpStartIP, IPAddress dhcpEndIP)
 {
-	if (System.isReady())
-	{
-		debugf("IP can be changed only in init() method");
-		return false;
-	}
-
 	wifi_softap_dhcps_stop();
 	struct ip_info ipinfo;
 	wifi_get_ip_info(SOFTAP_IF, &ipinfo);
@@ -136,6 +133,13 @@ bool AccessPointClass::setIP(IPAddress address)
 	ipinfo.gw = address;
 	IP4_ADDR(&ipinfo.netmask, 255, 255, 255, 0);
 	wifi_set_ip_info(SOFTAP_IF, &ipinfo);
+
+	struct dhcps_lease dhcp;
+	dhcp.start_ip = dhcpStartIP;
+	dhcp.end_ip = dhcpEndIP;
+
+	wifi_softap_set_dhcps_lease(&dhcp);
+
 	wifi_softap_dhcps_start();
 	return true;
 }
